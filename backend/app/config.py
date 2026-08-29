@@ -53,16 +53,40 @@ deployment tuning for a perception floor, not a gate decision threshold, so it
 is exempt from the "module constant, not a settings field" rule that GATE/
 FLOOR/MARGIN carry. It still lives only here, per the rule directly above.
 
-KNOWN GAP (raised at the Aug 29 vision-integration checkpoint, not fixed here):
-this floor was derived from a coverage table of in-distribution paddy photos
-only. On three genuinely out-of-scope test images (non-plant photos) the real
-classifier returned max-softmax 0.87 / 0.72 / 0.54 — none below this floor —
+KNOWN GAP (raised at the Aug 29 vision-integration checkpoint, partially
+mitigated by VISION_MIN_VEGETATION_FRACTION below, not fully closed): this
+floor was derived from a coverage table of in-distribution paddy photos only.
+On out-of-scope test images (non-plant photos) the real classifier returned
+max-softmax as high as 0.87 / 0.72 / 0.54 / 0.9995 — none below this floor —
 because a 4-class softmax with no rejection class concentrates mass somewhere
-regardless of input. Raising the floor to catch those would also reject ~93%
+regardless of input. Raising this floor to catch those would also reject ~93%
 of genuine paddy photos (per the same coverage table), so there is no single
-threshold fix. This needs a design decision (a leaf pre-filter, a trained
-negative/"normal" class, or shifting the burden to Doubt Doctor's differential
-question) — see Suchit/Thaariha, not a constant change here."""
+softmax-only threshold fix. The vegetation-fraction pre-filter below catches
+the specific failure mode observed (no green content at all) cheaply, without
+retraining, but is a heuristic, not a learned rejection class — see
+VISION_MIN_VEGETATION_FRACTION's own docstring for what it does and does not
+cover. A trained negative/"normal" class (retrain) or shifting more of the
+burden to Doubt Doctor's differential question remain open for Suchit/
+Thaariha to weigh against this mitigation."""
+
+VISION_MIN_VEGETATION_FRACTION = float(os.environ.get("VISION_MIN_VEGETATION_FRACTION", "0.15"))
+"""Below this fraction of green/yellow-green pixels, the classifier declares
+`out_of_scope=True` regardless of softmax confidence — a cheap, untrained
+complement to OUT_OF_SCOPE_MAX_SOFTMAX above.
+
+Why: the softmax floor alone missed every out-of-scope test image thrown at it
+during integration (see the KNOWN GAP note above), including one non-plant
+photo scored at 99.95% confidence. Measured on that same test set, real paddy
+leaf photos ran ~98% vegetation-hued pixels; the failing non-plant photos ran
+0.0%-6.8%. 0.15 sits with wide margin on both sides of that one data point —
+it has not been validated against a broad image set, only the specific
+failures observed on 2026-08-29.
+
+What this does NOT catch: any out-of-scope subject that happens to be green
+(a cucumber, a lawn, a different crop's leaf) — this is a vegetation detector,
+not a paddy-leaf detector or a trained rejection class. It complements
+OUT_OF_SCOPE_MAX_SOFTMAX; it does not replace the need for a real fix (see the
+KNOWN GAP note)."""
 
 # ---------------------------------------------------------------------------
 # Voice provider model pins — Sarvam. docs/DESIGN.md §1, §8.

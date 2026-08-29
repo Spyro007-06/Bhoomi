@@ -33,6 +33,7 @@ dependencies = [
   "torchvision==0.20.1",
   "timm==1.0.11",
   "pillow==11.0.0",
+  "numpy==2.4.6",
 ]
 
 [project.optional-dependencies]

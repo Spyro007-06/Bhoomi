@@ -26,7 +26,7 @@ import logging
 import threading
 from pathlib import Path
 
-from app.config import OUT_OF_SCOPE_MAX_SOFTMAX, settings
+from app.config import OUT_OF_SCOPE_MAX_SOFTMAX, VISION_MIN_VEGETATION_FRACTION, settings
 from app.contracts.vision import Prediction, TopK
 
 log = logging.getLogger("bhoomi.vision")
@@ -63,6 +63,26 @@ STUB_DISTRIBUTION: tuple[tuple[str, float], ...] = (
     ("paddy_brown_spot", 0.33),
     ("paddy_bacterial_leaf_blight", 0.33),
 )
+
+
+def _vegetation_fraction(img) -> float:
+    """Fraction of pixels in `img` that fall in a green/yellow-green hue range.
+
+    Cheap, untrained heuristic — see VISION_MIN_VEGETATION_FRACTION in
+    config.py for what it's for and its known limits. `img` is a PIL Image
+    already converted to RGB.
+    """
+    import numpy as np
+
+    small = img.resize((224, 224))
+    hsv = np.asarray(small.convert("HSV"))
+    hue, sat, val = hsv[..., 0].astype(int), hsv[..., 1].astype(int), hsv[..., 2].astype(int)
+    # PIL's HSV hue is 0-255 (not 0-359). Green sits around 85; this range
+    # covers yellow-green through green through teal-green, with saturation
+    # and brightness floors to exclude near-grey/near-black pixels that would
+    # otherwise false-positive on a dark, desaturated image.
+    mask = (hue >= 35) & (hue <= 130) & (sat >= 40) & (val >= 30)
+    return float(mask.mean())
 
 
 def _stub_topk() -> TopK:
@@ -161,6 +181,7 @@ class _VisionModel:
 
         with Image.open(io.BytesIO(image_bytes)) as img:
             img = img.convert("RGB")
+            veg_fraction = _vegetation_fraction(img)
             tensor = self.transform(img).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
@@ -176,9 +197,19 @@ class _VisionModel:
         top3 = ranked[:3]
         max_softmax = top3[0][1]
 
+        # Two independent out-of-scope signals, OR'd: low classifier confidence
+        # (the original design), or too little green/vegetation-hued content to
+        # plausibly be a leaf photo at all (added after integration testing
+        # found the softmax floor alone missed clear non-plant photos — see
+        # VISION_MIN_VEGETATION_FRACTION's docstring in config.py for what this
+        # does and doesn't cover).
+        out_of_scope = (
+            max_softmax < OUT_OF_SCOPE_MAX_SOFTMAX or veg_fraction < VISION_MIN_VEGETATION_FRACTION
+        )
+
         return TopK(
             predictions=[Prediction(label=lbl, confidence=c) for lbl, c in top3],
-            out_of_scope=max_softmax < OUT_OF_SCOPE_MAX_SOFTMAX,
+            out_of_scope=out_of_scope,
             model_version=self.model_version,
             is_stub=False,
         )
