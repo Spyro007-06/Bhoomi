@@ -51,7 +51,18 @@ OUT_OF_SCOPE_MAX_SOFTMAX = float(os.environ.get("VISION_OOS_FLOOR", "0.35"))
 (docs/DESIGN.md §4). Read once at import time from `VISION_OOS_FLOOR` — this is
 deployment tuning for a perception floor, not a gate decision threshold, so it
 is exempt from the "module constant, not a settings field" rule that GATE/
-FLOOR/MARGIN carry. It still lives only here, per the rule directly above."""
+FLOOR/MARGIN carry. It still lives only here, per the rule directly above.
+
+KNOWN GAP (raised at the Aug 29 vision-integration checkpoint, not fixed here):
+this floor was derived from a coverage table of in-distribution paddy photos
+only. On three genuinely out-of-scope test images (non-plant photos) the real
+classifier returned max-softmax 0.87 / 0.72 / 0.54 — none below this floor —
+because a 4-class softmax with no rejection class concentrates mass somewhere
+regardless of input. Raising the floor to catch those would also reject ~93%
+of genuine paddy photos (per the same coverage table), so there is no single
+threshold fix. This needs a design decision (a leaf pre-filter, a trained
+negative/"normal" class, or shifting the burden to Doubt Doctor's differential
+question) — see Suchit/Thaariha, not a constant change here."""
 
 # ---------------------------------------------------------------------------
 # Voice provider model pins — Sarvam. docs/DESIGN.md §1, §8.

@@ -19,6 +19,10 @@
   ],
   "source_dataset": "Project-AgML/paddy_disease_classification",
   "img_size": 224,
+  "normalization": {
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225]
+  },
   "temperature": 1.567124843597412,
   "val": {
     "accuracy": 0.9794594645500183,

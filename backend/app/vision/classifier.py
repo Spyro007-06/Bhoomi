@@ -37,11 +37,10 @@ WEIGHTS_DIR = Path(__file__).resolve().parent / "weights"
 WEIGHTS_PATH = WEIGHTS_DIR / "bhoomi_vision_v1.pth"
 METADATA_PATH = WEIGHTS_DIR / "bhoomi_vision_v1.json"
 
-# ImageNet normalization. bhoomi_vision_v1.json carries no mean/std of its own
-# (only img_size) — this matches timm's own default_cfg for efficientnet_b0
-# (verified against the installed timm build), not a value read from the
-# artifact. If a retrain ever writes normalization stats into the JSON, prefer
-# those over this constant.
+# Fallback normalization, used only if bhoomi_vision_v1.json has no
+# "normalization" key. The current artifact does carry one (confirmed by the
+# training author to match these values), so this constant should not
+# normally be exercised — it exists for older/foreign metadata files.
 _IMAGENET_MEAN = (0.485, 0.456, 0.406)
 _IMAGENET_STD = (0.229, 0.224, 0.225)
 
@@ -105,6 +104,16 @@ class _VisionModel:
         self.img_size: int = meta["img_size"]
         self.temperature: float = meta["temperature"]
 
+        normalization = meta.get("normalization")
+        if normalization:
+            self.norm_mean = tuple(normalization["mean"])
+            self.norm_std = tuple(normalization["std"])
+        else:
+            # Fallback only — bhoomi_vision_v1.json is expected to carry its own
+            # normalization now. This constant exists for older metadata files.
+            self.norm_mean = _IMAGENET_MEAN
+            self.norm_std = _IMAGENET_STD
+
         if self.model_name != "efficientnet_b0":
             raise NotImplementedError(
                 f"vision metadata names model_name={self.model_name!r}, but only "
@@ -133,7 +142,7 @@ class _VisionModel:
                 transforms.Resize(self.img_size),
                 transforms.CenterCrop(self.img_size),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=_IMAGENET_MEAN, std=_IMAGENET_STD),
+                transforms.Normalize(mean=self.norm_mean, std=self.norm_std),
             ]
         )
 
