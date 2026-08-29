@@ -9,6 +9,7 @@ re-declare a threshold, a radius or a floor anywhere else in the tree.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from typing import Literal
 
@@ -44,6 +45,13 @@ OCR_FLOOR = 0.60
 
 ASR_FLOOR = 0.60
 """Below this ASR confidence parsed_intent is omitted and the client re-prompts."""
+
+OUT_OF_SCOPE_MAX_SOFTMAX = float(os.environ.get("VISION_OOS_FLOOR", "0.35"))
+"""Below this max-softmax the classifier declares `out_of_scope=True` on C1
+(docs/DESIGN.md §4). Read once at import time from `VISION_OOS_FLOOR` — this is
+deployment tuning for a perception floor, not a gate decision threshold, so it
+is exempt from the "module constant, not a settings field" rule that GATE/
+FLOOR/MARGIN carry. It still lives only here, per the rule directly above."""
 
 # ---------------------------------------------------------------------------
 # Voice provider model pins — Sarvam. docs/DESIGN.md §1, §8.
