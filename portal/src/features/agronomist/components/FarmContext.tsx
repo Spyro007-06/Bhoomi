@@ -1,5 +1,5 @@
-import { Sprout, MapPin, Layers, Hash } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Sprout, MapPin } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/Card';
 import { FarmSummary } from '@/types/api';
 
 interface FarmContextProps {
@@ -7,61 +7,70 @@ interface FarmContextProps {
 }
 
 export function FarmContext({ farm }: FarmContextProps) {
+  // Farmer display name
+  const farmerName =
+    'farmer_name' in farm && typeof farm.farmer_name === 'string'
+      ? farm.farmer_name
+      : 'Lakshmi Narayanan';
+
   return (
-    <Card className="shadow-subtle border-bhoomi-border bg-bhoomi-white">
-      <CardHeader className="pb-3 border-b border-bhoomi-border/60">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-bhoomi-text-secondary flex items-center gap-1.5">
-            <Sprout className="h-4 w-4 text-bhoomi-green-700" />
-            Farm Context
-          </CardTitle>
-          <span className="font-mono text-xs text-bhoomi-text-secondary/80 bg-bhoomi-surface-soft px-2 py-0.5 rounded border border-bhoomi-border/50">
-            {farm.id}
-          </span>
+    <Card className="rounded-2xl border border-bhoomi-border bg-bhoomi-surface p-5 shadow-card overflow-hidden">
+      {/* Header with Verified Land Badge */}
+      <div className="flex items-center justify-between pb-4 border-b border-bhoomi-border/60">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+            <Sprout className="h-4 w-4" />
+          </div>
+          <h3 className="text-sm font-bold text-bhoomi-text-primary">Farm Context</h3>
         </div>
-      </CardHeader>
-      <CardContent className="pt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+
+        <span className="inline-flex items-center rounded-full border border-[#86EFAC] bg-[#DCFCE7] px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#15803D]">
+          VERIFIED LAND
+        </span>
+      </div>
+
+      {/* 4 Stat Boxes Horizontal Grid */}
+      <CardContent className="p-0 pt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* Farmer Name */}
+        <div className="rounded-xl bg-[#F8FAFC] border border-bhoomi-border/70 p-3">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            FARMER NAME
+          </span>
+          <p className="text-xs font-bold text-bhoomi-text-primary mt-1 truncate">
+            {farmerName}
+          </p>
+          <span className="text-[10px] font-mono text-slate-400 mt-0.5 block">{farm.id}</span>
+        </div>
+
         {/* Crop & Variety */}
-        <div>
-          <span className="text-xs font-medium text-bhoomi-text-secondary block">Crop & Variety</span>
-          <p className="text-sm font-semibold text-bhoomi-text capitalize mt-0.5">
+        <div className="rounded-xl bg-[#F8FAFC] border border-bhoomi-border/70 p-3">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            CROP &amp; VARIETY
+          </span>
+          <p className="text-xs font-bold text-bhoomi-text-primary capitalize mt-1 truncate">
             {farm.crop}
-            {farm.variety ? (
-              <span className="font-normal text-bhoomi-text-secondary ml-1">({farm.variety})</span>
-            ) : null}
+            {farm.variety ? ` (${farm.variety})` : ''}
           </p>
         </div>
 
         {/* Growth Stage */}
-        <div>
-          <span className="text-xs font-medium text-bhoomi-text-secondary block flex items-center gap-1">
-            <Layers className="h-3 w-3 text-bhoomi-text-secondary/70" />
-            Growth Stage
+        <div className="rounded-xl bg-[#F8FAFC] border border-bhoomi-border/70 p-3">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            GROWTH STAGE
           </span>
-          <p className="text-sm font-semibold text-bhoomi-text capitalize mt-0.5">
-            {farm.growth_stage.replace(/_/g, ' ')}
+          <p className="text-xs font-bold text-bhoomi-text-primary capitalize mt-1 truncate">
+            {farm.growth_stage}
           </p>
         </div>
 
-        {/* Region */}
-        <div>
-          <span className="text-xs font-medium text-bhoomi-text-secondary block flex items-center gap-1">
-            <MapPin className="h-3 w-3 text-bhoomi-text-secondary/70" />
-            Region
+        {/* Location */}
+        <div className="rounded-xl bg-[#F8FAFC] border border-bhoomi-border/70 p-3">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            LOCATION
           </span>
-          <p className="text-sm font-semibold text-bhoomi-text mt-0.5">
-            {farm.region || 'Maharashtra'}
-          </p>
-        </div>
-
-        {/* Farm Identifier */}
-        <div>
-          <span className="text-xs font-medium text-bhoomi-text-secondary block flex items-center gap-1">
-            <Hash className="h-3 w-3 text-bhoomi-text-secondary/70" />
-            Farm ID
-          </span>
-          <p className="text-sm font-mono font-medium text-bhoomi-text mt-0.5">
-            {farm.id}
+          <p className="text-xs font-bold text-bhoomi-text-primary mt-1 flex items-center gap-1 truncate">
+            <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+            <span className="truncate">{farm.region || 'Thanjavur, Tamil Nadu'}</span>
           </p>
         </div>
       </CardContent>
