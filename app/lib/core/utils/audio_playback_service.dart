@@ -157,21 +157,37 @@ class AudioPlaybackService {
   PlayerState get state => _player.state;
   Stream<PlayerState> get onPlayerStateChanged => _player.onPlayerStateChanged;
   Stream<Duration> get onPositionChanged => _player.onPositionChanged;
+  bool get isPlaying => state == PlayerState.playing;
   Stream<Duration> get onDurationChanged => _player.onDurationChanged;
   Stream<void> get onPlayerComplete => _player.onPlayerComplete;
 
   /// Play audio from remote URL (e.g. S3 presigned URL).
   Future<void> playUrl(String url) async {
+    try {
+      if (state == PlayerState.playing || state == PlayerState.paused) {
+        await _player.stop();
+      }
+    } catch (_) {}
     await _player.play(UrlSource(url));
   }
 
   /// Play audio from local file on device storage.
   Future<void> playFile(String filePath) async {
+    try {
+      if (state == PlayerState.playing || state == PlayerState.paused) {
+        await _player.stop();
+      }
+    } catch (_) {}
     await _player.play(DeviceFileSource(filePath));
   }
 
   /// Play audio directly from in-memory byte buffer.
   Future<void> playBytes(Uint8List bytes, {String? mimeType}) async {
+    try {
+      if (state == PlayerState.playing || state == PlayerState.paused) {
+        await _player.stop();
+      }
+    } catch (_) {}
     await _player.play(BytesSource(bytes, mimeType: mimeType));
   }
 

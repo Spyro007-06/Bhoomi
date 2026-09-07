@@ -38,6 +38,7 @@ abstract class AudioRecorderWrapper {
   Future<void> start(RecordConfig config, {required String path});
   Future<String?> stop();
   Future<void> cancel();
+  Future<Amplitude> getAmplitude();
   Future<void> dispose();
 }
 
@@ -113,6 +114,19 @@ class DefaultAudioRecorderWrapper implements AudioRecorderWrapper {
   }
 
   @override
+  Future<Amplitude> getAmplitude() async {
+    if (_isTestEnv) return Amplitude(current: -20.0, max: -5.0);
+    try {
+      if (_nativeRecorder == null) {
+        return Amplitude(current: -160.0, max: -160.0);
+      }
+      return await _nativeRecorder!.getAmplitude();
+    } catch (_) {
+      return Amplitude(current: -160.0, max: -160.0);
+    }
+  }
+
+  @override
   Future<void> dispose() async {
     _simulatedRecording = false;
     if (_isTestEnv) return;
@@ -134,6 +148,9 @@ class AudioRecordingService {
 
   AudioRecordingService({AudioRecorderWrapper? recorder})
       : _recorder = recorder ?? DefaultAudioRecorderWrapper();
+
+  /// Check if a recording session is currently active.
+  bool get isCurrentlyRecording => _recordingStartTime != null;
 
   /// Check current microphone permission status.
   Future<PermissionStatus> checkPermission() async {
@@ -165,12 +182,36 @@ class AudioRecordingService {
     }
   }
 
+  /// Fetch instantaneous decibel amplitude.
+  Future<Amplitude> getAmplitude() async {
+    return await _recorder.getAmplitude();
+  }
+
+  /// Returns normalized amplitude between 0.0 (silence) and 1.0 (loudest).
+  /// dBFS typically ranges from -60dB (silence) to 0dB (clipping).
+  Future<double> getNormalizedAmplitude() async {
+    try {
+      final amp = await _recorder.getAmplitude();
+      final currentDb = amp.current;
+      if (currentDb <= -50.0) return 0.0;
+      if (currentDb >= 0.0) return 1.0;
+      return ((currentDb + 50.0) / 50.0).clamp(0.0, 1.0);
+    } catch (_) {
+      return 0.0;
+    }
+  }
+
   /// Start recording audio into a unique temporary file.
   Future<String> startRecording({
     String? customPath,
     RecordConfig? config,
     String contentType = 'audio/wav',
   }) async {
+    // Concurrency guard: Do not start if already recording
+    if (_recordingStartTime != null) {
+      return _activeFilePath ?? 'voice_recording_temp.wav';
+    }
+
     if (_isTestEnv) {
       _activeFilePath = customPath ?? 'voice_recording_temp.wav';
       _activeContentType = contentType;
@@ -235,6 +276,10 @@ class AudioRecordingService {
 
   /// Stop active recording, read bytes, and return [AudioRecordingData].
   Future<AudioRecordingData?> stopRecording() async {
+    if (_recordingStartTime == null) {
+      // Guard: already stopped or never started
+      return null;
+    }
     if (_isTestEnv) {
       final data = AudioRecordingData(
         bytes: Uint8List.fromList([

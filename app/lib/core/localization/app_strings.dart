@@ -493,25 +493,29 @@ class AppStrings {
           : 'The OTP is incorrect. Please check the code and try again.');
 
   // Camera & Image Capture (Step 4)
+  String get backButton => language == AppLanguage.marathi
+      ? 'मागे जा'
+      : (language == AppLanguage.hindi ? 'पीछे जाएं' : 'Back');
+
   String get cameraTitle => language == AppLanguage.marathi
-      ? 'पीक तपासा (फोटो घ्या)'
-      : (language == AppLanguage.hindi ? 'फसल जांचें (फोटो लें)' : 'Check Crop (Take Photo)');
+      ? 'पीक तपासा'
+      : (language == AppLanguage.hindi ? 'फसल जांचें' : 'Check Crop');
 
   String get cameraInstruction => language == AppLanguage.marathi
-      ? 'पानावरील किंवा खोडावरील डाग स्पष्ट दिसतील असा फोटो घ्या.'
+      ? 'पिकाचा आणि बाधित भागाचा स्पष्ट फोटो घ्या.'
       : (language == AppLanguage.hindi
-          ? 'पत्ती या तने पर लगे धब्बे साफ दिखें, ऐसी फोटो लें।'
-          : 'Take a clear photo showing the affected leaf or stem.');
+          ? 'फसल और प्रभावित हिस्से की साफ फोटो लें।'
+          : 'Show the affected part of your crop clearly.');
 
   String get cameraFrameGuide => language == AppLanguage.marathi
-      ? 'पाने किंवा बाधित भाग चौकटीत ठेवा'
+      ? 'बाधित भाग चौकटीत ठेवा'
       : (language == AppLanguage.hindi
-          ? 'पत्तियां या प्रभावित हिस्सा फ्रेम में रखें'
-          : 'Keep affected leaf/crop inside frame');
+          ? 'प्रभावित हिस्सा फ्रेम में रखें'
+          : 'Keep affected area inside frame');
 
   String get captureButton => language == AppLanguage.marathi
       ? 'फोटो काढा'
-      : (language == AppLanguage.hindi ? 'फोटो खींचें' : 'Capture Photo');
+      : (language == AppLanguage.hindi ? 'फोटो खींचें' : 'Take photo');
 
   String get galleryButton => language == AppLanguage.marathi
       ? 'गॅलरीतून निवडा'
@@ -537,33 +541,67 @@ class AppStrings {
 
   String get cameraInitializing => language == AppLanguage.marathi
       ? 'कॅमेरा सुरू होत आहे...'
-      : (language == AppLanguage.hindi ? 'कैमरा शुरू हो रहा है...' : 'Starting camera...');
+      : (language == AppLanguage.hindi ? 'कैमरा शुरू हो रहा है...' : 'Getting camera ready...');
 
   String get cameraPermissionRequired => language == AppLanguage.marathi
-      ? 'पिकाचा फोटो घेण्यासाठी कॅमेरा परवानगी आवश्यक आहे.'
+      ? 'कॅमेरा परवानगी द्या'
       : (language == AppLanguage.hindi
-          ? 'फसल की तस्वीर लेने के लिए कैमरा की अनुमति आवश्यक है।'
-          : 'Camera permission is required to capture crop photographs.');
+          ? 'कैमरा अनुमति दें'
+          : 'Allow camera access');
+
+  String get cameraPermissionRequiredDesc => language == AppLanguage.marathi
+      ? 'कॅमेऱ्यामुळे भूमीला तुमच्या पिकाचा बाधित भाग पाहण्यास मदत होते.'
+      : (language == AppLanguage.hindi
+          ? 'कैमरे से भूमि को आपकी फसल का प्रभावित हिस्सा देखने में मदद मिलती है।'
+          : 'Camera access helps Bhoomi see the affected part of your crop.');
 
   String get cameraPermissionDeniedForever => language == AppLanguage.marathi
-      ? 'कॅमेरा परवानगी कायमची नाकारली आहे. कृपया ॲप सेटिंग्जमधून परवानगी द्या.'
+      ? 'कॅमेरा परवानगी बंद आहे'
       : (language == AppLanguage.hindi
-          ? 'कैमरा अनुमति स्थायी रूप से अस्वीकृत है। कृपया ऐप सेटिंग से अनुमति दें।'
-          : 'Camera permission is permanently denied. Please enable in App Settings.');
+          ? 'कैमरा अनुमति बंद है'
+          : 'Camera access is turned off');
+
+  String get cameraPermissionDeniedForeverDesc => language == AppLanguage.marathi
+      ? 'कृपया ॲप सेटिंग्जमधून कॅमेरा परवानगी चालू करा.'
+      : (language == AppLanguage.hindi
+          ? 'कृपया ऐप सेटिंग्स से कैमरा अनुमति चालू करें।'
+          : 'Please enable camera access in app settings.');
 
   String get cameraUnavailable => language == AppLanguage.marathi
-      ? 'डिव्हाइसवर कॅमेरा उपलब्ध नाही.'
-      : (language == AppLanguage.hindi ? 'डिवाइस पर कैमरा उपलब्ध नहीं है।' : 'No camera found on this device.');
+      ? 'कॅमेरा उपलब्ध नाही'
+      : (language == AppLanguage.hindi ? 'कैमरा उपलब्ध नहीं है' : 'Camera unavailable');
+
+  String get cameraUnavailableDesc => language == AppLanguage.marathi
+      ? 'या डिव्हाइसवर कॅमेरा वापरता येत नाही.'
+      : (language == AppLanguage.hindi ? 'इस डिवाइस पर कैमरा उपलब्ध नहीं है।' : "I can't access the camera on this device.");
 
   String get cameraError => language == AppLanguage.marathi
-      ? 'कॅमेरा सुरू करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.'
+      ? 'कॅमेरा सुरू करता आला नाही'
       : (language == AppLanguage.hindi
-          ? 'कैमरा शुरू करने में त्रुटि आई। कृपया पुनः प्रयास करें।'
-          : 'Failed to initialize camera. Please try again.');
+          ? 'कैमरा शुरू नहीं हो सका'
+          : "Couldn't start the camera");
+
+  String get cameraErrorDesc => language == AppLanguage.marathi
+      ? 'कृपया पुन्हा प्रयत्न करा किंवा गॅलरीतून फोटो निवडा.'
+      : (language == AppLanguage.hindi
+          ? 'कृपया पुनः प्रयास करें या गैलरी से फोटो चुनें।'
+          : 'Please try again or choose a photo from gallery.');
 
   String get grantPermissionButton => language == AppLanguage.marathi
       ? 'परवानगी द्या'
-      : (language == AppLanguage.hindi ? 'अनुमति दें' : 'Grant Permission');
+      : (language == AppLanguage.hindi ? 'अनुमति दें' : 'Allow camera');
+
+  String get notNowButton => language == AppLanguage.marathi
+      ? 'आत्ता नको'
+      : (language == AppLanguage.hindi ? 'अभी नहीं' : 'Not now');
+
+  String get tryAgainButton => language == AppLanguage.marathi
+      ? 'पुन्हा प्रयत्न करा'
+      : (language == AppLanguage.hindi ? 'पुनः प्रयास करें' : 'Try again');
+
+  String get photoCaptured => language == AppLanguage.marathi
+      ? 'फोटो घेतला'
+      : (language == AppLanguage.hindi ? 'फोटो ले लिया गया' : 'Photo captured');
 
   String get capturingPhoto => language == AppLanguage.marathi
       ? 'फोटो काढत आहे...'
@@ -571,8 +609,8 @@ class AppStrings {
 
   // Diagnosis Loading (Step 4)
   String get checkingPhotoTitle => language == AppLanguage.marathi
-      ? 'फोटो तपासत आहोत...'
-      : (language == AppLanguage.hindi ? 'तस्वीर की जाँच हो रही है...' : 'Checking the crop photo...');
+      ? 'धन्यवाद. मी आता फोटो तपासत आहे...'
+      : (language == AppLanguage.hindi ? 'धन्यवाद। मैं अभी फ़ोटो की जाँच कर रही हूँ...' : "Thank you. I'm checking the photo now.");
 
   String get checkingPhotoSubtitle => language == AppLanguage.marathi
       ? 'कृपया थोडा वेळ थांबा, लक्षणे ओळखली जात आहेत.'
@@ -1129,7 +1167,102 @@ class AppStrings {
 
   String get voiceReplayAnswer => language == AppLanguage.marathi
       ? 'पुन्हा ऐका'
-      : (language == AppLanguage.hindi ? 'दोबारा सुनें' : 'Listen Again');
+      : (language == AppLanguage.hindi ? 'दोबारा सुनें' : 'Replay Audio');
+
+  // Conversational Voice Design System (Phase 2)
+  String get voiceIdleSupporting => language == AppLanguage.marathi
+      ? 'तुमच्या शेतात काय घडत आहे ते मला सांगा.'
+      : (language == AppLanguage.hindi
+          ? 'मुझे बताएं कि आपके खेत में क्या हो रहा है।'
+          : "Tell me what's happening in your field.");
+
+  String get voiceStartTalking => language == AppLanguage.marathi
+      ? 'बोलणे सुरू करा'
+      : (language == AppLanguage.hindi ? 'बातचीत शुरू करें' : 'Start Talking');
+
+  String get voiceListening => language == AppLanguage.marathi
+      ? 'Bhoomi ऐकत आहे...'
+      : (language == AppLanguage.hindi ? 'Bhoomi सुन रही है...' : 'Bhoomi is listening...');
+
+  String get voiceBhoomiListening => voiceListening;
+
+  String get voiceTapToStop => language == AppLanguage.marathi
+      ? 'थांबवण्यासाठी टॅप करा'
+      : (language == AppLanguage.hindi ? 'रोकने के लिए टैप करें' : 'Tap to stop');
+
+  String get voiceStopRecording => language == AppLanguage.marathi
+      ? 'थांबवा'
+      : (language == AppLanguage.hindi ? 'रोकें' : 'Stop');
+
+  String get voiceYourQuestion => language == AppLanguage.marathi
+      ? 'तुमचा प्रश्न'
+      : (language == AppLanguage.hindi ? 'आपका प्रश्न' : 'Your Question');
+
+  String get voiceUnderstanding => language == AppLanguage.marathi
+      ? 'समजून घेत आहे...'
+      : (language == AppLanguage.hindi ? 'समझ रहा हूँ...' : 'Understanding you...');
+
+  String get voiceIHeard => language == AppLanguage.marathi
+      ? 'मी ऐकले:'
+      : (language == AppLanguage.hindi ? 'मैंने सुना:' : 'I heard:');
+
+  String get voiceSoundsRight => language == AppLanguage.marathi
+      ? 'बरोबर आहे'
+      : (language == AppLanguage.hindi ? 'सही है' : 'Sounds right');
+
+  String get voiceTryAgain => language == AppLanguage.marathi
+      ? 'पुन्हा बोला'
+      : (language == AppLanguage.hindi ? 'फिर से बोलें' : 'Try again');
+
+  String get voicePlayWhatIHear => language == AppLanguage.marathi
+      ? 'मी काय ऐकले ते ऐका'
+      : (language == AppLanguage.hindi ? 'जो सुना वह सुनें' : 'Play what I heard');
+
+  String get voiceBhoomiSpeaking => language == AppLanguage.marathi
+      ? 'भूमी बोलत आहे...'
+      : (language == AppLanguage.hindi ? 'भूमी बोल रही है...' : 'Bhoomi is speaking');
+
+  String get voiceCouldNotHear => language == AppLanguage.marathi
+      ? 'मला नीट ऐकू आले नाही.'
+      : (language == AppLanguage.hindi ? 'मुझे साफ सुनाई नहीं दिया।' : "I couldn't hear you clearly.");
+
+  String get voiceCouldNotPlay => language == AppLanguage.marathi
+      ? 'आवाज आता प्ले करता आला नाही.'
+      : (language == AppLanguage.hindi ? 'ऑडियो अभी नहीं चल सका।' : "I couldn't play that right now.");
+
+  String get voicePermissionNeedMic => language == AppLanguage.marathi
+      ? 'तुमचा आवाज ऐकण्यासाठी मला मायक्रोफोनची परवानगी हवी आहे.'
+      : (language == AppLanguage.hindi
+          ? 'आपकी आवाज़ सुनने के लिए मुझे माइक्रोफ़ोन अनुमति चाहिए।'
+          : 'I need microphone access to hear you.');
+
+  String get voiceShowAffectedLeaf => language == AppLanguage.marathi
+      ? 'बाधित पान दाखवा'
+      : (language == AppLanguage.hindi ? 'प्रभावित पत्ता दिखाएं' : 'Show me the affected leaf');
+
+  String get voiceShowCropContextual => language == AppLanguage.marathi
+      ? 'कृपया पिकाचा फोटो दाखवा'
+      : (language == AppLanguage.hindi ? 'कृपया फसल की तस्वीर दिखाएं' : 'Please show me the crop');
+
+  String get voiceTakeLeafPhoto => language == AppLanguage.marathi
+      ? 'पानावरील डागांचा फोटो घ्या'
+      : (language == AppLanguage.hindi ? 'धब्बों की तस्वीर लें' : 'Take a photo of the spots');
+
+  String get semanticsStartRecording => language == AppLanguage.marathi
+      ? 'आवाज नोंदवणे सुरू करा'
+      : (language == AppLanguage.hindi ? 'वॉयस रिकॉर्डिंग शुरू करें' : 'Start voice recording');
+
+  String get semanticsStopRecording => language == AppLanguage.marathi
+      ? 'आवाज नोंदवणे थांबवा'
+      : (language == AppLanguage.hindi ? 'वॉयस रिकॉर्डिंग रोकें' : 'Stop voice recording');
+
+  String get semanticsReplayBhoomi => language == AppLanguage.marathi
+      ? 'भूमीचा सल्ला पुन्हा ऐका'
+      : (language == AppLanguage.hindi ? 'भूमी की सलाह दोबारा सुनें' : "Replay Bhoomi's advice");
+
+  String get semanticsPauseBhoomi => language == AppLanguage.marathi
+      ? 'भूमीचा सल्ला थांबवा'
+      : (language == AppLanguage.hindi ? 'भूमी की सलाह रोकें' : "Pause Bhoomi's advice");
 
   String get voiceEditQuestion => language == AppLanguage.marathi
       ? 'प्रश्न बदला'
@@ -1140,6 +1273,65 @@ class AppStrings {
       : (language == AppLanguage.hindi
           ? 'फसल पर झुलसा या फफूंद के लक्षण हो सकते हैं। नाइट्रोजन का अत्यधिक उपयोग न करें, जल निकासी करें और जैविक उपायों का उपयोग करें।'
           : 'Crop may have blast or fungal symptoms. Avoid excess nitrogen fertilizer, ensure field drainage, and use organic IPM measures.');
+
+  // Conversational Multi-Turn & Completed Flow (Phase 4 & 6)
+  String get voicePreparingAnswer => language == AppLanguage.marathi
+      ? 'भूमीचे उत्तर तयार करत आहे...'
+      : (language == AppLanguage.hindi ? 'भूमी का जवाब तैयार हो रहा है...' : "Preparing Bhoomi's answer...");
+
+  String get voiceFinishedSpeaking => language == AppLanguage.marathi
+      ? 'भूमीचे बोलणे पूर्ण झाले.'
+      : (language == AppLanguage.hindi ? 'भूमी का बोलना पूरा हुआ।' : 'Bhoomi has finished speaking.');
+
+  String get voiceAskAgainConversational => language == AppLanguage.marathi
+      ? 'भूमीला पुन्हा विचारा'
+      : (language == AppLanguage.hindi ? 'भूमी से फिर पूछें' : 'Ask Bhoomi again');
+
+  String get voiceHearAgainConversational => language == AppLanguage.marathi
+      ? 'पुन्हा ऐका'
+      : (language == AppLanguage.hindi ? 'फिर से सुनें' : 'Hear again');
+
+  String get voiceReadOnScreen => language == AppLanguage.marathi
+      ? 'स्क्रीनवर वाचा'
+      : (language == AppLanguage.hindi ? 'स्क्रीन पर पढ़ें' : 'Read on screen');
+
+  String get voiceCameraReturnChecking => language == AppLanguage.marathi
+      ? 'धन्यवाद. मी आता फोटो तपासत आहे.'
+      : (language == AppLanguage.hindi ? 'धन्यवाद. मैं अभी फ़ोटो देख रही हूँ।' : "Thank you. I'm checking the photo now.");
+
+  String get voiceShowLeavesContextual => language == AppLanguage.marathi
+      ? 'बाधित पानाचा स्पष्ट फोटो दाखवा.'
+      : (language == AppLanguage.hindi ? 'प्रभावित पत्ते की स्पष्ट फ़ोटो दिखाएं।' : 'Show the affected leaf clearly.');
+
+  String get voiceShowInsectsContextual => language == AppLanguage.marathi
+      ? 'जवळ जाऊन किडीचा स्पष्ट फोटो दाखवा.'
+      : (language == AppLanguage.hindi ? 'पास जाकर कीड़े की स्पष्ट फ़ोटो दिखाएं।' : 'Move closer so the insect is visible.');
+
+  String get voiceShowPlantContextual => language == AppLanguage.marathi
+      ? 'संपूर्ण रोप/झाड फ्रेममध्ये दाखवा.'
+      : (language == AppLanguage.hindi ? 'पूरे पौधे को फ्रेम के अंदर दिखाएं।' : 'Fit the whole plant inside the frame.');
+
+  String get voiceShowUnknownContextual => language == AppLanguage.marathi
+      ? 'पिकाचा आणि बाधित भागाचा स्पष्ट फोटो दाखवा.'
+      : (language == AppLanguage.hindi
+          ? 'फसल और प्रभावित हिस्से की स्पष्ट फ़ोटो दिखाएं।'
+          : 'Show a clear photo of the crop and affected area.');
+
+  String get voiceShowFruitContextual => language == AppLanguage.marathi
+      ? 'बाधित फळाचा किंवा शेंगेचा स्पष्ट फोटो दाखवा.'
+      : (language == AppLanguage.hindi ? 'प्रभावित फल या फली की स्पष्ट फ़ोटो दिखाएं।' : 'Show the affected fruit or pod clearly.');
+
+  String get voiceShowStemContextual => language == AppLanguage.marathi
+      ? 'बाधित खोडाचा किंवा फांदीचा स्पष्ट फोटो दाखवा.'
+      : (language == AppLanguage.hindi ? 'प्रभावित तने या शाखा की स्पष्ट फ़ोटो दिखाएं।' : 'Show the affected stem or branch clearly.');
+
+  String get voiceShowRootContextual => language == AppLanguage.marathi
+      ? 'मुळांचा स्पष्ट फोटो दाखवा.'
+      : (language == AppLanguage.hindi ? 'जड़ों की स्पष्ट फ़ोटो दिखाएं।' : 'Show the roots clearly after gentle cleaning.');
+
+  String get voiceShowSoilContextual => language == AppLanguage.marathi
+      ? 'जमिनीचा व मातीचा स्पष्ट फोटो दाखवा.'
+      : (language == AppLanguage.hindi ? 'मिट्टी और ज़मीन की स्पष्ट फ़ोटो दिखाएं।' : 'Show the soil surface and moisture condition clearly.');
 
   // Low Connectivity & Upload Failure Resilience
   String get presignFailedTitle => language == AppLanguage.marathi

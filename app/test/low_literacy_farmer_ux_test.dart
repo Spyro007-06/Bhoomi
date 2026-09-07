@@ -211,7 +211,7 @@ void main() {
 
       // Tap spoken audio button
       await tester.tap(find.byIcon(Icons.volume_up_rounded));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // 3. Verify IPM Ladder content
       expect(find.textContaining('Paddy Blast'), findsWidgets);

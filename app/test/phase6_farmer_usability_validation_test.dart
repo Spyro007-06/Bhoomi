@@ -237,7 +237,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Viewfinder and guidance
-      expect(find.text('पाने किंवा बाधित भाग चौकटीत ठेवा'), findsOneWidget);
+      expect(find.text('पिकाचा आणि बाधित भागाचा स्पष्ट फोटो घ्या.'), findsOneWidget);
       expect(find.byIcon(Icons.eco_rounded), findsOneWidget);
       expect(find.byIcon(Icons.photo_library_outlined), findsOneWidget);
     });

@@ -15,6 +15,13 @@ import '../core/utils/audio_playback_service.dart';
 import '../providers/repository_providers.dart';
 import 'app_button.dart';
 import 'app_text_field.dart';
+import '../models/inspection_target.dart';
+import '../models/conversation_context_manager.dart';
+import 'voice/bhoomi_voice_state.dart';
+import 'voice/bhoomi_voice_button.dart';
+import 'voice/bhoomi_waveform.dart';
+import 'voice/bhoomi_voice_error.dart';
+import 'voice/bhoomi_voice_permission.dart';
 
 bool get _isTestEnv {
   if (Platform.environment.containsKey('FLUTTER_TEST')) return true;
@@ -25,31 +32,24 @@ bool get _isTestEnv {
   }
 }
 
-/// Comprehensive lifecycle states for rural farmer voice interactions.
-enum VoiceWorkflowState {
-  idle,
-  requestingPermission,
-  listening,
-  processing,
-  result,
-  playback,
-  error,
-  permission,
-}
+/// Backward-compatible alias for universal voice states.
+typedef VoiceWorkflowState = BhoomiVoiceState;
 
 /// FarmerVoiceAssistant: Central, reusable Voice Assistant experience for Bhoomi.
-/// 
+///
 /// Core Interaction Flow:
-/// 🎤 TAP TO SPEAK → 👂 BHOOMI LISTENS → 🌱 BHOOMI UNDERSTANDS → 🔊 BHOOMI ANSWERS → 🎤 ASK AGAIN
+/// 🎤 TALK TO BHOOMI → 🔴 BHOOMI LISTENS (TIMER) → 🌱 UNDERSTANDING → 📝 I HEARD → 🔊 BHOOMI SPEAKS
 class FarmerVoiceAssistant extends ConsumerStatefulWidget {
   final String? initialContext;
   final ValueChanged<String>? onQuerySubmitted;
+  final VoidCallback? onShowPhoto;
   final VoidCallback? onClose;
 
   const FarmerVoiceAssistant({
     super.key,
     this.initialContext,
     this.onQuerySubmitted,
+    this.onShowPhoto,
     this.onClose,
   });
 
@@ -58,6 +58,7 @@ class FarmerVoiceAssistant extends ConsumerStatefulWidget {
     BuildContext context, {
     String? initialContext,
     ValueChanged<String>? onQuerySubmitted,
+    VoidCallback? onShowPhoto,
   }) {
     return showModalBottomSheet<String>(
       context: context,
@@ -65,6 +66,12 @@ class FarmerVoiceAssistant extends ConsumerStatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (ctx) => FarmerVoiceAssistant(
         initialContext: initialContext,
+        onShowPhoto: onShowPhoto != null
+            ? () {
+                Navigator.of(ctx).pop();
+                onShowPhoto();
+              }
+            : null,
         onQuerySubmitted: (query) {
           onQuerySubmitted?.call(query);
           Navigator.of(ctx).pop(query);
@@ -75,21 +82,35 @@ class FarmerVoiceAssistant extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<FarmerVoiceAssistant> createState() => _FarmerVoiceAssistantState();
+  ConsumerState<FarmerVoiceAssistant> createState() =>
+      _FarmerVoiceAssistantState();
 }
 
 class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late AnimationController _animController;
-  late Animation<double> _pulseAnimation;
   late TextEditingController _transcriptController;
   late TextEditingController _answerController;
 
-  VoiceWorkflowState _state = VoiceWorkflowState.idle;
+  BhoomiVoiceState _state = BhoomiVoiceState.idle;
   bool _isPlayingAudio = false;
   bool _isEditingQuestion = false;
   bool _isPermanentlyDenied = false;
   String? _errorMessage;
+
+  // Race condition & concurrency protection token
+  int _interactionGenerationId = 0;
+
+  // Active recording timer & real amplitude
+  Timer? _recordingTimer;
+  Timer? _amplitudeTimer;
+  int _recordingSeconds = 0;
+  double _currentAmplitude = 0.0;
+
+  // Conversational continuity & cached synthesis audio URL
+  final FarmerConversationContext _conversationContext = FarmerConversationContext();
+  String? _cachedAudioUrl;
+  InspectionTarget _resolvedTarget = InspectionTarget.unknown;
+  bool _isAnswerExpanded = true;
 
   StreamSubscription<void>? _playerCompleteSub;
 
@@ -97,26 +118,40 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.25).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
-    );
     _transcriptController = TextEditingController();
     _answerController = TextEditingController();
+    if (widget.initialContext != null && widget.initialContext!.isNotEmpty) {
+      _updateConversationContext(widget.initialContext!);
+    }
+  }
+
+  void _updateConversationContext(String newTurnText) {
+    _conversationContext.processTurn(newTurnText);
+    _resolvedTarget = _conversationContext.inspectionTarget;
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      if (_state == VoiceWorkflowState.listening) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_state.isMicActive) {
         _cancelListening();
       }
       if (_isPlayingAudio) {
         _stopAudioPlayback();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      // Auto-recover if returning from System Settings with microphone granted
+      if (_state == BhoomiVoiceState.permissionRequired) {
+        final recordingService = ref.read(audioRecordingServiceProvider);
+        recordingService.checkPermission().then((status) {
+          if (mounted && status.isGranted) {
+            setState(() {
+              _isPermanentlyDenied = false;
+              _state = BhoomiVoiceState.idle;
+            });
+          }
+        });
       }
     }
   }
@@ -124,33 +159,90 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _recordingTimer?.cancel();
+    _amplitudeTimer?.cancel();
     _playerCompleteSub?.cancel();
-    _animController.dispose();
     _transcriptController.dispose();
     _answerController.dispose();
     super.dispose();
   }
 
+  void _startTimer() {
+    _recordingTimer?.cancel();
+    _amplitudeTimer?.cancel();
+    _recordingSeconds = 0;
+    _currentAmplitude = 0.0;
+
+    _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _recordingSeconds++;
+        });
+      }
+    });
+
+    final recordingService = ref.read(audioRecordingServiceProvider);
+    _amplitudeTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
+      if (!mounted || _state != BhoomiVoiceState.recording) {
+        timer.cancel();
+        return;
+      }
+      final rawAmp = await recordingService.getNormalizedAmplitude();
+      if (mounted && _state == BhoomiVoiceState.recording) {
+        setState(() {
+          // Exponential moving average to smooth jitter while tracking real volume
+          _currentAmplitude = (_currentAmplitude * 0.3) + (rawAmp * 0.7);
+        });
+      }
+    });
+  }
+
+  void _stopTimer() {
+    _recordingTimer?.cancel();
+    _recordingTimer = null;
+    _amplitudeTimer?.cancel();
+    _amplitudeTimer = null;
+    _currentAmplitude = 0.0;
+  }
+
+  String _formatTimer(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
   Future<void> _startListening() async {
+    // 1. Guard against overlapping TTS audio & safely interrupt
+    if (_isPlayingAudio) {
+      await _stopAudioPlayback();
+    }
+    _playerCompleteSub?.cancel();
+    _cachedAudioUrl = null;
+
+    if (_transcriptController.text.isNotEmpty) {
+      _updateConversationContext(_transcriptController.text);
+    }
+
+    final generationId = ++_interactionGenerationId;
     final recordingService = ref.read(audioRecordingServiceProvider);
     final strings = ref.read(stringsProvider);
 
     setState(() {
-      _state = VoiceWorkflowState.listening;
+      _state = BhoomiVoiceState.listening;
       _errorMessage = null;
       _isEditingQuestion = false;
       _isPlayingAudio = false;
     });
-    _animController.repeat(reverse: true);
 
     try {
       final status = await recordingService.checkPermission();
+      if (generationId != _interactionGenerationId) return;
+
       if (status.isPermanentlyDenied) {
-        _animController.stop();
         if (mounted) {
           setState(() {
             _isPermanentlyDenied = true;
-            _state = VoiceWorkflowState.permission;
+            _state = BhoomiVoiceState.permissionRequired;
           });
         }
         return;
@@ -158,22 +250,22 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
 
       if (!status.isGranted) {
         final requestResult = await recordingService.requestPermission();
+        if (generationId != _interactionGenerationId) return;
+
         if (requestResult.isPermanentlyDenied) {
-          _animController.stop();
           if (mounted) {
             setState(() {
               _isPermanentlyDenied = true;
-              _state = VoiceWorkflowState.permission;
+              _state = BhoomiVoiceState.permissionRequired;
             });
           }
           return;
         }
         if (!requestResult.isGranted) {
-          _animController.stop();
           if (mounted) {
             setState(() {
               _isPermanentlyDenied = false;
-              _state = VoiceWorkflowState.permission;
+              _state = BhoomiVoiceState.permissionRequired;
             });
           }
           return;
@@ -182,35 +274,51 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
 
       // Start actual microphone recording
       await recordingService.startRecording(contentType: 'audio/wav');
-    } catch (e) {
-      _animController.stop();
-      if (mounted) {
+      if (mounted && generationId == _interactionGenerationId) {
         setState(() {
-          _state = VoiceWorkflowState.error;
-          _errorMessage = e is AppException ? e.message : strings.voiceErrorNotUnderstoodDesc;
+          _state = BhoomiVoiceState.recording;
+        });
+        _startTimer();
+      }
+    } catch (e) {
+      _stopTimer();
+      if (mounted && generationId == _interactionGenerationId) {
+        setState(() {
+          _state = BhoomiVoiceState.error;
+          _errorMessage =
+              e is AppException ? e.message : strings.voiceErrorNotUnderstoodDesc;
         });
       }
     }
   }
 
   Future<void> _cancelListening() async {
-    _animController.stop();
+    _interactionGenerationId++;
+    _stopTimer();
     final recordingService = ref.read(audioRecordingServiceProvider);
     await recordingService.cancelRecording();
 
     if (mounted) {
       setState(() {
-        _state = VoiceWorkflowState.idle;
+        _state = BhoomiVoiceState.idle;
         _transcriptController.clear();
         _isPlayingAudio = false;
+        _recordingSeconds = 0;
+        _currentAmplitude = 0.0;
       });
     }
   }
 
   Future<void> _stopListeningAndProcess() async {
-    _animController.stop();
+    if (_state != BhoomiVoiceState.recording && _state != BhoomiVoiceState.listening) {
+      // Guard against multiple simultaneous stop taps
+      return;
+    }
+
+    final generationId = _interactionGenerationId;
+    _stopTimer();
     setState(() {
-      _state = VoiceWorkflowState.processing;
+      _state = BhoomiVoiceState.processing;
     });
 
     final recordingService = ref.read(audioRecordingServiceProvider);
@@ -220,17 +328,19 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
     final strings = ref.read(stringsProvider);
 
     try {
-      // 1. Stop recording and retrieve real recorded bytes
+      // 1. Finalize and fetch recorded audio file
       final recordingData = await recordingService.stopRecording();
+      if (generationId != _interactionGenerationId) return;
+
       if (recordingData == null || recordingData.bytes.isEmpty) {
         throw const AudioServiceException(
-          message: 'Empty audio recorded.',
+          message: 'No speech detected in recording',
           code: 'EMPTY_RECORDING',
         );
       }
 
-      // 2. Upload raw audio bytes to S3 via presigned upload pipeline
-      String assetId = 'voice_asset_${DateTime.now().millisecondsSinceEpoch}';
+      // 2. Upload voice note to presigned S3 storage
+      String assetId = 'v_rec_${DateTime.now().millisecondsSinceEpoch}';
       if (!_isTestEnv) {
         try {
           assetId = await assetRepo.uploadAudio(
@@ -243,35 +353,39 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
           }
         }
       }
+      if (generationId != _interactionGenerationId) return;
 
       // 3. Immediately clean up temporary recording file on disk
       await recordingService.deleteFile(recordingData.filePath);
 
-      // 4. Transcribe real uploaded asset via VoiceRepository
+      // 4. Transcribe real uploaded asset via VoiceRepository with context
       final result = await voiceRepo.transcribe(
         assetId: assetId,
         lang: language.localeIdentifier,
-        context: widget.initialContext ?? 'query',
+        context: widget.initialContext ?? (_conversationContext.toContextString().isNotEmpty ? _conversationContext.toContextString() : 'query'),
       );
 
-      if (mounted) {
-        setState(() {
-          _transcriptController.text = result.text.isNotEmpty
-              ? result.text
-              : (language.isMarathi
-                  ? 'पानांवर करडे ठिपके दिसत आहेत, काय उपाय करावा?'
-                  : (language.isHindi
-                      ? 'पत्तियों पर धब्बे दिख रहे हैं, क्या उपाय करें?'
-                      : 'Grey spots are visible on leaves, what to do?'));
+      if (mounted && generationId == _interactionGenerationId) {
+        final queryText = result.text.isNotEmpty
+            ? result.text
+            : (language.isMarathi
+                ? 'पानांवर करडे ठिपके दिसत आहेत, काय उपाय करावा?'
+                : (language.isHindi
+                    ? 'पत्तियों पर धब्बे दिख रहे हैं, क्या उपाय करें?'
+                    : 'Grey spots are visible on leaves, what to do?'));
 
+        _updateConversationContext(queryText);
+
+        setState(() {
+          _transcriptController.text = queryText;
           _answerController.text = strings.voiceDefaultAnswer;
-          _state = VoiceWorkflowState.result;
+          _state = BhoomiVoiceState.transcriptionConfirmation;
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && generationId == _interactionGenerationId) {
         setState(() {
-          _state = VoiceWorkflowState.error;
+          _state = BhoomiVoiceState.error;
           if (e is AudioServiceException && e.code == 'EMPTY_RECORDING') {
             _errorMessage = strings.voiceEmptyRecordingError;
           } else if (e is PresignedUploadException) {
@@ -285,8 +399,8 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   }
 
   Future<void> _synthesizeAndPlay() async {
-    final voiceRepo = ref.read(voiceRepositoryProvider);
     final playbackService = ref.read(audioPlaybackServiceProvider);
+    final voiceRepo = ref.read(voiceRepositoryProvider);
     final language = ref.read(appLanguageProvider);
     final strings = ref.read(stringsProvider);
 
@@ -295,10 +409,35 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
       return;
     }
 
+    final generationId = ++_interactionGenerationId;
     setState(() {
       _isPlayingAudio = true;
-      _state = VoiceWorkflowState.playback;
+      _state = BhoomiVoiceState.speaking;
     });
+
+    // Replay cached audio URL if already synthesized (No duplicate STT/TTS calls)
+    if (_cachedAudioUrl != null && _cachedAudioUrl!.isNotEmpty) {
+      try {
+        _playerCompleteSub?.cancel();
+        _playerCompleteSub = playbackService.onPlayerComplete.listen((_) {
+          if (mounted && generationId == _interactionGenerationId) {
+            setState(() {
+              _isPlayingAudio = false;
+              _state = BhoomiVoiceState.completed;
+            });
+          }
+        });
+        await playbackService.playUrl(_cachedAudioUrl!);
+      } catch (_) {
+        if (mounted && generationId == _interactionGenerationId) {
+          setState(() {
+            _isPlayingAudio = false;
+            _errorMessage = strings.voicePlaybackError;
+          });
+        }
+      }
+      return;
+    }
 
     try {
       final synthResult = await voiceRepo.synthesize(
@@ -308,12 +447,16 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
         lang: language.localeIdentifier,
       );
 
+      if (generationId != _interactionGenerationId) return;
+
       if (synthResult.audioUrl.isNotEmpty) {
+        _cachedAudioUrl = synthResult.audioUrl;
         _playerCompleteSub?.cancel();
         _playerCompleteSub = playbackService.onPlayerComplete.listen((_) {
-          if (mounted) {
+          if (mounted && generationId == _interactionGenerationId) {
             setState(() {
               _isPlayingAudio = false;
+              _state = BhoomiVoiceState.completed;
             });
           }
         });
@@ -321,7 +464,7 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
         await playbackService.playUrl(synthResult.audioUrl);
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && generationId == _interactionGenerationId) {
         setState(() {
           _isPlayingAudio = false;
           _errorMessage = strings.voicePlaybackError;
@@ -349,20 +492,36 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   }
 
   void _resetToIdle() {
-    _animController.stop();
+    _interactionGenerationId++;
+    _stopTimer();
     _stopAudioPlayback();
+    _conversationContext.boundedTurns.clear();
+    _conversationContext.activeCrop = null;
+    _conversationContext.currentIssue = null;
+    _conversationContext.diagnosisSummary = null;
+    _conversationContext.inspectionTarget = InspectionTarget.unknown;
+    _conversationContext.advisoryTopic = null;
+    _cachedAudioUrl = null;
     setState(() {
-      _state = VoiceWorkflowState.idle;
+      _state = BhoomiVoiceState.idle;
       _transcriptController.clear();
       _isPlayingAudio = false;
       _isEditingQuestion = false;
       _errorMessage = null;
+      _recordingSeconds = 0;
+      _currentAmplitude = 0.0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final strings = ref.watch(stringsProvider);
+    ref.listen<AppLanguage>(appLanguageProvider, (prev, next) {
+      if (prev != next && _isPlayingAudio) {
+        _stopAudioPlayback();
+        _cachedAudioUrl = null;
+      }
+    });
     final viewInsets = MediaQuery.of(context).viewInsets;
 
     return Container(
@@ -392,7 +551,7 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header Drag Handle & Title
+              // Header Drag Handle
               Center(
                 child: Container(
                   width: 40,
@@ -405,13 +564,15 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
               ),
               const SizedBox(height: AppSpacing.m16),
 
+              // Title Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Row(
                       children: [
-                        const Icon(Icons.mic_rounded, color: AppColors.forest, size: 24),
+                        const Icon(Icons.mic_rounded,
+                            color: AppColors.forest, size: 24),
                         const SizedBox(width: AppSpacing.s8),
                         Flexible(
                           child: Text(
@@ -426,7 +587,8 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.fieldSlate),
+                    icon: const Icon(Icons.close_rounded,
+                        color: AppColors.fieldSlate),
                     onPressed: () {
                       _stopAudioPlayback();
                       if (widget.onClose != null) {
@@ -441,7 +603,8 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
               ),
               const Divider(height: AppSpacing.l20, color: AppColors.border),
 
-              if (widget.initialContext != null && widget.initialContext!.isNotEmpty) ...[
+              if (widget.initialContext != null &&
+                  widget.initialContext!.isNotEmpty) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.m12,
@@ -450,12 +613,14 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
                   decoration: BoxDecoration(
                     color: AppColors.primaryLight,
                     borderRadius: AppRadius.chip,
-                    border: Border.all(color: AppColors.forest.withValues(alpha: 0.3)),
+                    border:
+                        Border.all(color: AppColors.forest.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.topic_rounded, color: AppColors.forest, size: 16),
+                      const Icon(Icons.topic_rounded,
+                          color: AppColors.forest, size: 16),
                       const SizedBox(width: AppSpacing.s6),
                       Flexible(
                         child: Text(
@@ -472,7 +637,7 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
                 const SizedBox(height: AppSpacing.s8),
               ],
 
-              // Main Workflow Body according to State
+              // Main Workflow Body
               _buildWorkflowBody(strings),
             ],
           ),
@@ -483,22 +648,36 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
 
   Widget _buildWorkflowBody(AppStrings strings) {
     switch (_state) {
-      case VoiceWorkflowState.idle:
-      case VoiceWorkflowState.requestingPermission:
+      case BhoomiVoiceState.idle:
+      case BhoomiVoiceState.ready:
         return _buildIdleState(strings);
-      case VoiceWorkflowState.listening:
-        return _buildListeningState(strings);
-      case VoiceWorkflowState.processing:
+      case BhoomiVoiceState.listening:
+      case BhoomiVoiceState.recording:
+      case BhoomiVoiceState.stopping:
+        return _buildRecordingState(strings);
+      case BhoomiVoiceState.processing:
         return _buildProcessingState(strings);
-      case VoiceWorkflowState.result:
-        return _buildResultState(strings);
-      case VoiceWorkflowState.playback:
-        return _buildPlaybackState(strings);
-      case VoiceWorkflowState.error:
+      case BhoomiVoiceState.transcriptionConfirmation:
+        return _buildTranscriptionConfirmationState(strings);
+      case BhoomiVoiceState.speaking:
+      case BhoomiVoiceState.paused:
+        return _buildSpeakingState(strings);
+      case BhoomiVoiceState.completed:
+        return _buildCompletedState(strings);
+      case BhoomiVoiceState.error:
         return _buildErrorState(strings);
-      case VoiceWorkflowState.permission:
+      case BhoomiVoiceState.permissionRequired:
         return _buildPermissionState(strings);
     }
+  }
+
+  /// Generates conversational, semantic-aware camera guidance based on farmer's query.
+  String _getContextualCameraPrompt(AppStrings strings) {
+    _resolvedTarget = InspectionTarget.resolveFromQuery(
+      _transcriptController.text,
+      widget.initialContext ?? _conversationContext.toContextString(),
+    );
+    return _resolvedTarget.getLocalizedPrompt(strings);
   }
 
   // =========================================================================
@@ -537,7 +716,7 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
         ),
         const SizedBox(height: AppSpacing.xs4),
         Text(
-          strings.voiceSpeakInYourLanguage,
+          strings.voiceIdleSupporting,
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.fieldSlate,
           ),
@@ -547,32 +726,11 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
 
         // Prominent 80dp Tactile Mic Button
         Center(
-          child: Semantics(
-            label: strings.semanticsVoiceMic,
-            button: true,
-            child: GestureDetector(
-              onTap: _startListening,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.forest,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.forest.withValues(alpha: 0.35),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.mic_rounded,
-                  color: AppColors.pureWhite,
-                  size: 40,
-                ),
-              ),
-            ),
+          child: BhoomiVoiceButton(
+            state: BhoomiVoiceState.idle,
+            size: 80,
+            onTap: _startListening,
+            semanticLabel: strings.semanticsStartRecording,
           ),
         ),
         const SizedBox(height: AppSpacing.l24),
@@ -616,12 +774,14 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   }
 
   // =========================================================================
-  // 2. LISTENING STATE
+  // 2. RECORDING STATE (WITH LIVE TIMER & WAVEFORM)
   // =========================================================================
-  Widget _buildListeningState(AppStrings strings) {
+  Widget _buildRecordingState(AppStrings strings) {
     return Column(
       children: [
         const SizedBox(height: AppSpacing.m16),
+
+        // Live Header: Red Dot + Listening + Timer
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -634,13 +794,33 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
               ),
             ),
             const SizedBox(width: AppSpacing.s8),
-            Text(
-              strings.voiceListeningPrompt,
-              style: AppTypography.subheading.copyWith(
-                color: AppColors.forest,
-                fontWeight: FontWeight.w800,
+            Flexible(
+              child: Text(
+                strings.voiceListeningPrompt,
+                style: AppTypography.subheading.copyWith(
+                  color: AppColors.forest,
+                  fontWeight: FontWeight.w800,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
+            ),
+            const SizedBox(width: AppSpacing.s8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.dangerBg,
+                borderRadius: AppRadius.chip,
+              ),
+              child: Text(
+                _formatTimer(_recordingSeconds),
+                style: AppTypography.captionSmall.copyWith(
+                  color: AppColors.danger,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
             ),
           ],
         ),
@@ -650,51 +830,42 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
           style: AppTypography.bodySmall.copyWith(color: AppColors.fieldSlate),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.xl32),
+        const SizedBox(height: AppSpacing.l24),
 
-        // Animated Pulsing Mic with Breathing Ripple
+        // Multi-bar Live Waveform (Amplitude-driven + Silence-aware)
         Center(
-          child: AnimatedBuilder(
-            animation: _pulseAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _pulseAnimation.value,
-                child: Container(
-                  width: 84,
-                  height: 84,
-                  decoration: BoxDecoration(
-                    color: AppColors.forest,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.forest.withValues(alpha: 0.4),
-                        blurRadius: 20 * _pulseAnimation.value,
-                        spreadRadius: 6 * (_pulseAnimation.value - 1.0),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.mic_rounded,
-                    color: AppColors.pureWhite,
-                    size: 40,
-                  ),
-                ),
-              );
-            },
+          child: BhoomiWaveform(
+            color: AppColors.danger,
+            barCount: 7,
+            minHeight: 10,
+            maxHeight: 36,
+            barWidth: 5,
+            amplitude: _currentAmplitude,
           ),
         ),
-        const SizedBox(height: AppSpacing.xl32),
+        const SizedBox(height: AppSpacing.l24),
 
-        // Stop Recording Action Button
+        // Pulsing Tactile Mic Button
+        Center(
+          child: BhoomiVoiceButton(
+            state: BhoomiVoiceState.recording,
+            size: 84,
+            onTap: _stopListeningAndProcess,
+            semanticLabel: strings.semanticsStopRecording,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl28),
+
+        // Primary Action: [ Stop / थांबवा / रोकें ]
         AppButton.danger(
-          label: strings.voiceStopListening,
+          label: strings.voiceStopRecording,
           size: AppButtonSize.large,
           onPressed: _stopListeningAndProcess,
           leadingIcon: const Icon(Icons.stop_rounded, color: Colors.white),
         ),
         const SizedBox(height: AppSpacing.s8),
 
-        // Cancel link to safely return to idle
+        // Cancel button to safely return to idle
         TextButton(
           onPressed: _cancelListening,
           child: Text(
@@ -726,7 +897,7 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
         ),
         const SizedBox(height: AppSpacing.l20),
         Text(
-          '🌱 ${strings.voiceProcessingPrompt}',
+          '🌱 ${strings.voiceUnderstanding}',
           style: AppTypography.bodyLarge.copyWith(
             color: AppColors.soilCharcoal,
             fontWeight: FontWeight.w700,
@@ -745,13 +916,13 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   }
 
   // =========================================================================
-  // 4. RESULT STATE
+  // 4. TRANSCRIPTION CONFIRMATION / RESULT STATE
   // =========================================================================
-  Widget _buildResultState(AppStrings strings) {
+  Widget _buildTranscriptionConfirmationState(AppStrings strings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Section 1: Farmer Question / Transcript
+        // Section 1: Farmer Question / Transcript Confirmation
         Container(
           padding: const EdgeInsets.all(AppSpacing.m12),
           decoration: BoxDecoration(
@@ -765,11 +936,22 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    strings.voiceResultTitle,
-                    style: AppTypography.captionSmall.copyWith(
-                      color: AppColors.fieldSlate,
-                      fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.record_voice_over_rounded,
+                            color: AppColors.forest, size: 18),
+                        const SizedBox(width: AppSpacing.s6),
+                        Flexible(
+                          child: Text(
+                            strings.voiceYourQuestion,
+                            style: AppTypography.captionSmall.copyWith(
+                              color: AppColors.forest,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   InkWell(
@@ -781,7 +963,8 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.edit_rounded, color: AppColors.forest, size: 14),
+                        const Icon(Icons.edit_rounded,
+                            color: AppColors.forest, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           strings.voiceEditQuestion,
@@ -799,7 +982,7 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
               if (_isEditingQuestion)
                 AppTextField(
                   controller: _transcriptController,
-                  label: 'Question',
+                  label: strings.voiceResultTitle,
                   hintText: 'Edit query if needed...',
                 )
               else
@@ -831,11 +1014,13 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
                 children: [
                   const Text('🌱', style: TextStyle(fontSize: 18)),
                   const SizedBox(width: AppSpacing.s8),
-                  Text(
-                    strings.voiceBhoomiAnswer,
-                    style: AppTypography.subheading.copyWith(
-                      color: AppColors.forest,
-                      fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: Text(
+                      strings.voiceBhoomiAnswer,
+                      style: AppTypography.subheading.copyWith(
+                        color: AppColors.forest,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ],
@@ -859,7 +1044,9 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
 
         // Primary Action 1: Listen Audio / Stop Audio
         AppButton.primary(
-          label: _isPlayingAudio ? strings.voicePauseAnswer : strings.listenSpokenSummary,
+          label: _isPlayingAudio
+              ? strings.voicePauseAnswer
+              : strings.listenSpokenSummary,
           onPressed: _synthesizeAndPlay,
           leadingIcon: Icon(
             _isPlayingAudio ? Icons.pause_rounded : Icons.volume_up_rounded,
@@ -894,14 +1081,24 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
             ),
           ],
         ),
+
+        // Optional Multimodal Voice-to-Camera Bridge
+        if (widget.onShowPhoto != null) ...[
+          const SizedBox(height: AppSpacing.s10),
+          AppButton.secondary(
+            label: _getContextualCameraPrompt(strings),
+            onPressed: widget.onShowPhoto,
+            leadingIcon: const Icon(Icons.camera_alt_rounded, size: 18),
+          ),
+        ],
       ],
     );
   }
 
   // =========================================================================
-  // 5. PLAYBACK STATE
+  // 5. SPEAKING STATE
   // =========================================================================
-  Widget _buildPlaybackState(AppStrings strings) {
+  Widget _buildSpeakingState(AppStrings strings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -910,7 +1107,8 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
           decoration: BoxDecoration(
             color: AppColors.primaryLight,
             borderRadius: AppRadius.card,
-            border: Border.all(color: AppColors.forest.withValues(alpha: 0.4), width: 1.5),
+            border: Border.all(
+                color: AppColors.forest.withValues(alpha: 0.4), width: 1.5),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -918,7 +1116,9 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
               Row(
                 children: [
                   Icon(
-                    _isPlayingAudio ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                    _isPlayingAudio
+                        ? Icons.volume_up_rounded
+                        : Icons.volume_off_rounded,
                     color: AppColors.forest,
                     size: 24,
                   ),
@@ -932,7 +1132,13 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
                       ),
                     ),
                   ),
-                  if (_isPlayingAudio) _buildAnimatedWaveform(),
+                  if (_isPlayingAudio)
+                    const BhoomiWaveform(
+                      color: AppColors.forest,
+                      barCount: 4,
+                      minHeight: 8,
+                      maxHeight: 22,
+                    ),
                 ],
               ),
               const SizedBox(height: AppSpacing.m12),
@@ -955,7 +1161,9 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
           children: [
             Expanded(
               child: AppButton.secondary(
-                label: _isPlayingAudio ? strings.voicePauseAnswer : strings.voiceReplayAnswer,
+                label: _isPlayingAudio
+                    ? strings.voicePauseAnswer
+                    : strings.voiceReplayAnswer,
                 onPressed: _toggleAudioPlayback,
                 leadingIcon: Icon(
                   _isPlayingAudio ? Icons.pause_rounded : Icons.replay_rounded,
@@ -973,6 +1181,16 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
             ),
           ],
         ),
+
+        // Optional Multimodal Voice-to-Camera Bridge
+        if (widget.onShowPhoto != null) ...[
+          const SizedBox(height: AppSpacing.s10),
+          AppButton.secondary(
+            label: _getContextualCameraPrompt(strings),
+            onPressed: widget.onShowPhoto,
+            leadingIcon: const Icon(Icons.camera_alt_rounded, size: 18),
+          ),
+        ],
         const SizedBox(height: AppSpacing.s8),
 
         Center(
@@ -997,50 +1215,141 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   }
 
   // =========================================================================
-  // 6. ERROR STATE
+  // 5B. COMPLETED STATE (CONVERSATIONAL CONTINUITY & CTA HIERARCHY)
   // =========================================================================
-  Widget _buildErrorState(AppStrings strings) {
+  Widget _buildCompletedState(AppStrings strings) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: AppSpacing.m16),
-        const Text('😕', style: TextStyle(fontSize: 48)),
-        const SizedBox(height: AppSpacing.m12),
-        Text(
-          strings.voiceErrorNotUnderstood,
-          style: AppTypography.subheading.copyWith(
-            color: AppColors.soilCharcoal,
-            fontWeight: FontWeight.w800,
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.l16),
+          decoration: BoxDecoration(
+            color: AppColors.warmSurface,
+            borderRadius: AppRadius.card,
+            border: Border.all(
+                color: AppColors.forest.withValues(alpha: 0.3), width: 1.5),
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSpacing.s8),
-        Text(
-          _errorMessage ?? strings.voiceErrorNotUnderstoodDesc,
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.fieldSlate,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.success,
+                    size: 22,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Expanded(
+                    child: Text(
+                      strings.voiceFinishedSpeaking,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.forest,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      _isAnswerExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      color: AppColors.forest,
+                      size: 22,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isAnswerExpanded = !_isAnswerExpanded;
+                      });
+                    },
+                    tooltip: strings.voiceReadOnScreen,
+                  ),
+                ],
+              ),
+              if (_isAnswerExpanded) ...[
+                const SizedBox(height: AppSpacing.m12),
+                Text(
+                  _answerController.text.isNotEmpty
+                      ? _answerController.text
+                      : _transcriptController.text,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.soilCharcoal,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ],
           ),
-          textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.l24),
+        const SizedBox(height: AppSpacing.l16),
 
+        // PRIMARY CTA: 🎙 Ask Bhoomi again
         AppButton.primary(
-          label: strings.voiceRetry,
+          label: strings.voiceAskAgainConversational,
           onPressed: _startListening,
           leadingIcon: const Icon(Icons.mic_rounded, size: 20),
         ),
         const SizedBox(height: AppSpacing.s10),
 
-        AppButton.secondary(
-          label: strings.voiceTypeFallback,
-          onPressed: () {
-            setState(() {
-              _state = VoiceWorkflowState.result;
-              _isEditingQuestion = true;
-            });
-          },
-          leadingIcon: const Icon(Icons.keyboard_rounded, size: 20),
+        // SECONDARY CTA: 📷 Show Bhoomi the crop
+        if (widget.onShowPhoto != null) ...[
+          AppButton.secondary(
+            label: _getContextualCameraPrompt(strings),
+            onPressed: widget.onShowPhoto,
+            leadingIcon: const Icon(Icons.camera_alt_rounded, size: 20),
+          ),
+          const SizedBox(height: AppSpacing.s10),
+        ],
+
+        // TERTIARY ACTIONS: 🔊 Hear again & 📖 Read on screen
+        Row(
+          children: [
+            Expanded(
+              child: AppButton.outline(
+                label: strings.voiceHearAgainConversational,
+                onPressed: _synthesizeAndPlay,
+                leadingIcon: const Icon(Icons.volume_up_rounded, size: 18),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.m12),
+            Expanded(
+              child: AppButton.ghost(
+                label: strings.voiceReadOnScreen,
+                onPressed: () {
+                  setState(() {
+                    _isAnswerExpanded = !_isAnswerExpanded;
+                  });
+                },
+                leadingIcon: Icon(
+                  _isAnswerExpanded
+                      ? Icons.visibility_off_rounded
+                      : Icons.menu_book_rounded,
+                  size: 18,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  // =========================================================================
+  // 6. ERROR STATE
+  // =========================================================================
+  Widget _buildErrorState(AppStrings strings) {
+    return BhoomiVoiceError(
+      strings: strings,
+      message: _errorMessage,
+      onRetry: _startListening,
+      onShowCrop: widget.onShowPhoto,
+      onTypeInstead: () {
+        setState(() {
+          _state = BhoomiVoiceState.transcriptionConfirmation;
+          _isEditingQuestion = true;
+        });
+      },
     );
   }
 
@@ -1048,87 +1357,23 @@ class _FarmerVoiceAssistantState extends ConsumerState<FarmerVoiceAssistant>
   // 7. PERMISSION STATE
   // =========================================================================
   Widget _buildPermissionState(AppStrings strings) {
-    return Column(
-      children: [
-        const SizedBox(height: AppSpacing.m16),
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.turmeric.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.mic_off_rounded, color: AppColors.turmeric, size: 32),
-        ),
-        const SizedBox(height: AppSpacing.m16),
-        Text(
-          strings.voicePermissionTitle,
-          style: AppTypography.subheading.copyWith(
-            color: AppColors.soilCharcoal,
-            fontWeight: FontWeight.w800,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSpacing.s8),
-        Text(
-          _isPermanentlyDenied
-              ? strings.voicePermissionPermanentlyDenied
-              : strings.voicePermissionDesc,
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.fieldSlate,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSpacing.l24),
-
-        if (_isPermanentlyDenied)
-          AppButton.primary(
-            label: strings.voiceOpenSettings,
-            onPressed: () async {
-              final recordingService = ref.read(audioRecordingServiceProvider);
-              await recordingService.openSettings();
-              _resetToIdle();
-            },
-            leadingIcon: const Icon(Icons.settings_rounded, size: 20),
-          )
-        else
-          AppButton.primary(
-            label: strings.voiceGrantPermission,
-            onPressed: _startListening,
-            leadingIcon: const Icon(Icons.check_rounded, size: 20),
-          ),
-        const SizedBox(height: AppSpacing.s10),
-
-        AppButton.secondary(
-          label: strings.cancel,
-          onPressed: _resetToIdle,
-          leadingIcon: const Icon(Icons.close_rounded, size: 20),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAnimatedWaveform() {
-    return AnimatedBuilder(
-      animation: _animController,
-      builder: (context, child) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(4, (index) {
-            final phase = (index * 0.25);
-            final heightFactor = ((_animController.value + phase) % 1.0);
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 1.5),
-              width: 3.5,
-              height: 10.0 + (heightFactor * 16.0),
-              decoration: BoxDecoration(
-                color: AppColors.forest,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            );
-          }),
-        );
+    return BhoomiVoicePermission(
+      strings: strings,
+      isPermanentlyDenied: _isPermanentlyDenied,
+      onRequestPermission: _startListening,
+      onOpenSettings: () async {
+        final recordingService = ref.read(audioRecordingServiceProvider);
+        await recordingService.openSettings();
+        _resetToIdle();
       },
+      onShowCrop: widget.onShowPhoto,
+      onTypeInstead: () {
+        setState(() {
+          _state = BhoomiVoiceState.transcriptionConfirmation;
+          _isEditingQuestion = true;
+        });
+      },
+      onCancel: _resetToIdle,
     );
   }
 }

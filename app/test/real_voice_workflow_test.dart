@@ -55,6 +55,11 @@ class FakeAudioRecorderWrapper implements AudioRecorderWrapper {
   }
 
   @override
+  Future<Amplitude> getAmplitude() async {
+    return Amplitude(current: -15.0, max: -3.0);
+  }
+
+  @override
   Future<void> dispose() async {
     recordingActive = false;
     disposeCallCount++;

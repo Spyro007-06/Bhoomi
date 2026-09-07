@@ -7,6 +7,8 @@ import '../../../core/localization/locale_provider.dart';
 import '../../../models/diagnosis_models.dart';
 import '../../../models/advisory_models.dart';
 import '../../../models/gate_models.dart';
+import '../../../core/utils/audio_playback_service.dart';
+import '../../../providers/repository_providers.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_card.dart';
 import '../../../widgets/app_status_badge.dart';
@@ -140,7 +142,7 @@ class AdvisoryResultScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.l20),
 
-              // Grounded Advisory with Mandatory IPM Ordering
+              // Grounded Advisory with Mandatory IPM Ordering & Spoken Summary (LISTEN)
               AdvisoryIpmCard(
                 possibleIssue: advisory?.possibleIssue ?? diagnosis?.label ?? 'blast',
                 whatToAvoid: advisory?.whatToAvoid ?? 'Do not top-dress nitrogen now. It accelerates spread.',
@@ -167,13 +169,30 @@ class AdvisoryResultScreen extends ConsumerWidget {
                 expertTrigger: advisory?.expertTrigger,
                 citations: citationItems,
                 spokenSummary: spokenSummary,
-                onPlayAudio: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(spokenSummary ?? 'Playing spoken advisory audio.'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
+                onPlayAudio: () async {
+                  final textToSpeak = spokenSummary ??
+                      '${strings.getLocalizedTargetName(diagnosis?.label ?? 'blast')}. ${advisory?.whatToAvoid ?? ''}';
+                  try {
+                    final voiceRepo = ref.read(voiceRepositoryProvider);
+                    final playbackService = ref.read(audioPlaybackServiceProvider);
+                    final language = ref.read(appLanguageProvider);
+                    final result = await voiceRepo.synthesize(
+                      text: textToSpeak,
+                      lang: language.localeIdentifier,
+                    );
+                    if (result.audioUrl.isNotEmpty) {
+                      await playbackService.playUrl(result.audioUrl);
+                    }
+                  } catch (_) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(textToSpeak),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
               const SizedBox(height: AppSpacing.l20),

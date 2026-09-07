@@ -10,7 +10,9 @@ import '../../../providers/repository_providers.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_card.dart';
 import '../../../widgets/stub_banner.dart';
+import '../../../widgets/spoken_summary_player.dart';
 import '../../../widgets/language_selector_button.dart';
+import '../../../core/utils/audio_playback_service.dart';
 import '../../diagnose/presentation/advisory_result_screen.dart';
 import '../../diagnose/presentation/escalation_status_screen.dart';
 
@@ -31,6 +33,19 @@ class DoubtDoctorScreen extends ConsumerStatefulWidget {
 class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
   bool _isSubmitting = false;
   String? _errorMessage;
+  AudioPlaybackService? _audioPlaybackService;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlaybackService = ref.read(audioPlaybackServiceProvider);
+  }
+
+  @override
+  void dispose() {
+    _audioPlaybackService?.stop();
+    super.dispose();
+  }
 
   Future<void> _handleAnswer(String answer) async {
     final problemId = widget.response.problemId ?? 'p_1';
@@ -197,10 +212,16 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
                         height: 1.3,
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.m12),
+                    // Voice prompt player
+                    SpokenSummaryPlayer(
+                      text: question,
+                      title: 'प्रश्न ऐका (Listen to Question)',
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl32),
+              const SizedBox(height: AppSpacing.l24),
 
               if (_errorMessage != null) ...[
                 Text(

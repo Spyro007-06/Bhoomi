@@ -276,9 +276,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Real Camera Capture Screen is active and initialized
-      expect(find.text('पीक तपासा (फोटो घ्या)'), findsOneWidget);
-      expect(find.text('पानावरील किंवा खोडावरील डाग स्पष्ट दिसतील असा फोटो घ्या.'), findsOneWidget);
-      expect(find.text('पाने किंवा बाधित भाग चौकटीत ठेवा'), findsOneWidget);
+      expect(find.text('पीक तपासा'), findsWidgets);
+      expect(find.text('पिकाचा आणि बाधित भागाचा स्पष्ट फोटो घ्या.'), findsOneWidget);
 
       // 2. Tap Shutter Capture Button
       await tester.tap(find.byIcon(Icons.camera_alt_rounded));
@@ -337,7 +336,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify permission denied message & Grant Permission button
-      expect(find.text('पिकाचा फोटो घेण्यासाठी कॅमेरा परवानगी आवश्यक आहे.'), findsOneWidget);
+      expect(find.text('कॅमेरा परवानगी द्या'), findsOneWidget);
       expect(find.text('परवानगी द्या'), findsOneWidget);
 
       // Grant permission and tap retry
@@ -346,7 +345,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Camera initializes successfully
-      expect(find.text('पाने किंवा बाधित भाग चौकटीत ठेवा'), findsOneWidget);
+      expect(find.text('पिकाचा आणि बाधित भागाचा स्पष्ट फोटो घ्या.'), findsOneWidget);
     });
 
     testWidgets('Handles permanently denied permission state with settings action',
@@ -374,7 +373,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify permanently denied message & Open Settings button
-      expect(find.text('कॅमेरा परवानगी कायमची नाकारली आहे. कृपया ॲप सेटिंग्जमधून परवानगी द्या.'), findsOneWidget);
+      expect(find.text('कॅमेरा परवानगी बंद आहे'), findsOneWidget);
       expect(find.text('सेटिंग्ज उघडा'), findsOneWidget);
 
       // Tap settings button and verify platform wrapper received call
@@ -408,7 +407,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify no camera available warning
-      expect(find.text('डिव्हाइसवर कॅमेरा उपलब्ध नाही.'), findsOneWidget);
+      expect(find.text('कॅमेरा उपलब्ध नाही'), findsOneWidget);
     });
   });
 }

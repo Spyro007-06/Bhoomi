@@ -64,7 +64,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('पाने किंवा बाधित भाग चौकटीत ठेवा'), findsOneWidget);
+      expect(find.text('पिकाचा आणि बाधित भागाचा स्पष्ट फोटो घ्या.'), findsOneWidget);
       expect(find.byIcon(Icons.eco_rounded), findsOneWidget);
     });
 

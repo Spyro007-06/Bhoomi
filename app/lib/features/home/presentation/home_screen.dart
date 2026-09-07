@@ -112,7 +112,10 @@ class HomeScreen extends ConsumerWidget {
                   button: true,
                   child: InkWell(
                     borderRadius: AppRadius.card,
-                    onTap: () => FarmerVoiceAssistant.show(context),
+                    onTap: () => FarmerVoiceAssistant.show(
+                      context,
+                      onShowPhoto: () => onCheckCropPressed?.call(),
+                    ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.l16,
@@ -217,7 +220,163 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.l16),
 
                 // =========================================================================
-                // 3. COMPACT FARM STATUS CARD
+                // 3. SECONDARY CROP CHECK ACTION: 📷 SHOW BHOOMI YOUR CROP
+                // =========================================================================
+                GestureDetector(
+                  onTap: onCheckCropPressed,
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.l16),
+                    decoration: BoxDecoration(
+                      color: AppColors.forest,
+                      borderRadius: AppRadius.card,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.forest.withValues(alpha: 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.l16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                strings.checkCropBannerTitle,
+                                style: AppTypography.subheading.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                strings.checkCropBannerAction,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.primaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.l24),
+
+                // =========================================================================
+                // 3. TODAY'S ATTENTION (ACTIONABLE ALERTS & FOLLOW-UPS)
+                // =========================================================================
+                alertsAsync.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (alertsRes) {
+                    if (alertsRes.alerts.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final topAlert = alertsRes.alerts.first;
+                    final tasks = topAlert.inspectionTasks.isNotEmpty
+                        ? topAlert.inspectionTasks
+                        : ['Check the upper leaves on 10 plants across the field.'];
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strings.recentAlertsHeader,
+                          style: AppTypography.subheading.copyWith(
+                            color: AppColors.soilCharcoal,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.m12),
+                        RiskCard(
+                          target: topAlert.target,
+                          riskLevel: topAlert.riskLevel,
+                          reason: topAlert.reason,
+                          inspectionTasks: tasks,
+                          triggerType: topAlert.triggerType,
+                          onInspectNow: () async {
+                            try {
+                              await ref.read(alertRepositoryProvider).respondToAlert(
+                                    alertId: topAlert.id,
+                                    outcome: 'found',
+                                  );
+                              ref.invalidate(activeAlertsProvider(farmIdForFeatures));
+                            } catch (_) {}
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.l24),
+                      ],
+                    );
+                  },
+                ),
+
+                followupsAsync.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (followupsRes) {
+                    if (followupsRes.followUps.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final topFollowup = followupsRes.followUps.first;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strings.pendingFollowupsHeader,
+                          style: AppTypography.subheading.copyWith(
+                            color: AppColors.soilCharcoal,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.m12),
+                        FollowUpCard(
+                          question: topFollowup.question ?? strings.followupQuestionDefault,
+                          questionLocalized: strings.followupQuestionDefault,
+                          target: topFollowup.target ?? 'treatment',
+                          onResponse: (response) async {
+                            try {
+                              await ref.read(followUpRepositoryProvider).respondToFollowUp(
+                                    followUpId: topFollowup.id,
+                                    response: response,
+                                  );
+                              ref.invalidate(pendingFollowUpsProvider(farmIdForFeatures));
+                            } catch (_) {}
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.l24),
+                      ],
+                    );
+                  },
+                ),
+
+                // =========================================================================
+                // 5. FARM STATUS & SUPPORTING MEMORY
                 // =========================================================================
                 if (activeFarmId == null || activeFarmId.isEmpty)
                   AppCard(
@@ -307,211 +466,9 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
 
-                const SizedBox(height: AppSpacing.l16),
-
-                // =========================================================================
-                // 4. SECONDARY CROP CHECK ACTION: 📷 SHOW BHOOMI YOUR CROP
-                // =========================================================================
-                GestureDetector(
-                  onTap: onCheckCropPressed,
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSpacing.l16),
-                    decoration: BoxDecoration(
-                      color: AppColors.forest,
-                      borderRadius: AppRadius.card,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.forest.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt_rounded,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.l16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                strings.checkCropBannerTitle,
-                                style: AppTypography.subheading.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                strings.checkCropBannerAction,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.primaryLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: AppSpacing.xl28),
-
-                // Section 1: Active Weather & Pest Alerts
-                Text(
-                  strings.recentAlertsHeader,
-                  style: AppTypography.subheading.copyWith(
-                    color: AppColors.soilCharcoal,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.m12),
-                alertsAsync.when(
-                  loading: () => const AppCard(
-                    padding: EdgeInsets.all(AppSpacing.l16),
-                    child: Center(
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.forest),
-                    ),
-                  ),
-                  error: (_, __) => AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.l16),
-                    child: Text(
-                      strings.noActiveAlerts,
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.fieldSlate),
-                    ),
-                  ),
-                  data: (alertsRes) {
-                    if (alertsRes.alerts.isEmpty) {
-                      return AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.l16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.shield_outlined, color: AppColors.success, size: 24),
-                            const SizedBox(width: AppSpacing.m12),
-                            Expanded(
-                              child: Text(
-                                strings.noActiveAlerts,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.fieldSlate,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    // Render top active alert
-                    final topAlert = alertsRes.alerts.first;
-                    final tasks = topAlert.inspectionTasks.isNotEmpty
-                        ? topAlert.inspectionTasks
-                        : ['Check the upper leaves on 10 plants across the field.'];
-
-                    return RiskCard(
-                      target: topAlert.target,
-                      riskLevel: topAlert.riskLevel,
-                      reason: topAlert.reason,
-                      inspectionTasks: tasks,
-                      triggerType: topAlert.triggerType,
-                      onInspectNow: () async {
-                        try {
-                          await ref.read(alertRepositoryProvider).respondToAlert(
-                                alertId: topAlert.id,
-                                outcome: 'found',
-                              );
-                          ref.invalidate(activeAlertsProvider(farmIdForFeatures));
-                        } catch (_) {}
-                      },
-                    );
-                  },
-                ),
-
                 const SizedBox(height: AppSpacing.l24),
 
-                // Section 2: Pending Follow-ups
-                Text(
-                  strings.pendingFollowupsHeader,
-                  style: AppTypography.subheading.copyWith(
-                    color: AppColors.soilCharcoal,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.m12),
-                followupsAsync.when(
-                  loading: () => const AppCard(
-                    padding: EdgeInsets.all(AppSpacing.l16),
-                    child: Center(
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.forest),
-                    ),
-                  ),
-                  error: (_, __) => AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.l16),
-                    child: Text(
-                      strings.noPendingFollowups,
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.fieldSlate),
-                    ),
-                  ),
-                  data: (followupsRes) {
-                    if (followupsRes.followUps.isEmpty) {
-                      return AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.l16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.event_available_rounded, color: AppColors.forest, size: 24),
-                            const SizedBox(width: AppSpacing.m12),
-                            Expanded(
-                              child: Text(
-                                strings.noPendingFollowups,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.fieldSlate,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    final topFollowup = followupsRes.followUps.first;
-                    return FollowUpCard(
-                      question: topFollowup.question ?? strings.followupQuestionDefault,
-                      questionLocalized: strings.followupQuestionDefault,
-                      target: topFollowup.target ?? 'treatment',
-                      onResponse: (response) async {
-                        try {
-                          await ref.read(followUpRepositoryProvider).respondToFollowUp(
-                                followUpId: topFollowup.id,
-                                response: response,
-                              );
-                          ref.invalidate(pendingFollowUpsProvider(farmIdForFeatures));
-                        } catch (_) {}
-                      },
-                    );
-                  },
-                ),
-
-                const SizedBox(height: AppSpacing.l24),
-
-                // Section 3: Recent Activity (Timeline Snippet)
+                // Section 6: Recent Activity (Timeline Snippet)
                 Text(
                   strings.homeRecentActivityHeader,
                   style: AppTypography.subheading.copyWith(
