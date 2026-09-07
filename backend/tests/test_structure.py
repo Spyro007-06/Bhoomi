@@ -83,6 +83,10 @@ IMPLEMENTED = {
     # brief's scaffolded placeholder either -- a new module, same reasoning as
     # services/corpus.py above.
     "services/alerts.py",
+    # Bhoomi v3 phase, Part 2: the asset-bytes read/write helpers voice/ was
+    # blocked on. Not a phase brief's scaffolded placeholder -- a new module,
+    # same reasoning as services/corpus.py above.
+    "services/assets.py",
 }
 
 
@@ -144,6 +148,7 @@ def test_the_expected_modules_exist() -> None:
         "escalation.py",
         "corpus.py",
         "alerts.py",
+        "assets.py",
     }
 
 
