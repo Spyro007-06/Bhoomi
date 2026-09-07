@@ -1708,9 +1708,8 @@
             "type": "number"
           },
           "label": {
-            "description": "Pest species or disease, from the bounded set",
-            "title": "Label",
-            "type": "string"
+            "$ref": "#/components/schemas/TargetLabel",
+            "description": "Pest species or disease, from the bounded set"
           }
         },
         "required": [
@@ -2780,6 +2779,48 @@
         "summary": "Presign",
         "tags": [
           "assets"
+        ]
+      }
+    },
+    "/api/v1/auth/demo": {
+      "post": {
+        "description": "Mint tokens for the fixed, pre-seeded demo farmer. SIH judging only.\n\nNo request body: there used to be a `demo_code` field defaulting to the\nsame literal the handler fell back to when the body was absent, which is\nnot a credential -- removed rather than tightened, since a hardcoded\nstring in a public repo cannot be one. The only gate left is\nsettings.demo_mode (whether this route is mounted at all -- see\napp/main.py) and settings.app_env, checked again here even though\nmounting already implies demo_mode is true, so this function's own\ninvariant does not depend on how it was reached.\n\nDoes not create the demo farmer or farm -- an unauthenticated write path\nwas the least defensible part of the original endpoint. Both are seed\ndata (seed/farms.py); absence here is a clear, unauthenticated-safe\nerror telling the caller to run the seed, not a silent row creation.",
+        "operationId": "demo_login_api_v1_auth_demo_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Demo mode is disabled in this environment: DEMO_MODE is not set, or app_env is production."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The demo farmer has not been seeded in this environment. Run `python -m seed.farms`."
+          }
+        },
+        "summary": "Demo Login",
+        "tags": [
+          "auth"
         ]
       }
     },
