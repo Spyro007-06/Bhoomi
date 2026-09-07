@@ -12,9 +12,10 @@ class LocaleNotifier extends StateNotifier<AppLanguage> {
   }
 
   Future<void> _loadPersistedLanguage() async {
-    if (_storage == null) return;
+    final storage = _storage;
+    if (storage == null) return;
     try {
-      final savedCode = await _storage!.read(key: languageStorageKey);
+      final savedCode = await storage.read(key: languageStorageKey);
       if (savedCode != null && savedCode.isNotEmpty) {
         final lang = AppLanguage.fromCode(savedCode);
         if (state != lang) {
