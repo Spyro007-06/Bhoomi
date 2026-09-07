@@ -19,6 +19,7 @@
   ],
   "source_dataset": "Project-AgML/paddy_disease_classification",
   "img_size": 224,
+  "sha256": "da61d0dc6d1d7e0b5f9638cd8fa3d934a9d80bbce09767855c4f29cb9dfa5363",
   "normalization": {
     "mean": [0.485, 0.456, 0.406],
     "std": [0.229, 0.224, 0.225]
