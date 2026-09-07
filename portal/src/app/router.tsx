@@ -7,6 +7,10 @@ import { AppShell } from '@/components/layout/AppShell';
 // Agronomist Pages
 import { CaseQueuePage } from '@/features/agronomist/pages/CaseQueuePage';
 import { CaseWorkspacePage } from '@/features/agronomist/pages/CaseWorkspacePage';
+import { UnderReviewPage } from '@/features/agronomist/pages/UnderReviewPage';
+import { ResolvedHistoryPage } from '@/features/agronomist/pages/ResolvedHistoryPage';
+import { TreatmentEfficacyPage } from '@/features/agronomist/pages/TreatmentEfficacyPage';
+import { ActivityLogsPage } from '@/features/agronomist/pages/ActivityLogsPage';
 
 // Officials Pages (F15)
 import { OfficialsDashboardPage } from '@/features/officials/pages/OfficialsDashboardPage';
@@ -40,6 +44,22 @@ export const routes: RouteObject[] = [
               {
                 path: '/agronomist/cases/:caseId',
                 element: <CaseWorkspacePage />,
+              },
+              {
+                path: '/agronomist/under-review',
+                element: <UnderReviewPage />,
+              },
+              {
+                path: '/agronomist/resolved',
+                element: <ResolvedHistoryPage />,
+              },
+              {
+                path: '/agronomist/efficacy',
+                element: <TreatmentEfficacyPage />,
+              },
+              {
+                path: '/agronomist/logs',
+                element: <ActivityLogsPage />,
               },
             ],
           },

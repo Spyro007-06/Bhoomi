@@ -287,12 +287,13 @@ export function handleDemoMockResponse<T>(endpoint: string, method = 'GET'): T |
       return DEMO_CASE_QUEUE as unknown as T;
     }
     if (
-      cleanEndpoint.startsWith('/cases/') &&
+      cleanEndpoint.includes('/cases/') &&
       !cleanEndpoint.includes('/confirm') &&
       !cleanEndpoint.includes('/request-info')
     ) {
       const parts = cleanEndpoint.split('/');
-      const caseId = parts[2] || 'case_demo_001';
+      const casesIdx = parts.indexOf('cases');
+      const caseId = (casesIdx !== -1 && parts[casesIdx + 1]) || 'case_demo_001';
       return getDemoCaseBundle(caseId) as unknown as T;
     }
   }
@@ -300,7 +301,8 @@ export function handleDemoMockResponse<T>(endpoint: string, method = 'GET'): T |
   if (method === 'POST') {
     if (cleanEndpoint.includes('/confirm')) {
       const parts = cleanEndpoint.split('/');
-      const caseId = parts[2] || 'case_demo_001';
+      const casesIdx = parts.indexOf('cases');
+      const caseId = (casesIdx !== -1 && parts[casesIdx + 1]) || 'case_demo_001';
       const confirmResponse: CaseConfirmResponse = {
         case_id: caseId,
         status: 'resolved',
@@ -312,7 +314,8 @@ export function handleDemoMockResponse<T>(endpoint: string, method = 'GET'): T |
     }
     if (cleanEndpoint.includes('/request-info')) {
       const parts = cleanEndpoint.split('/');
-      const caseId = parts[2] || 'case_demo_001';
+      const casesIdx = parts.indexOf('cases');
+      const caseId = (casesIdx !== -1 && parts[casesIdx + 1]) || 'case_demo_001';
       const requestInfoResponse: CaseRequestInfoResponse = {
         case_id: caseId,
         status: 'assigned',

@@ -18,7 +18,7 @@ export function OfficialsHotspotsPage() {
   const totalConfirmed = points.reduce((acc, p) => acc + p.confirmed_count, 0);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-20">
+    <div className="flex-1 p-6 pb-20 bg-bhoomi-canvas min-w-0 max-w-[1600px] mx-auto w-full space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-bhoomi-border pb-5">
         <div>
@@ -63,7 +63,7 @@ export function OfficialsHotspotsPage() {
           <Card className="p-4 rounded-2xl border border-bhoomi-border bg-bhoomi-surface shadow-card">
             <div className="flex items-center gap-2 text-bhoomi-text-muted mb-1">
               <MapPin className="h-4 w-4 text-bhoomi-primary" />
-              <span className="text-xs font-bold uppercase tracking-wider">
+              <span className="text-[10px] font-bold uppercase tracking-wider">
                 Active Clusters
               </span>
             </div>
@@ -75,7 +75,7 @@ export function OfficialsHotspotsPage() {
           <Card className="p-4 rounded-2xl border border-red-200 bg-red-50/50 shadow-card">
             <div className="flex items-center gap-2 text-red-800 mb-1">
               <ShieldCheck className="h-4 w-4 text-red-600" />
-              <span className="text-xs font-bold uppercase tracking-wider">
+              <span className="text-[10px] font-bold uppercase tracking-wider">
                 Confirmed Cases
               </span>
             </div>

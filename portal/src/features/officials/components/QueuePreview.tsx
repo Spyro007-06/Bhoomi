@@ -88,25 +88,27 @@ export function QueuePreview() {
               </p>
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {items.slice(0, 4).map((item) => (
                 <div
                   key={item.case_id}
-                  className="flex items-center justify-between rounded-xl border border-bhoomi-border bg-bhoomi-canvas p-3 text-xs transition-colors hover:bg-bhoomi-primary-soft/50 shadow-xs"
+                  className="flex items-center justify-between rounded-xl border border-bhoomi-border bg-[#F8FAFC] p-3 text-xs transition-colors hover:bg-white hover:border-bhoomi-primary/40 shadow-xs"
                 >
-                  <div className="space-y-1">
-                    <p className="font-semibold text-bhoomi-text-primary font-mono text-xs">
+                  <div className="space-y-1 truncate mr-2">
+                    <p className="font-bold text-bhoomi-text-primary font-mono text-xs">
                       {item.case_id}
                     </p>
-                    <div className="flex items-center gap-2 text-[11px] text-bhoomi-text-secondary">
-                      <span className="font-medium text-bhoomi-text-primary">{formatTargetLabel(item.predicted_label)}</span>
+                    <div className="flex items-center gap-2 text-[11px] text-bhoomi-text-secondary truncate">
+                      <span className="font-semibold text-bhoomi-text-primary truncate">
+                        {formatTargetLabel(item.predicted_label)}
+                      </span>
                       <span>·</span>
-                      <span className={item.confidence < 0.6 ? 'text-amber-700 font-semibold' : 'text-bhoomi-text-muted'}>
+                      <span className={item.confidence < 0.6 ? 'text-amber-700 font-semibold shrink-0' : 'text-bhoomi-text-muted shrink-0'}>
                         {Math.round(item.confidence * 100)}% conf
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
+                  <div className="flex flex-col items-end gap-1 shrink-0">
                     {item.severity === 'high' ? (
                       <Badge variant="danger" size="sm" className="h-5 px-2 text-[10px] gap-1">
                         <AlertTriangle className="h-3 w-3" />
@@ -128,10 +130,10 @@ export function QueuePreview() {
         </CardContent>
       </div>
 
-      <div className="p-4 pt-0">
+      <div className="p-4 pt-3">
         <Link
           to="/official/queue"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bhoomi-border bg-bhoomi-canvas px-3 py-2.5 text-xs font-semibold text-bhoomi-text-primary hover:bg-bhoomi-primary-light hover:text-bhoomi-primary hover:border-bhoomi-primary/30 transition-colors shadow-xs"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bhoomi-border bg-[#F8FAFC] px-3 py-2.5 text-xs font-semibold text-bhoomi-text-primary hover:bg-[#DCFCE7] hover:text-[#15803D] hover:border-[#86EFAC] transition-colors shadow-xs"
         >
           <span>View Full Action Queue</span>
           <ArrowRight className="h-3.5 w-3.5" />

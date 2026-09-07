@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { DashboardHeader } from '../components/DashboardHeader';
 import { OfficialQueueSummary } from '../components/OfficialQueueSummary';
 import { OfficialQueueTable } from '../components/OfficialQueueTable';
 import { officialKeys, useOfficialQueue } from '../hooks';
@@ -20,20 +19,22 @@ export function OfficialsQueuePage() {
   const items = data?.queue || [];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-20">
+    <div className="flex-1 p-6 pb-20 bg-bhoomi-canvas min-w-0 max-w-[1600px] mx-auto w-full space-y-6">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-bhoomi-border pb-5">
         <div>
           <div className="flex items-center gap-2.5">
-            <DashboardHeader
-              title="Official Queue"
-              subtitle="Review records requiring official attention."
-            />
+            <h1 className="text-2xl font-bold tracking-tight text-bhoomi-text-primary">
+              Official Queue
+            </h1>
             <Badge variant="primary" size="sm" className="hidden sm:inline-flex gap-1">
               <ShieldCheck className="h-3.5 w-3.5" />
               <span>Official Review</span>
             </Badge>
           </div>
+          <p className="text-xs text-bhoomi-text-secondary mt-1">
+            Review and monitor high-confidence field diagnoses and confirmation statuses.
+          </p>
         </div>
 
         <div className="flex items-center gap-3">

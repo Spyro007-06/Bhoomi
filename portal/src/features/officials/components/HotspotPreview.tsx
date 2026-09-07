@@ -93,17 +93,17 @@ export function HotspotPreview() {
             <>
               {/* Aggregate Key Stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-bhoomi-border bg-bhoomi-canvas p-3.5 shadow-xs">
-                  <p className="text-[11px] font-bold text-bhoomi-text-muted uppercase tracking-wider">
-                    Outbreak Clusters
+                <div className="rounded-xl border border-bhoomi-border bg-[#F8FAFC] p-3.5 shadow-xs">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    OUTBREAK CLUSTERS
                   </p>
                   <p className="mt-1 text-2xl font-bold font-mono text-bhoomi-text-primary">
                     {points.length}
                   </p>
                 </div>
-                <div className="rounded-xl border border-red-200 bg-red-50/60 p-3.5 shadow-xs">
-                  <p className="text-[11px] font-bold text-red-800 uppercase tracking-wider">
-                    Confirmed Cases
+                <div className="rounded-xl border border-red-200 bg-red-50/50 p-3.5 shadow-xs">
+                  <p className="text-[10px] font-bold text-red-800 uppercase tracking-wider">
+                    CONFIRMED CASES
                   </p>
                   <p className="mt-1 text-2xl font-bold font-mono text-red-900">
                     {totalOutbreaks}
@@ -113,32 +113,61 @@ export function HotspotPreview() {
 
               {/* Disease Breakdown */}
               <div className="space-y-2">
-                <p className="text-xs font-bold text-bhoomi-text-secondary uppercase tracking-wider">
-                  Active Disease Outbreaks
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  ACTIVE DISEASE OUTBREAKS
                 </p>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {Object.entries(totalsByLabel).map(([label, count]) => (
-                    <span
+                    <div
                       key={label}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-bhoomi-border bg-bhoomi-canvas px-2.5 py-1 text-xs text-bhoomi-text-primary font-medium shadow-xs"
+                      className="flex items-center justify-between rounded-xl border border-bhoomi-border bg-[#F8FAFC] px-3.5 py-2.5 text-xs shadow-xs"
                     >
-                      <span>{formatTargetLabel(label)}:</span>
-                      <span className="font-bold font-mono text-bhoomi-primary bg-bhoomi-primary-light px-1.5 py-0.5 rounded text-[11px] border border-bhoomi-primary/20">
+                      <span className="font-semibold text-bhoomi-text-primary truncate mr-2">
+                        {formatTargetLabel(label)}
+                      </span>
+                      <span className="font-mono font-bold text-emerald-800 bg-[#DCFCE7] border border-[#86EFAC] px-2 py-0.5 rounded-md text-[11px] shrink-0">
                         {count}
                       </span>
-                    </span>
+                    </div>
                   ))}
                 </div>
               </div>
+
+              {/* Active Geospatial Clusters */}
+              {points.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    SURVEILLANCE CLUSTERS
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {points.slice(0, 4).map((p, idx) => (
+                      <div
+                        key={`${p.lat}-${p.lng}-${idx}`}
+                        className="flex items-center justify-between rounded-xl border border-bhoomi-border/70 bg-white px-3 py-2 text-xs shadow-xs"
+                      >
+                        <div className="flex items-center gap-1.5 truncate">
+                          <MapPin className="h-3.5 w-3.5 text-red-600 shrink-0" />
+                          <span className="font-semibold text-bhoomi-text-primary truncate">
+                            {formatTargetLabel(p.label)}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded shrink-0">
+                          {p.confirmed_count} cases
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </CardContent>
       </div>
 
-      <div className="p-4 pt-0">
+      <div className="p-4 pt-3">
         <Link
           to="/official/hotspots"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bhoomi-border bg-bhoomi-canvas px-3 py-2.5 text-xs font-semibold text-bhoomi-text-primary hover:bg-bhoomi-primary-light hover:text-bhoomi-primary hover:border-bhoomi-primary/30 transition-colors shadow-xs"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bhoomi-border bg-[#F8FAFC] px-3 py-2.5 text-xs font-semibold text-bhoomi-text-primary hover:bg-[#DCFCE7] hover:text-[#15803D] hover:border-[#86EFAC] transition-colors shadow-xs"
         >
           <span>View Hotspots Map</span>
           <ArrowRight className="h-3.5 w-3.5" />

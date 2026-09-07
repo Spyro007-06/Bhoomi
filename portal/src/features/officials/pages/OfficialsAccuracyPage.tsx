@@ -21,7 +21,7 @@ export function OfficialsAccuracyPage() {
   const rows = data?.by_label || [];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-20">
+    <div className="flex-1 p-6 pb-20 bg-bhoomi-canvas min-w-0 max-w-[1600px] mx-auto w-full space-y-6">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-bhoomi-border pb-5">
         <div>

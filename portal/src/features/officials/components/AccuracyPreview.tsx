@@ -77,7 +77,7 @@ export function AccuracyPreview() {
               </div>
             </div>
             {windowFrom && windowTo && (
-              <Badge variant="neutral" size="sm" className="text-[11px] font-mono text-bhoomi-text-muted">
+              <Badge variant="neutral" size="sm" className="text-[10px] font-mono text-bhoomi-text-muted hidden sm:inline-flex">
                 {windowFrom} → {windowTo}
               </Badge>
             )}
@@ -97,12 +97,12 @@ export function AccuracyPreview() {
             <>
               {/* Confirmed vs Corrected Summary */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-bhoomi-primary/20 bg-bhoomi-primary-soft p-3.5 shadow-xs">
-                  <div className="flex items-center gap-1.5 text-xs text-bhoomi-primary font-bold">
+                <div className="rounded-xl border border-[#86EFAC] bg-[#F0FDF4] p-3.5 shadow-xs">
+                  <div className="flex items-center gap-1.5 text-xs text-[#15803D] font-bold">
                     <CheckCircle className="h-3.5 w-3.5" />
                     <span>Confirmed</span>
                   </div>
-                  <p className="mt-1 text-2xl font-bold font-mono text-bhoomi-primary-dark">
+                  <p className="mt-1 text-2xl font-bold font-mono text-[#15803D]">
                     {totalConfirmed}
                   </p>
                 </div>
@@ -119,28 +119,28 @@ export function AccuracyPreview() {
 
               {/* Per-Label Accuracy List */}
               <div className="space-y-2">
-                <p className="text-xs font-bold text-bhoomi-text-secondary uppercase tracking-wider">
-                  Performance by Crop Disease
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  PERFORMANCE BY CROP DISEASE
                 </p>
                 <div className="space-y-2">
                   {rows.slice(0, 3).map((row) => (
                     <div
                       key={row.label}
-                      className="rounded-xl border border-bhoomi-border bg-bhoomi-canvas p-2.5 text-xs space-y-1.5 shadow-xs"
+                      className="rounded-xl border border-bhoomi-border bg-[#F8FAFC] p-3 text-xs space-y-1.5 shadow-xs"
                     >
                       <div className="flex items-center justify-between font-semibold">
-                        <span className="text-bhoomi-text-primary">
+                        <span className="text-bhoomi-text-primary font-bold">
                           {formatTargetLabel(row.label)}
                         </span>
-                        <span className="font-mono font-bold text-bhoomi-primary">
+                        <span className="font-mono font-bold text-emerald-800">
                           {row.accuracy !== null ? `${Math.round(row.accuracy * 100)}%` : 'N/A'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-[11px] text-bhoomi-text-muted">
                         <span>{row.confirmed} confirmed · {row.corrected} corrected</span>
-                        <div className="h-1.5 w-20 rounded-full bg-bhoomi-border overflow-hidden">
+                        <div className="h-1.5 w-24 rounded-full bg-slate-200 overflow-hidden">
                           <div
-                            className="h-full bg-bhoomi-primary rounded-full transition-all duration-300"
+                            className="h-full bg-emerald-600 rounded-full transition-all duration-300"
                             style={{ width: `${row.accuracy !== null ? Math.round(row.accuracy * 100) : 0}%` }}
                           />
                         </div>
@@ -154,10 +154,10 @@ export function AccuracyPreview() {
         </CardContent>
       </div>
 
-      <div className="p-4 pt-0">
+      <div className="p-4 pt-3">
         <Link
           to="/official/accuracy"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bhoomi-border bg-bhoomi-canvas px-3 py-2.5 text-xs font-semibold text-bhoomi-text-primary hover:bg-bhoomi-primary-light hover:text-bhoomi-primary hover:border-bhoomi-primary/30 transition-colors shadow-xs"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bhoomi-border bg-[#F8FAFC] px-3 py-2.5 text-xs font-semibold text-bhoomi-text-primary hover:bg-[#DCFCE7] hover:text-[#15803D] hover:border-[#86EFAC] transition-colors shadow-xs"
         >
           <span>View Full Accuracy Report</span>
           <ArrowRight className="h-3.5 w-3.5" />

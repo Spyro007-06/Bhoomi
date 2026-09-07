@@ -21,26 +21,26 @@ export function CaseQueueTable({ cases, isLoading }: CaseQueueTableProps) {
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-bhoomi-canvas hover:bg-bhoomi-canvas border-b border-bhoomi-border">
-              <TableHead className="w-20 font-bold text-bhoomi-text-muted text-[11px] uppercase tracking-wider">
+            <TableRow className="bg-[#F8FAFC] hover:bg-[#F8FAFC] border-b border-bhoomi-border">
+              <TableHead className="w-20 font-bold text-slate-500 text-[11px] uppercase tracking-wider py-3.5">
                 Queue #
               </TableHead>
-              <TableHead className="w-32 font-bold text-bhoomi-text-muted text-[11px] uppercase tracking-wider">
+              <TableHead className="w-36 min-w-[140px] font-bold text-slate-500 text-[11px] uppercase tracking-wider py-3.5">
                 Case ID
               </TableHead>
-              <TableHead className="font-bold text-bhoomi-text-muted text-[11px] uppercase tracking-wider">
+              <TableHead className="min-w-[200px] font-bold text-slate-500 text-[11px] uppercase tracking-wider py-3.5">
                 Target Problem
               </TableHead>
-              <TableHead className="w-36 font-bold text-bhoomi-text-muted text-[11px] uppercase tracking-wider">
+              <TableHead className="w-44 font-bold text-slate-500 text-[11px] uppercase tracking-wider py-3.5">
                 Region
               </TableHead>
-              <TableHead className="w-28 font-bold text-bhoomi-text-muted text-[11px] uppercase tracking-wider">
+              <TableHead className="w-28 font-bold text-slate-500 text-[11px] uppercase tracking-wider py-3.5">
                 Status
               </TableHead>
-              <TableHead className="w-32 font-bold text-bhoomi-text-muted text-[11px] uppercase tracking-wider">
+              <TableHead className="w-40 font-bold text-slate-500 text-[11px] uppercase tracking-wider py-3.5">
                 Received
               </TableHead>
-              <TableHead className="w-28 text-right font-bold text-bhoomi-text-muted text-[11px] uppercase tracking-wider">
+              <TableHead className="w-28 text-right font-bold text-slate-500 text-[11px] uppercase tracking-wider py-3.5">
                 Action
               </TableHead>
             </TableRow>
@@ -54,7 +54,7 @@ export function CaseQueueTable({ cases, isLoading }: CaseQueueTableProps) {
                     <Skeleton className="h-6 w-10 rounded-lg" />
                   </TableCell>
                   <TableCell>
-                    <Skeleton className="h-4 w-20 rounded-md" />
+                    <Skeleton className="h-4 w-28 rounded-md" />
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-5 w-48 rounded-md" />
@@ -66,7 +66,7 @@ export function CaseQueueTable({ cases, isLoading }: CaseQueueTableProps) {
                     <Skeleton className="h-5 w-16 rounded-full" />
                   </TableCell>
                   <TableCell>
-                    <Skeleton className="h-4 w-20 rounded-md" />
+                    <Skeleton className="h-4 w-24 rounded-md" />
                   </TableCell>
                   <TableCell className="text-right">
                     <Skeleton className="h-8 w-16 ml-auto rounded-xl" />

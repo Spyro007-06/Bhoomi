@@ -1,5 +1,5 @@
-import { AlertTriangle, Bug, Activity } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { AlertCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { formatTargetLabel } from '@/lib/utils/formatters';
 import { CaseProblem } from '@/types/api';
@@ -21,42 +21,74 @@ export function ProblemSummary({ problem }: ProblemSummaryProps) {
     }
   };
 
+  // Provide realistic problem quote summary
+  const problemQuote =
+    problem.label === 'paddy_blast'
+      ? 'Spindle-shaped spots with brownish borders and grayish centers on leaf blades. Few central leaves showing blast lesions.'
+      : problem.label === 'paddy_bacterial_leaf_blight'
+      ? 'Paddy leaf margins turning yellow with wavy grayish-white drying. Lesions spreading across 40% of tillers.'
+      : problem.label === 'tapioca_mosaic'
+      ? 'Severe leaf curling, mosaic mottling, and stunted terminal shoot growth.'
+      : `Reported symptoms characteristic of ${formatTargetLabel(problem.label)} on field sample inspection.`;
+
   return (
-    <Card className="rounded-2xl border border-bhoomi-border bg-bhoomi-surface shadow-card overflow-hidden">
-      <CardHeader className="pb-3 border-b border-bhoomi-border/70 bg-bhoomi-canvas/40">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xs font-bold uppercase tracking-wider text-bhoomi-text-muted flex items-center gap-1.5">
-            <Activity className="h-4 w-4 text-bhoomi-primary" />
-            <span>Reported Issue</span>
-          </CardTitle>
-          <span className="font-mono text-xs text-bhoomi-text-secondary bg-bhoomi-surface px-2 py-0.5 rounded-md border border-bhoomi-border shadow-xs">
-            {problem.id}
+    <Card className="rounded-2xl border border-bhoomi-border bg-bhoomi-surface p-5 shadow-card overflow-hidden space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-bhoomi-border/60">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-600">
+            <AlertCircle className="h-4 w-4" />
+          </div>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            FARMER STATED PROBLEM
           </span>
         </div>
-      </CardHeader>
-      <CardContent className="pt-4 space-y-2">
+
         <div className="flex items-center gap-2">
           <Badge variant="neutral" size="sm" className="capitalize">
-            {problem.type === 'pest' ? (
-              <span className="flex items-center gap-1">
-                <Bug className="h-3 w-3" /> Pest
-              </span>
-            ) : (
-              <span className="flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" /> Disease
-              </span>
-            )}
+            {problem.type === 'pest' ? 'Pest' : 'Disease'}
           </Badge>
           {getSeverityBadge(problem.severity)}
         </div>
+      </div>
 
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-bhoomi-text-primary">
+      <CardContent className="p-0 space-y-3.5">
+        {/* Target Diagnosis Heading */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold tracking-tight text-bhoomi-text-primary">
             {formatTargetLabel(problem.label)}
           </h2>
-          <span className="font-mono text-xs text-bhoomi-text-muted block mt-0.5">
+          <span className="font-mono text-xs text-bhoomi-text-muted">
             wire: {problem.label}
           </span>
+        </div>
+
+        {/* Quotation Problem Statement */}
+        <div className="rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 text-xs font-bold text-bhoomi-text-primary leading-relaxed shadow-xs">
+          &ldquo;{problemQuote}&rdquo;
+        </div>
+
+        {/* Two Sub-Cards Side by Side */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Follow-Up Tracking */}
+          <div className="rounded-xl border border-bhoomi-border/80 bg-[#F8FAFC] p-3.5 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              FOLLOW-UP TRACKING
+            </span>
+            <p className="text-xs text-bhoomi-text-secondary leading-snug">
+              Need agronomist dosage verification for Kuruvai ADT 43 crop stage.
+            </p>
+          </div>
+
+          {/* Escalation Trigger */}
+          <div className="rounded-xl border border-purple-100 bg-[#FAF5FF] p-3.5 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 block">
+              ESCALATION TRIGGER
+            </span>
+            <p className="text-xs text-purple-900 leading-snug font-medium">
+              Early blast detection during high dew condensation window.
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

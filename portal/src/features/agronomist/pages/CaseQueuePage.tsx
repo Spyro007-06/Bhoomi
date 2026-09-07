@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useSearchParams, Navigate } from 'react-router-dom';
 import { useInfiniteCaseQueue } from '../hooks';
 import { QueueHeader } from '../components/QueueHeader';
 import { CaseQueueTable } from '../components/CaseQueueTable';
@@ -10,6 +11,10 @@ import { CheckCircle2, SearchX } from 'lucide-react';
 import { isBhoomiApiError } from '@/lib/api/errors';
 
 export function CaseQueuePage() {
+  const [searchParams] = useSearchParams();
+  const statusParam = searchParams.get('status');
+  const viewParam = searchParams.get('view');
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const {
@@ -39,6 +44,19 @@ export function CaseQueuePage() {
       return matchId || matchLabel || matchRegion;
     });
   }, [allCases, searchQuery]);
+
+  if (statusParam === 'under_review') {
+    return <Navigate to="/agronomist/under-review" replace />;
+  }
+  if (statusParam === 'resolved') {
+    return <Navigate to="/agronomist/resolved" replace />;
+  }
+  if (viewParam === 'efficacy') {
+    return <Navigate to="/agronomist/efficacy" replace />;
+  }
+  if (viewParam === 'logs') {
+    return <Navigate to="/agronomist/logs" replace />;
+  }
 
   const renderContent = () => {
     if (isError) {
@@ -102,7 +120,7 @@ export function CaseQueuePage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 p-6 pb-20 bg-bhoomi-canvas min-w-0 max-w-[1600px] mx-auto w-full space-y-6">
       <QueueHeader
         onRefresh={() => refetch()}
         isRefreshing={isFetching && !isLoading && !isFetchingNextPage}
