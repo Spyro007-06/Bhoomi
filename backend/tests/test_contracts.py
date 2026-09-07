@@ -29,7 +29,7 @@ from app.contracts import (
 
 
 def _topk(*confidences: float, **kw) -> TopK:
-    labels = ["blast", "brown_spot", "bacterial_leaf_blight"]
+    labels = ["paddy_blast", "paddy_brown_spot", "paddy_bacterial_leaf_blight"]
     return TopK(
         predictions=[
             Prediction(label=lbl, confidence=c) for lbl, c in zip(labels, confidences, strict=False)
@@ -51,7 +51,7 @@ def test_topk_accepts_exactly_three_descending_predictions() -> None:
 def test_topk_rejects_wrong_length() -> None:
     with pytest.raises(ValidationError):
         TopK(
-            predictions=[Prediction(label="blast", confidence=0.9)],
+            predictions=[Prediction(label="paddy_blast", confidence=0.9)],
             out_of_scope=False,
             model_version="test-1",
             is_stub=False,
@@ -67,7 +67,7 @@ def test_topk_rejects_unsorted_predictions() -> None:
 
 def test_confidence_is_bounded() -> None:
     with pytest.raises(ValidationError):
-        Prediction(label="blast", confidence=1.4)
+        Prediction(label="paddy_blast", confidence=1.4)
 
 
 # --- C2 · core -> everyone --------------------------------------------------
