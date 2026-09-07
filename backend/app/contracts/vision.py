@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.contracts.enums import TargetLabel
+
 TOPK_SIZE = 3
 """Exactly three predictions. Not "at least" and not "up to"."""
 
@@ -18,7 +20,7 @@ TOPK_SIZE = 3
 class Prediction(BaseModel):
     """One candidate from the bounded label set."""
 
-    label: str = Field(description="Pest species or disease, from the bounded set")
+    label: TargetLabel = Field(description="Pest species or disease, from the bounded set")
     confidence: float = Field(ge=0.0, le=1.0)
 
 
