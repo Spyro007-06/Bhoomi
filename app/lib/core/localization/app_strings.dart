@@ -521,6 +521,18 @@ class AppStrings {
       ? 'गॅलरीतून निवडा'
       : (language == AppLanguage.hindi ? 'गैलरी से चुनें' : 'Choose from Gallery');
 
+  String get galleryShort => language == AppLanguage.marathi
+      ? 'गॅलरी'
+      : (language == AppLanguage.hindi ? 'गैलरी' : 'Gallery');
+
+  String get flashButton => language == AppLanguage.marathi
+      ? 'फ्लॅश'
+      : (language == AppLanguage.hindi ? 'फ़्लैश' : 'Flash');
+
+  String get choosePhotoButton => language == AppLanguage.marathi
+      ? 'फोटो निवडा'
+      : (language == AppLanguage.hindi ? 'फोटो चुनें' : 'Choose a photo');
+
   String get retakeButton => language == AppLanguage.marathi
       ? 'पुन्हा फोटो घ्या'
       : (language == AppLanguage.hindi ? 'दोबारा फोटो लें' : 'Retake');
