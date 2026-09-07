@@ -306,21 +306,26 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: 48,
+        toolbarHeight: 52,
+        centerTitle: false,
+        titleSpacing: AppSpacing.s4,
         leading: Semantics(
           label: strings.backButton,
           button: true,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.soilCharcoal, size: 22),
-            tooltip: strings.backButton,
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            onPressed: () {
-              if (widget.onBack != null) {
-                widget.onBack!();
-              } else if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              }
-            },
+          child: Center(
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: AppColors.soilCharcoal, size: 22),
+              tooltip: strings.backButton,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                if (widget.onBack != null) {
+                  widget.onBack!();
+                } else if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
           ),
         ),
         title: Text(
@@ -332,7 +337,15 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
           ),
         ),
         actions: const [
-          LanguageSelectorButton(isDarkBackground: false),
+          Padding(
+            padding: EdgeInsets.only(right: AppSpacing.l20),
+            child: Center(
+              child: LanguageSelectorButton(
+                isDarkBackground: false,
+                margin: EdgeInsets.zero,
+              ),
+            ),
+          ),
         ],
       ),
       body: SafeArea(
@@ -342,10 +355,11 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.l20,
-                vertical: AppSpacing.s6,
+                vertical: AppSpacing.s8,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(
                     widget.inspectionTarget?.framingIcon ?? Icons.eco_rounded,
@@ -379,8 +393,9 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                       vertical: AppSpacing.m16,
                     ),
                     child: Container(
+                      constraints: const BoxConstraints(maxWidth: 360),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.l20,
+                        horizontal: AppSpacing.l24,
                         vertical: AppSpacing.l24,
                       ),
                       decoration: BoxDecoration(
@@ -393,6 +408,7 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const Icon(
                             Icons.no_photography_outlined,
@@ -476,7 +492,7 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.l20,
-                  vertical: AppSpacing.s10,
+                  vertical: AppSpacing.m12,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -499,6 +515,7 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 const Icon(
                                   Icons.photo_library_outlined,
@@ -549,22 +566,21 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: _isProcessingCapture
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.camera_alt_rounded,
+                          alignment: Alignment.center,
+                          child: _isProcessingCapture
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
                                     color: Colors.white,
-                                    size: 32,
+                                    strokeWidth: 2.5,
                                   ),
-                          ),
+                                )
+                              : const Icon(
+                                  Icons.camera_alt_rounded,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
                         ),
                       ),
                     ),
@@ -586,6 +602,7 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Icon(
                                   _currentFlashMode == FlashMode.always
