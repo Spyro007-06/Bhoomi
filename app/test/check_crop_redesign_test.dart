@@ -76,6 +76,9 @@ class MockCameraPlatformWrapper implements CameraPlatformWrapper {
   }) {
     return MockCameraController(description: camera);
   }
+
+  @override
+  Future<XFile?> pickImageFromGallery() async => null;
 }
 
 class _FixedLocaleNotifier extends LocaleNotifier {

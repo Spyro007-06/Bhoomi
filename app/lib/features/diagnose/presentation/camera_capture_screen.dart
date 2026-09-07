@@ -55,6 +55,7 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
   String? _errorMessage;
   bool _isProcessingCapture = false;
   FlashMode _currentFlashMode = FlashMode.auto;
+  Uint8List? _capturedImageBytes;
 
   late final CameraPlatformWrapper _cameraPlatform;
   late final ImageCompressor _imageCompressor;
@@ -100,8 +101,10 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
         setState(() => _cameraStatus = CameraStateStatus.uninitialized);
       }
     } else if (state == AppLifecycleState.resumed) {
-      // Re-initialize camera upon user returning to app
-      _initializeCamera();
+      // Re-initialize camera upon user returning to app if no photo captured yet
+      if (_capturedImageBytes == null) {
+        _initializeCamera();
+      }
     }
   }
 
@@ -231,15 +234,14 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
       // 4. Update Riverpod diagnosis state
       ref.read(diagnosisControllerProvider.notifier).setImage(compressedBytes);
 
-      setState(() => _isProcessingCapture = false);
-
-      // 5. Navigate to preview and confirmation screen
-      if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ImagePreviewScreen(imageBytes: compressedBytes),
-        ),
-      );
+      if (mounted) {
+        setState(() => _isProcessingCapture = false);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ImagePreviewScreen(imageBytes: compressedBytes),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessingCapture = false);
@@ -280,14 +282,47 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
     }
   }
 
-  void _onGalleryPressed() {
-    final strings = ref.read(stringsProvider);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(strings.galleryButton),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  Future<void> _onGalleryPressed() async {
+    if (_isProcessingCapture) return;
+
+    try {
+      setState(() => _isProcessingCapture = true);
+
+      final xFile = await _cameraPlatform.pickImageFromGallery();
+      if (xFile == null) {
+        if (mounted) setState(() => _isProcessingCapture = false);
+        return;
+      }
+
+      final rawBytes = await xFile.readAsBytes();
+      if (rawBytes.isEmpty) {
+        if (mounted) setState(() => _isProcessingCapture = false);
+        return;
+      }
+
+      final compressedBytes = await _imageCompressor.compress(bytes: rawBytes);
+
+      ref.read(diagnosisControllerProvider.notifier).setImage(compressedBytes);
+
+      if (mounted) {
+        setState(() => _isProcessingCapture = false);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ImagePreviewScreen(imageBytes: compressedBytes),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isProcessingCapture = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -487,7 +522,7 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                 ),
               ),
 
-            // Bottom Controls Bar with Clean Hierarchy (Hidden when camera is unavailable to prevent duplicate gallery controls)
+            // Bottom Controls Bar with Clean Hierarchy
             if (_cameraStatus != CameraStateStatus.noCameraAvailable)
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -649,27 +684,13 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
     if (_cameraStatus == CameraStateStatus.ready &&
         _cameraController != null &&
         _cameraController!.value.isInitialized) {
-      return Stack(
-        fit: StackFit.expand,
-        alignment: Alignment.center,
-        children: [
-          FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: _cameraController!.value.previewSize?.height ?? 1,
-              height: _cameraController!.value.previewSize?.width ?? 1,
-              child: _cameraController!.buildPreview(),
-            ),
-          ),
-          // Subtle target icon watermark
-          Center(
-            child: Icon(
-              widget.inspectionTarget?.framingIcon ?? Icons.eco_rounded,
-              size: 64,
-              color: Colors.white.withValues(alpha: 0.12),
-            ),
-          ),
-        ],
+      return FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _cameraController!.value.previewSize?.height ?? 1,
+          height: _cameraController!.value.previewSize?.width ?? 1,
+          child: _cameraController!.buildPreview(),
+        ),
       );
     }
 

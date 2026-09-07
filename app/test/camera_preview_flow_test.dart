@@ -189,6 +189,14 @@ class FakeCameraPlatformWrapper implements CameraPlatformWrapper {
     );
     return lastCreatedController!;
   }
+
+  @override
+  Future<XFile?> pickImageFromGallery() async => photoToReturn ??
+      XFile.fromData(
+        Uint8List.fromList([10, 20, 30, 40, 50, 60, 70, 80]),
+        name: 'gallery_leaf.jpg',
+        mimeType: 'image/jpeg',
+      );
 }
 
 class FakeImageCompressor implements ImageCompressor {
