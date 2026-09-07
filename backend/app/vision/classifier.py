@@ -20,13 +20,19 @@ here.
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import logging
 import threading
 from pathlib import Path
 
-from app.config import OUT_OF_SCOPE_MAX_SOFTMAX, VISION_MIN_VEGETATION_FRACTION, settings
+from app.config import (
+    OUT_OF_SCOPE_MAX_SOFTMAX,
+    OUT_OF_SCOPE_RAW_LOGIT_FLOOR,
+    VISION_MIN_VEGETATION_FRACTION,
+    settings,
+)
 from app.contracts.vision import Prediction, TopK
 
 log = logging.getLogger("bhoomi.vision")
@@ -118,6 +124,25 @@ class _VisionModel:
             )
 
         meta = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
+
+        expected_sha256 = meta.get("sha256")
+        if not expected_sha256:
+            raise RuntimeError(
+                f"{METADATA_PATH.name} has no 'sha256' field — refusing to load an "
+                "unverifiable checkpoint. A checkpoint without a recorded hash can be "
+                "silently swapped for a different file; add the hash rather than "
+                "loading around this check."
+            )
+        actual_sha256 = hashlib.sha256(WEIGHTS_PATH.read_bytes()).hexdigest()
+        if actual_sha256 != expected_sha256:
+            raise RuntimeError(
+                f"checkpoint hash mismatch for {WEIGHTS_PATH.name}: got "
+                f"{actual_sha256}, expected {expected_sha256} (from "
+                f"{METADATA_PATH.name}). Refusing to load a checkpoint that does not "
+                "match its recorded hash — do not edit the JSON to make this pass."
+            )
+        self.sha256 = actual_sha256
+
         self.labels: list[str] = meta["labels"]
         self.model_version: str = meta["model_version"]
         self.model_name: str = meta["model_name"]
@@ -167,8 +192,10 @@ class _VisionModel:
         )
 
         log.info(
-            "vision real model loaded: %s v=%s labels=%s img_size=%d temperature=%.4f",
-            self.model_name,
+            "vision real model loaded: file=%s sha256=%s v=%s labels=%s img_size=%d "
+            "temperature=%.4f",
+            WEIGHTS_PATH.name,
+            self.sha256[:8],
             self.model_version,
             self.labels,
             self.img_size,
@@ -186,6 +213,13 @@ class _VisionModel:
 
         with torch.no_grad():
             logits = self.model(tensor)[0]
+            # Raw, pre-temperature max-logit — the OOD signal below reads this,
+            # not `calibrated`. See OUT_OF_SCOPE_RAW_LOGIT_FLOOR in config.py for
+            # why: temperature is fit to calibrate the four known classes against
+            # each other and can inflate an out-of-distribution input's apparent
+            # confidence, so scoring after it would use a rescaling that was
+            # never fit for OOD rejection in the first place.
+            raw_max_logit = logits.max().item()
             calibrated = logits / self.temperature
             probs = torch.softmax(calibrated, dim=0)
 
@@ -197,14 +231,24 @@ class _VisionModel:
         top3 = ranked[:3]
         max_softmax = top3[0][1]
 
-        # Two independent out-of-scope signals, OR'd: low classifier confidence
-        # (the original design), or too little green/vegetation-hued content to
-        # plausibly be a leaf photo at all (added after integration testing
-        # found the softmax floor alone missed clear non-plant photos — see
-        # VISION_MIN_VEGETATION_FRACTION's docstring in config.py for what this
-        # does and doesn't cover).
+        log.info(
+            "vision OOD signal: raw_max_logit=%.4f floor=%.4f",
+            raw_max_logit,
+            OUT_OF_SCOPE_RAW_LOGIT_FLOOR,
+        )
+
+        # Three independent out-of-scope signals, OR'd: low calibrated confidence
+        # (the original design), too little green/vegetation-hued content to
+        # plausibly be a leaf photo at all (added after integration testing found
+        # the softmax floor alone missed clear non-plant photos), or a low raw
+        # pre-temperature max-logit (added — see OUT_OF_SCOPE_RAW_LOGIT_FLOOR's
+        # docstring in config.py for what this does and doesn't catch). None of
+        # the three replaces the others; each is a heuristic with its own known
+        # gap, documented at its constant.
         out_of_scope = (
-            max_softmax < OUT_OF_SCOPE_MAX_SOFTMAX or veg_fraction < VISION_MIN_VEGETATION_FRACTION
+            max_softmax < OUT_OF_SCOPE_MAX_SOFTMAX
+            or veg_fraction < VISION_MIN_VEGETATION_FRACTION
+            or raw_max_logit < OUT_OF_SCOPE_RAW_LOGIT_FLOOR
         )
 
         return TopK(

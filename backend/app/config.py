@@ -88,6 +88,34 @@ not a paddy-leaf detector or a trained rejection class. It complements
 OUT_OF_SCOPE_MAX_SOFTMAX; it does not replace the need for a real fix (see the
 KNOWN GAP note)."""
 
+OUT_OF_SCOPE_RAW_LOGIT_FLOOR = float(os.environ.get("VISION_OOS_RAW_LOGIT_FLOOR", "2.0"))
+"""Below this raw (pre-temperature) max-logit, the classifier declares
+`out_of_scope=True` — a third, independent complement to OUT_OF_SCOPE_MAX_SOFTMAX
+and VISION_MIN_VEGETATION_FRACTION above. Same exemption as those two: perception
+tuning, not a gate decision, so it is env-overridable rather than hardcoded.
+
+Why pre-temperature, not post: `temperature` is fitted purely to calibrate the
+*known* 4-class probabilities (docs/DESIGN.md §4) — it is optimized so that a
+0.58 on an in-distribution photo means "right 58% of the time", and it cannot
+change any argmax. It says nothing about whether the input belongs to that
+distribution at all, and dividing by it before scoring can inflate an
+out-of-distribution input's apparent confidence exactly the way
+OUT_OF_SCOPE_MAX_SOFTMAX's KNOWN GAP describes (0.9995 on a fabric photo).
+Scoring the raw logit sidesteps a rescaling that was never fit for this job.
+
+KNOWN GAP, same honesty as the two constants above: this floor was set from the
+same small ad-hoc probe used for VISION_MIN_VEGETATION_FRACTION (solid-color
+squares standing in for non-plant input) plus a handful of unrelated real
+photos found on the dev machine, not a genuine paddy-photo validation set —
+none was available locally. In that probe, the solid-color squares scored
+1.7-2.13 raw max-logit; ordinary real photos (portraits, objects) scored
+2.6-11.85, i.e. *higher* than the synthetic non-plant proxies and on the same
+order as a confident in-distribution prediction. So this floor, like the
+softmax one, reliably catches only the specific failure shape it was set
+against (flat, low-signal input) and should not be read as "raw-logit OOD
+detection solved" — it is one more heuristic vote in the OR below, not a
+replacement for a trained rejection class."""
+
 # ---------------------------------------------------------------------------
 # Voice provider model pins — Sarvam. docs/DESIGN.md §1, §8.
 # Module constants, not settings, for the same reason the thresholds are: they
