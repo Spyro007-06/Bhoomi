@@ -6,10 +6,14 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   helperText?: string;
   icon?: ReactNode;
+  endAdornment?: ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = 'text', label, error, helperText, icon, id, disabled, ...props }, ref) => {
+  (
+    { className, type = 'text', label, error, helperText, icon, endAdornment, id, disabled, ...props },
+    ref
+  ) => {
     const generatedId = useId();
     const inputId = id || generatedId;
     const errorId = `${inputId}-error`;
@@ -41,6 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               'flex h-10 w-full rounded-xl border bg-bhoomi-surface px-3.5 py-2 text-sm text-bhoomi-text-primary placeholder:text-bhoomi-text-disabled focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bhoomi-primary/20 focus-visible:border-bhoomi-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors shadow-xs',
               icon && 'pl-10',
+              endAdornment && 'pr-10',
               error
                 ? 'border-bhoomi-danger focus-visible:ring-bhoomi-danger/20 focus-visible:border-bhoomi-danger'
                 : 'border-bhoomi-border-strong hover:border-bhoomi-text-muted',
@@ -48,6 +53,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
             {...props}
           />
+          {endAdornment && (
+            <div className="absolute right-3.5 flex items-center text-bhoomi-text-muted">
+              {endAdornment}
+            </div>
+          )}
         </div>
         {error && (
           <p id={errorId} className="text-xs font-medium text-bhoomi-danger">

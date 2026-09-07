@@ -3,8 +3,25 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
-import { Sprout, AlertCircle, WifiOff, Zap } from 'lucide-react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/Card';
+import {
+  Sprout,
+  AlertCircle,
+  WifiOff,
+  Zap,
+  Mail,
+  Lock,
+  ShieldCheck,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-react';
 import { isBhoomiApiError } from '@/lib/api/errors';
 import { loginRequestSchema } from '../validation';
 import { ZodError } from 'zod';
@@ -107,39 +124,97 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bhoomi-background p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-bhoomi-green-800 text-bhoomi-cream shadow-sm">
-            <Sprout className="h-7 w-7" />
+    <div className="relative min-h-screen w-full flex flex-col justify-between items-center px-4 py-8 sm:px-6 lg:px-8 select-none overflow-x-hidden overflow-y-auto">
+      {/* Layer 1: Agricultural Landscape Background */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 ease-out pointer-events-none scale-100 animate-bhm-fade-in"
+        style={{
+          backgroundImage: "url('/images/bhoomi-agri-bg.jpg')",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Layer 2: Soft Translucent Base Overlay */}
+      <div
+        className="fixed inset-0 bg-slate-950/40 pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* Layer 3: Atmospheric Green Gradient & Depth */}
+      <div
+        className="fixed inset-0 bg-gradient-to-t from-emerald-950/80 via-slate-950/30 to-emerald-950/60 backdrop-blur-[1.5px] pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* Subtle Ambient Sunlight Glow Orbs */}
+      <div
+        className="fixed -top-32 left-1/2 -translate-x-1/2 w-[650px] h-[450px] bg-emerald-400/15 rounded-full blur-3xl pointer-events-none animate-bhm-pulse-soft"
+        aria-hidden="true"
+      />
+      <div
+        className="fixed -bottom-40 right-10 w-[500px] h-[400px] bg-lime-500/10 rounded-full blur-3xl pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* Layer 4: Foreground Login Interface */}
+      <div className="relative z-10 my-auto w-full max-w-[430px] space-y-6 animate-bhm-fade-in-up">
+        {/* Brand Identity Area */}
+        <div className="text-center space-y-3">
+          {/* Government Operations Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-950/50 backdrop-blur-md px-3.5 py-1 text-[11px] font-semibold tracking-wider text-emerald-200 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+            </span>
+            <span>GOVERNMENT OF MAHARASHTRA</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-bhoomi-green-900">BHOOMI Portal</h1>
-          <p className="text-sm text-bhoomi-text-secondary">
-            Agronomist Case Management & Officials Surveillance
-          </p>
+
+          {/* Logo Squircle with Sprout Emblem */}
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#15803D] via-[#166534] to-[#14532D] text-white shadow-xl shadow-emerald-950/40 ring-2 ring-white/30 transition-transform duration-300 hover:scale-105">
+            <Sprout className="h-8 w-8 text-[#FAF7EF]" />
+          </div>
+
+          {/* Title & Subtitle */}
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">
+              BHOOMI Portal
+            </h1>
+            <p className="text-xs sm:text-sm font-medium text-emerald-100/90 drop-shadow-xs max-w-sm mx-auto">
+              Agronomist Case Management & Officials Surveillance
+            </p>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>
+        {/* Elevated Glassmorphism Login Card */}
+        <Card className="rounded-2xl border border-white/80 bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.35),0_1px_3px_rgba(0,0,0,0.08)] text-bhoomi-text-primary transition-all">
+          <CardHeader className="space-y-1 pb-4 pt-6 px-6 sm:px-8">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                Sign In
+              </CardTitle>
+              <div className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 border border-emerald-200/70">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Secure Access</span>
+              </div>
+            </div>
+            <CardDescription className="text-xs text-slate-500">
               Enter your official credentials to access your portal workspace.
             </CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit} noValidate>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-6 sm:px-8">
               {generalError && (
                 <div
                   role="alert"
-                  className="rounded-lg bg-red-50 p-3.5 text-sm text-bhoomi-danger border border-red-200 flex items-start gap-2.5"
+                  className="rounded-xl bg-red-50/95 p-3.5 text-xs text-bhoomi-danger border border-red-200 flex items-start gap-2.5 shadow-xs animate-bhm-fade-in"
                 >
                   {generalError.isNetwork ? (
-                    <WifiOff className="h-5 w-5 shrink-0 text-bhoomi-danger mt-0.5" />
+                    <WifiOff className="h-4 w-4 shrink-0 text-bhoomi-danger mt-0.5" />
                   ) : (
-                    <AlertCircle className="h-5 w-5 shrink-0 text-bhoomi-danger mt-0.5" />
+                    <AlertCircle className="h-4 w-4 shrink-0 text-bhoomi-danger mt-0.5" />
                   )}
-                  <div className="leading-snug">{generalError.message}</div>
+                  <div className="leading-snug font-medium">{generalError.message}</div>
                 </div>
               )}
 
@@ -153,6 +228,8 @@ export function LoginPage() {
                 error={fieldErrors.email}
                 required
                 disabled={isSubmitting}
+                icon={<Mail className="h-4 w-4 text-slate-400" />}
+                className="h-11 bg-slate-50/70 focus:bg-white text-slate-900 placeholder:text-slate-400 border-slate-300/80 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
               />
 
               <Input
@@ -165,58 +242,71 @@ export function LoginPage() {
                 error={fieldErrors.password}
                 required
                 disabled={isSubmitting}
+                icon={<Lock className="h-4 w-4 text-slate-400" />}
+                className="h-11 bg-slate-50/70 focus:bg-white text-slate-900 placeholder:text-slate-400 border-slate-300/80 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
               />
             </CardContent>
 
-            <CardFooter className="flex flex-col gap-3 pt-2">
-              <Button type="submit" className="w-full" isLoading={isSubmitting}>
-                Sign In to Workspace
+            <CardFooter className="flex flex-col gap-3 pt-2 pb-6 px-6 sm:px-8">
+              <Button
+                type="submit"
+                className="w-full h-11 text-sm font-semibold bg-[#1B5E20] hover:bg-[#14532D] active:bg-[#0F3E22] text-white shadow-md shadow-emerald-950/20 hover:shadow-lg active:scale-[0.99] transition-all duration-200 rounded-xl flex items-center justify-center gap-2 group"
+                isLoading={isSubmitting}
+              >
+                <span>Sign In to Workspace</span>
+                {!isSubmitting && (
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                )}
               </Button>
 
               <div className="relative w-full my-2">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-bhoomi-border" />
+                  <div className="w-full border-t border-slate-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-bhoomi-text-secondary font-medium">
+                  <span className="bg-white px-2.5 text-slate-400 font-semibold tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="h-3 w-3 text-amber-500" />
                     Demo Fast Access
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 w-full">
+              <div className="grid grid-cols-2 gap-2.5 w-full">
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
-                  className="w-full flex items-center justify-center gap-1.5 text-xs"
+                  className="w-full h-10 flex items-center justify-center gap-1.5 text-xs font-semibold border border-slate-200 bg-slate-50/80 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-950 text-slate-700 transition-all rounded-xl shadow-xs active:scale-[0.98]"
                   onClick={() => handleDemoLogin('official')}
                 >
-                  <Zap className="h-3.5 w-3.5 text-amber-600" />
-                  Official Dashboard
+                  <Zap className="h-3.5 w-3.5 text-amber-600 fill-amber-500/20 shrink-0" />
+                  <span>Official Dashboard</span>
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="w-full flex items-center justify-center gap-1.5 text-xs"
+                  className="w-full h-10 flex items-center justify-center gap-1.5 text-xs font-semibold border border-slate-200 bg-slate-50/80 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-950 text-slate-700 transition-all rounded-xl shadow-xs active:scale-[0.98]"
                   onClick={() => handleDemoLogin('agronomist')}
                 >
-                  <Sprout className="h-3.5 w-3.5 text-bhoomi-green-700" />
-                  Agronomist Queue
+                  <Sprout className="h-3.5 w-3.5 text-[#1B5E20] shrink-0" />
+                  <span>Agronomist Queue</span>
                 </Button>
               </div>
             </CardFooter>
           </form>
         </Card>
 
-        <div className="text-center">
-          <p className="text-xs text-bhoomi-text-secondary">
-            Government of Maharashtra · SIH26131
-          </p>
+        {/* Official Footer Banner */}
+        <div className="text-center pt-1">
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-950/40 backdrop-blur-md px-3.5 py-1.5 text-xs font-medium text-emerald-100/80 border border-white/10 shadow-xs">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+            <span>Government of Maharashtra · SIH26131</span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
 
