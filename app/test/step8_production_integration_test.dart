@@ -582,10 +582,10 @@ void main() {
       await tester.tap(find.byIcon(Icons.shield_outlined).last);
       await tester.pumpAndSettle();
       expect(find.byType(AlertsScreen), findsOneWidget);
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsOneWidget);
 
       // Phase 6: Acknowledge Alert (Inspect Now)
-      await tester.tap(find.text("I'LL CHECK (मी तपासतो)"));
+      await tester.tap(find.text("मी तपासतो (Inspect Field)"));
       await tester.pumpAndSettle();
       expect(find.text('प्रतिसाद नोंदवला गेला आहे. शेताचे निरीक्षण केल्याबद्दल धन्यवाद!'), findsWidgets);
 
@@ -740,17 +740,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('How is the crop 4 days after draining the field?'), findsOneWidget);
-      expect(find.text('Got worse\n(बिघडले)'), findsOneWidget);
+      expect(find.text('बिघडले\n(Got worse)'), findsOneWidget);
 
       // Tap Got Worse -> triggers auto-escalation
-      await tester.tap(find.text('Got worse\n(बिघडले)'));
+      await tester.tap(find.text('बिघडले\n(Got worse)'));
       await tester.pumpAndSettle();
 
       expect(find.text('Auto-Escalated to Expert (Case ID: CASE-AUTO-ESC-888)'), findsOneWidget);
       expect(find.text('Severity: early → severe'), findsOneWidget);
 
       // Verify second tap is rejected (non-duplicated, idempotent)
-      await tester.tap(find.text('Got worse\n(बिघडले)'));
+      await tester.tap(find.text('बिघडले\n(Got worse)'));
       await tester.pumpAndSettle();
       expect(find.text('Auto-Escalated to Expert (Case ID: CASE-AUTO-ESC-888)'), findsOneWidget);
     });

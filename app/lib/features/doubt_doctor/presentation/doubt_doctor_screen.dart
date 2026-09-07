@@ -254,7 +254,7 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
   }
 }
 
-class _CandidateCard extends StatelessWidget {
+class _CandidateCard extends ConsumerWidget {
   final CandidateModel candidate;
   final String candidateTag;
 
@@ -264,7 +264,9 @@ class _CandidateCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(stringsProvider);
+
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.m12),
       child: Column(
@@ -282,7 +284,7 @@ class _CandidateCard extends StatelessWidget {
 
           // Label
           Text(
-            candidate.label.replaceAll('_', ' ').toUpperCase(),
+            strings.getLocalizedTargetName(candidate.label),
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.forest,
               fontWeight: FontWeight.w800,

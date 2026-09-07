@@ -141,7 +141,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       RiskCard(
-                        target: alert.target.replaceAll('_', ' ').toUpperCase(),
+                        target: alert.target,
                         riskLevel: alert.riskLevel,
                         reason: alert.reason,
                         inspectionTasks: tasks,
@@ -156,7 +156,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                       const SizedBox(height: AppSpacing.s10),
                       FarmerContextualVoiceAction.outline(
                         label: strings.voiceContextAlertWhy,
-                        contextTopic: '${alert.target.replaceAll('_', ' ')} Alert',
+                        contextTopic: '${strings.getLocalizedTargetName(alert.target)} Alert',
                       ),
                       if (isResponded) ...[
                         const SizedBox(height: AppSpacing.s8),

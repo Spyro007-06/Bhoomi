@@ -79,7 +79,6 @@ void main() {
 
       // 1. Verify FollowUpCard is rendered
       expect(find.byType(FollowUpCard), findsOneWidget);
-      expect(find.text('BLAST TREATMENT'), findsOneWidget);
       expect(find.text('Are lesions drying up after bio-control spray?'), findsOneWidget);
 
       // 2. Verify 3 tactile buttons

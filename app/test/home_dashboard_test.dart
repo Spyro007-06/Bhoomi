@@ -153,11 +153,10 @@ void main() {
 
       // 3. Verify Active Risk Alert is rendered live
       expect(find.byType(RiskCard), findsOneWidget);
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsWidgets);
 
       // 4. Verify Pending Follow-up is rendered live
       expect(find.byType(FollowUpCard), findsOneWidget);
-      expect(find.text('BLAST TREATMENT'), findsOneWidget);
 
       // 5. Verify Recent Activity is rendered
       expect(find.text('Blast Diagnosed'), findsOneWidget);

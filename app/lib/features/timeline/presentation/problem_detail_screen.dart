@@ -107,7 +107,7 @@ class ProblemDetailScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: AppSpacing.s10),
                         Text(
-                          problem.label.replaceAll('_', ' ').toUpperCase(),
+                          strings.getLocalizedTargetName(problem.label),
                           style: AppTypography.title.copyWith(
                             color: AppColors.primaryDark,
                             fontWeight: FontWeight.w800,
@@ -275,7 +275,7 @@ class ProblemDetailScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.m12),
                     FarmerContextualVoiceAction.outline(
                       label: strings.voiceContextHistoryAsk,
-                      contextTopic: '${problem.label.replaceAll('_', ' ')} Record',
+                      contextTopic: '${strings.getLocalizedTargetName(problem.label)} Record',
                     ),
                     const SizedBox(height: AppSpacing.l20),
                   ],

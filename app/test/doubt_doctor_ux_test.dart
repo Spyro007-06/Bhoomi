@@ -114,8 +114,8 @@ void main() {
       expect(find.text('थोडी अधिक माहिती हवी आहे'), findsOneWidget);
 
       // 2. Verify Candidate Cards
-      expect(find.text('BLAST'), findsOneWidget);
-      expect(find.text('BROWN SPOT'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsOneWidget);
+      expect(find.text('तपकिरी ठिपके'), findsOneWidget);
       expect(find.text('Diamond lesions with grey centre'), findsOneWidget);
       expect(find.text('Round spots with yellow halo'), findsOneWidget);
 

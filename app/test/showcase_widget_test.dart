@@ -68,23 +68,23 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(RiskCard), findsOneWidget);
       expect(find.text('HIGH RISK'), findsOneWidget);
-      expect(find.text('GO LOOK (शेतात काय तपासावे):'), findsOneWidget);
-      expect(find.text("I'LL CHECK (मी तपासतो)"), findsOneWidget);
+      expect(find.text('What to Inspect in Field:'), findsOneWidget);
+      expect(find.text("I'll Inspect Field"), findsOneWidget);
 
       // 7. Check Confidence Gate Card (starts on Advise)
-      await tester.scrollUntilVisible(find.text('CONFIDENT DIAGNOSIS'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(find.text('Sufficient confidence for treatment guidance'), 300, scrollable: find.byType(Scrollable).first);
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('CONFIDENT DIAGNOSIS'), findsOneWidget);
+      expect(find.text('Sufficient confidence for treatment guidance'), findsOneWidget);
       expect(find.text('Paddy Blast (भातावरील करपा)'), findsWidgets);
 
       // 8. Check Advisory IPM Card
       await tester.scrollUntilVisible(find.byType(AdvisoryIpmCard), 300, scrollable: find.byType(Scrollable).first);
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(AdvisoryIpmCard), findsOneWidget);
-      expect(find.text('WHAT TO AVOID FIRST (हे अजिबात करू नका):'), findsOneWidget);
-      expect(find.text('Cultural Action (मशागतीय / जैविक उपाय)'), findsOneWidget);
-      expect(find.text('Biological Action (जैविक नियंत्रण)'), findsOneWidget);
-      expect(find.text('Chemical Action (रासायनिक फवारणी)'), findsOneWidget);
+      expect(find.text('What to Avoid First (Crucial):'), findsOneWidget);
+      expect(find.text('Cultural Management'), findsOneWidget);
+      expect(find.text('Biological Management'), findsOneWidget);
+      expect(find.text('Chemical Management'), findsOneWidget);
 
       // 9. Check Pesticide Veto Card
       await tester.scrollUntilVisible(find.byType(PesticideVetoCard), 300, scrollable: find.byType(Scrollable).first);
@@ -169,23 +169,23 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Initial state is Advise
-      expect(find.text('CONFIDENT DIAGNOSIS'), findsOneWidget);
+      expect(find.text('Sufficient confidence for treatment guidance'), findsOneWidget);
 
       // Switch to Clarify (Doubt Doctor)
       await tester.tap(find.text('Clarify'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('ONE OBSERVATION NEEDED'), findsOneWidget);
-      expect(find.text('YES (होय)'), findsOneWidget);
-      expect(find.text('NO (नाही)'), findsOneWidget);
-      expect(find.text("CAN'T TELL"), findsOneWidget);
+      expect(find.text('Doubt Doctor · Clarification Needed'), findsOneWidget);
+      expect(find.text('Yes'), findsOneWidget);
+      expect(find.text('No'), findsOneWidget);
+      expect(find.text("Can't Tell"), findsOneWidget);
 
       // Switch to Escalate
       await tester.tap(find.text('Escalate'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('EXPERT REVIEW NEEDED'), findsOneWidget);
-      expect(find.text('Call Kisan Helpline (कॉल करा)'), findsOneWidget);
+      expect(find.text('Direct Agronomist Referral'), findsOneWidget);
+      expect(find.text('Call Kisan Helpline'), findsOneWidget);
     });
 
     testWidgets('Chemical action in Advisory IPM card expands and collapses',
@@ -216,14 +216,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Chemical details (dosage) should be collapsed initially
-      expect(find.text('Dosage (प्रमाण):'), findsNothing);
+      expect(find.text('Dosage:'), findsNothing);
 
       // Tap chemical section to expand
-      await tester.tap(find.text('Chemical Action (रासायनिक फवारणी)'));
+      await tester.tap(find.text('Chemical Management'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Dosage (प्रमाण):'), findsOneWidget);
+      expect(find.text('Dosage:'), findsOneWidget);
       expect(find.text('0.6 g per litre of water'), findsOneWidget);
     });
   });

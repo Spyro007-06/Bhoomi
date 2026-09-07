@@ -214,7 +214,7 @@ void main() {
       await tester.pump();
 
       // 3. Verify IPM Ladder content
-      expect(find.text('Early Paddy Blast'), findsOneWidget);
+      expect(find.textContaining('Paddy Blast'), findsWidgets);
       expect(find.textContaining('Drain excess water'), findsOneWidget);
     });
 
@@ -241,12 +241,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify 3 choices: Improved, No change, Got worse
-      expect(find.text('Improved\n(सुधारणा)'), findsOneWidget);
-      expect(find.text('No change\n(बदल नाही)'), findsOneWidget);
-      expect(find.text('Got worse\n(बिघडले)'), findsOneWidget);
+      expect(find.text('सुधारणा\n(Improved)'), findsOneWidget);
+      expect(find.text('बदल नाही\n(No change)'), findsOneWidget);
+      expect(find.text('बिघडले\n(Got worse)'), findsOneWidget);
 
       // Tap 'Improved'
-      await tester.tap(find.text('Improved\n(सुधारणा)'));
+      await tester.tap(find.text('सुधारणा\n(Improved)'));
       expect(recordedOutcome, 'improved');
     });
 

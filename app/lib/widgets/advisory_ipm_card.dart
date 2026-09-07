@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_radius.dart';
+import '../core/localization/locale_provider.dart';
+import '../core/localization/app_strings.dart';
 
 /// IPM Action ladder item data
 class LadderRung {
@@ -44,7 +47,7 @@ class AdvisoryCitation {
 /// 5. Expert trigger
 /// 6. Citations visible but secondary
 /// 7. Spoken summary audio playback
-class AdvisoryIpmCard extends StatefulWidget {
+class AdvisoryIpmCard extends ConsumerStatefulWidget {
   final String possibleIssue;
   final String whatToAvoid;
   final String whatToCheck;
@@ -56,21 +59,21 @@ class AdvisoryIpmCard extends StatefulWidget {
 
   const AdvisoryIpmCard({
     super.key,
-    this.possibleIssue = 'Early Paddy Blast (भातावरील करपा - सुरुवातीची अवस्था)',
-    this.whatToAvoid = 'Do not top-dress nitrogen now. It accelerates fungal spread. (युरिया/नायट्रोजन खत देऊ नका, यामुळे रोग झपाट्याने वाढतो.)',
-    this.whatToCheck = 'Diamond-shaped lesions with grey centres on upper leaves. (वरच्या पानांवर राखाडी केंद्र असलेले टोकदार ठिपके तपासा.)',
+    this.possibleIssue = 'blast',
+    this.whatToAvoid = 'Do not top-dress nitrogen now. It accelerates fungal spread.',
+    this.whatToCheck = 'Diamond-shaped lesions with grey centres on upper leaves.',
     this.ladder = const [
       LadderRung(
         tier: 'cultural',
-        action: 'Drain the field and let the soil surface dry for 48 hours to reduce humidity. (शेतातील पाणी काढून ४८ तास वाळू द्या.)',
+        action: 'Drain the field and let the soil surface dry for 48 hours to reduce humidity.',
       ),
       LadderRung(
         tier: 'biological',
-        action: 'Apply Pseudomonas fluorescens (10g/litre) as foliar spray in evening hours. (सूडोमोनास फ्लुरोसन्स फवारणी करा.)',
+        action: 'Apply Pseudomonas fluorescens (10g/litre) as foliar spray in evening hours.',
       ),
       LadderRung(
         tier: 'chemical',
-        action: 'Tricyclazole 75% WP (ट्रायसायक्लॅझोल ७५% डब्ल्यूपी)',
+        action: 'Tricyclazole 75% WP',
         dosage: '0.6 g per litre of water',
         phiDays: 30,
         reentryHours: 24,
@@ -84,20 +87,29 @@ class AdvisoryIpmCard extends StatefulWidget {
         reviewedOn: '2025-11-02',
       ),
     ],
-    this.spokenSummary = 'सध्या शेतातील पाणी काढा आणि नायट्रोजन खत देणे टाळा...',
+    this.spokenSummary,
     this.onPlayAudio,
   });
 
   @override
-  State<AdvisoryIpmCard> createState() => _AdvisoryIpmCardState();
+  ConsumerState<AdvisoryIpmCard> createState() => _AdvisoryIpmCardState();
 }
 
-class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
+class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
   bool _isChemicalExpanded = false;
   bool _isPlayingAudio = false;
 
   @override
   Widget build(BuildContext context) {
+    AppStrings strings;
+    try {
+      strings = ref.watch(stringsProvider);
+    } catch (_) {
+      strings = AppStrings(AppLanguage.marathi);
+    }
+
+    final localizedIssue = strings.getLocalizedTargetName(widget.possibleIssue);
+
     // Separate ladder tiers
     final culturalRungs = widget.ladder.where((r) => r.tier == 'cultural').toList();
     final biologicalRungs = widget.ladder.where((r) => r.tier == 'biological').toList();
@@ -138,7 +150,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                 const SizedBox(width: AppSpacing.s8),
                 Expanded(
                   child: Text(
-                    'Grounded Advisory (सल्ला व मार्गदर्शन)',
+                    strings.advisoryCardHeader,
                     style: AppTypography.subhead.copyWith(
                       color: AppColors.primaryDark,
                       fontSize: 16,
@@ -160,7 +172,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                       });
                       widget.onPlayAudio?.call();
                     },
-                    tooltip: 'Listen to spoken advisory',
+                    tooltip: strings.semanticsPlayAudio,
                   ),
               ],
             ),
@@ -173,7 +185,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
               children: [
                 // 1. Issue
                 Text(
-                  widget.possibleIssue,
+                  localizedIssue,
                   style: AppTypography.sectionTitle.copyWith(
                     color: AppColors.soilCharcoal,
                   ),
@@ -211,7 +223,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                           const SizedBox(width: AppSpacing.s8),
                           Expanded(
                             child: Text(
-                              'WHAT TO AVOID FIRST (हे अजिबात करू नका):',
+                              strings.advisoryWhatToAvoidHeader,
                               style: AppTypography.caption.copyWith(
                                 color: AppColors.warning,
                                 fontWeight: FontWeight.w800,
@@ -257,7 +269,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'WHAT TO CHECK IN THE FIELD (काय तपासावे):',
+                              strings.advisoryWhatToCheckHeader,
                               style: AppTypography.captionSmall.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.info,
@@ -282,7 +294,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
 
                 // 4. IPM ACTION LADDER (Cultural -> Biological -> Chemical)
                 Text(
-                  'IPM ACTION LADDER (एकात्मिक कीड व्यवस्थापन पायऱ्या):',
+                  strings.advisoryIpmLadderHeader,
                   style: AppTypography.caption.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.forest,
@@ -294,8 +306,8 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                 // Step 1: Cultural Management
                 _buildLadderSection(
                   stepNumber: '1',
-                  stepTitle: 'Cultural Action (मशागतीय / जैविक उपाय)',
-                  stepSubtitle: 'First-line non-chemical practices',
+                  stepTitle: strings.advisoryStep1Title,
+                  stepSubtitle: strings.advisoryStep1Subtitle,
                   accentColor: AppColors.forest,
                   rungs: culturalRungs,
                 ),
@@ -304,15 +316,15 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                 // Step 2: Biological Management
                 _buildLadderSection(
                   stepNumber: '2',
-                  stepTitle: 'Biological Action (जैविक नियंत्रण)',
-                  stepSubtitle: 'Bio-agents & natural predators',
+                  stepTitle: strings.advisoryStep2Title,
+                  stepSubtitle: strings.advisoryStep2Subtitle,
                   accentColor: AppColors.paddyGreen,
                   rungs: biologicalRungs,
                 ),
                 const SizedBox(height: AppSpacing.m12),
 
                 // Step 3: Chemical Management (Collapsed by Default)
-                _buildChemicalSection(chemicalRungs),
+                _buildChemicalSection(chemicalRungs, strings),
 
                 // 5. Expert Trigger
                 if (widget.expertTrigger != null) ...[
@@ -334,7 +346,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'EXPERT ESCALATION TRIGGER (तज्ञ मदतीची वेळ):',
+                                strings.advisoryExpertTriggerHeader,
                                 style: AppTypography.captionSmall.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.danger,
@@ -371,7 +383,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                           children: widget.citations
                               .map(
                                 (c) => Text(
-                                  'Source: ${c.title} (Reviewed: ${c.reviewedOn})',
+                                  '${strings.advisorySourcePrefix}: ${c.title} (${strings.advisoryReviewedPrefix}: ${c.reviewedOn})',
                                   style: AppTypography.captionSmall.copyWith(
                                     color: AppColors.fieldSlate,
                                     fontStyle: FontStyle.italic,
@@ -469,7 +481,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
     );
   }
 
-  Widget _buildChemicalSection(List<LadderRung> chemicalRungs) {
+  Widget _buildChemicalSection(List<LadderRung> chemicalRungs, AppStrings strings) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.warmSurface,
@@ -518,7 +530,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Chemical Action (रासायनिक फवारणी)',
+                                strings.advisoryStep3Title,
                                 style: AppTypography.bodyMedium.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.soilCharcoal,
@@ -536,7 +548,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                                 borderRadius: AppRadius.chip,
                               ),
                               child: Text(
-                                'Last Resort',
+                                strings.advisoryLastResortBadge,
                                 style: AppTypography.captionSmall.copyWith(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
@@ -547,7 +559,7 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                           ],
                         ),
                         Text(
-                          'Strictly collapsed by default — use only if needed',
+                          strings.advisoryStep3Subtitle,
                           style: AppTypography.captionSmall.copyWith(
                             color: AppColors.fieldSlate,
                           ),
@@ -586,20 +598,20 @@ class _AdvisoryIpmCardState extends State<AdvisoryIpmCard> {
                       if (rung.dosage != null)
                         _buildChemicalDetailRow(
                           icon: Icons.water_drop_outlined,
-                          label: 'Dosage (प्रमाण):',
+                          label: strings.advisoryDosageLabel,
                           value: rung.dosage!,
                         ),
                       if (rung.phiDays != null)
                         _buildChemicalDetailRow(
                           icon: Icons.calendar_today_outlined,
-                          label: 'Pre-Harvest Interval (PHI):',
-                          value: '${rung.phiDays} days before harvest',
+                          label: strings.advisoryPhiLabel,
+                          value: strings.advisoryPhiDaysText(rung.phiDays!),
                         ),
                       if (rung.reentryHours != null)
                         _buildChemicalDetailRow(
                           icon: Icons.timer_outlined,
-                          label: 'Re-entry Period:',
-                          value: '${rung.reentryHours} hours after spraying',
+                          label: strings.advisoryReentryLabel,
+                          value: strings.advisoryReentryHoursText(rung.reentryHours!),
                         ),
                     ],
                   );

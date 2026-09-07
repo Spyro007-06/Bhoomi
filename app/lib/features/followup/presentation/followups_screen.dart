@@ -139,7 +139,7 @@ class _FollowupsScreenState extends ConsumerState<FollowupsScreen> {
                       FollowUpCard(
                         question: item.question ?? strings.followupQuestionDefault,
                         questionLocalized: strings.followupQuestionDefault,
-                        target: (item.target ?? 'TREATMENT').replaceAll('_', ' ').toUpperCase(),
+                        target: item.target ?? 'treatment',
                         onResponse: isCompleted || isSubmitting
                             ? null
                             : (val) => _handleFollowUpResponse(item.id, val),

@@ -286,7 +286,7 @@ void main() {
 
       // What to do & High Confidence
       expect(find.text('उच्च अचूकता (High Confidence)'), findsOneWidget);
-      expect(find.text('WHAT TO AVOID FIRST (हे अजिबात करू नका):'), findsOneWidget);
+      expect(find.text('हे अजिबात करू नका (What to Avoid):'), findsOneWidget);
       expect(find.text('या समस्येबद्दल विचारा'), findsOneWidget);
       expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
     });

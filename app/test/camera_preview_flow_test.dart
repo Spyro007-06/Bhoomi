@@ -309,7 +309,7 @@ void main() {
 
       // 6. Rendered AdvisoryResultScreen
       expect(find.byType(AdvisoryResultScreen), findsOneWidget);
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsWidgets);
     });
 
     testWidgets('Handles camera permission denied state and allows retry',

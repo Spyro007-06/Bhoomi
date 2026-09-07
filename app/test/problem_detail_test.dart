@@ -76,7 +76,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Verify Problem title and status
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsOneWidget);
       expect(find.text('सक्रिय (Open)'), findsOneWidget);
       expect(find.textContaining('नोंदणी दिनांक: 2026-08-28'), findsOneWidget);
 

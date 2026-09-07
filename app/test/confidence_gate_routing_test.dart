@@ -73,7 +73,7 @@ void main() {
       expect(find.textContaining('Demonstration Mode'), findsOneWidget);
 
       // 2. Verify Diagnosis label & High confidence
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsWidgets);
       expect(find.text('उच्च अचूकता (High Confidence)'), findsOneWidget);
 
       // 3. Verify WHAT TO AVOID is displayed
@@ -81,10 +81,10 @@ void main() {
 
       // 4. Verify Chemical details are COLLAPSED by default
       expect(find.textContaining('0.6 g per litre'), findsNothing);
-      expect(find.text('Chemical Action (रासायनिक फवारणी)'), findsOneWidget);
+      expect(find.text('रासायनिक फवारणी (Chemical Action)'), findsOneWidget);
 
       // 5. Tap to expand chemical details
-      await tester.tap(find.text('Chemical Action (रासायनिक फवारणी)'));
+      await tester.tap(find.text('रासायनिक फवारणी (Chemical Action)'));
       await tester.pumpAndSettle();
       expect(find.textContaining('0.6 g per litre'), findsOneWidget);
 

@@ -42,6 +42,7 @@ class FollowUpCard extends ConsumerWidget {
     }
 
     final effectiveQuestion = question ?? strings.voiceContextFollowupPrompt;
+    final localizedTarget = strings.getLocalizedTargetName(target);
 
     return Container(
       decoration: BoxDecoration(
@@ -78,7 +79,7 @@ class FollowUpCard extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.s8),
                 Expanded(
                   child: Text(
-                    'Follow-up Check-in (पाठपुरावा)',
+                    strings.followupCheckinHeader,
                     style: AppTypography.subhead.copyWith(
                       color: AppColors.info,
                       fontSize: 15,
@@ -86,7 +87,7 @@ class FollowUpCard extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  target,
+                  localizedTarget,
                   style: AppTypography.captionSmall.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -123,7 +124,7 @@ class FollowUpCard extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: _buildChoiceButton(
-                        label: 'Improved\n(सुधारणा)',
+                        label: strings.followupOptionImproved,
                         icon: Icons.sentiment_satisfied_alt_rounded,
                         color: AppColors.success,
                         onTap: () => onResponse?.call('improved'),
@@ -132,7 +133,7 @@ class FollowUpCard extends ConsumerWidget {
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: _buildChoiceButton(
-                        label: 'No change\n(बदल नाही)',
+                        label: strings.followupOptionNoChange,
                         icon: Icons.sentiment_neutral_rounded,
                         color: AppColors.fieldSlate,
                         onTap: () => onResponse?.call('no_change'),
@@ -141,7 +142,7 @@ class FollowUpCard extends ConsumerWidget {
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: _buildChoiceButton(
-                        label: 'Got worse\n(बिघडले)',
+                        label: strings.followupOptionGotWorse,
                         icon: Icons.sentiment_very_dissatisfied_rounded,
                         color: AppColors.danger,
                         onTap: () => onResponse?.call('got_worse'),

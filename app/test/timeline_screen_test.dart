@@ -111,7 +111,7 @@ void main() {
       // 3. Navigated to ProblemDetailScreen
       expect(find.byType(ProblemDetailScreen), findsOneWidget);
       expect(find.text('समस्या सविस्तर माहिती'), findsOneWidget);
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsOneWidget);
     });
 
     testWidgets('Renders empty state when timeline has no events',

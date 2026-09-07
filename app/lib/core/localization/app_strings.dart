@@ -1,3 +1,5 @@
+import '../constants/app_constants.dart';
+
 /// Multi-language localization dictionary for Bhoomi Farmer App.
 /// Supports Marathi (Primary - mr-IN), Hindi (hi-IN), and Indian English (en-IN).
 
@@ -1300,6 +1302,423 @@ class AppStrings {
       : (language == AppLanguage.hindi
           ? 'Bhoomi के साथ शुरुआत करें'
           : 'Get started with Bhoomi');
+
+  // =========================================================================
+  // SAFETY-CRITICAL LOCALIZATION (P4 HARDENING)
+  // =========================================================================
+
+  /// Localized Target Display Name Resolver
+  String getLocalizedTargetName(String? rawTarget) =>
+      AppConstants.getLocalizedTarget(rawTarget, lang: language.code);
+
+  // --- 1. RiskCard Strings ---
+  String get riskCardTriggerWeather => language == AppLanguage.marathi
+      ? 'हवामान आधारित इशारा (Weather Risk)'
+      : (language == AppLanguage.hindi
+          ? 'मौसम आधारित चेतावनी (Weather Risk)'
+          : 'Weather Risk Alert');
+
+  String get riskCardTriggerSpread => language == AppLanguage.marathi
+      ? 'शेजारील शेत प्रसार इशारा (Nearby Outbreak)'
+      : (language == AppLanguage.hindi
+          ? 'पड़ोसी खेत से प्रसार चेतावनी'
+          : 'Nearby Farm Outbreak Alert');
+
+  String get riskCardTriggerSeasonal => language == AppLanguage.marathi
+      ? 'हंगामी कीड इशारा (Seasonal Alert)'
+      : (language == AppLanguage.hindi
+          ? 'मौसमी कीट चेतावनी (Seasonal Alert)'
+          : 'Seasonal Pest Alert');
+
+  String get riskCardTriggerCombined => language == AppLanguage.marathi
+      ? 'एकत्रित धोका इशारा (Combined Risk)'
+      : (language == AppLanguage.hindi
+          ? 'संयुक्त जोखिम चेतावनी (Combined Risk)'
+          : 'Combined Risk Alert');
+
+  String get riskCardWhyHeader => language == AppLanguage.marathi
+      ? 'कारणे व निरीक्षण:'
+      : (language == AppLanguage.hindi ? 'कारण और विवरण:' : 'Why (Reason):');
+
+  String get riskCardGoLookHeader => language == AppLanguage.marathi
+      ? 'शेतात काय तपासावे (तपासणी कृती):'
+      : (language == AppLanguage.hindi
+          ? 'खेत में क्या जांचें (निरीक्षण):'
+          : 'What to Inspect in Field:');
+
+  String get riskCardInspectNowAction => language == AppLanguage.marathi
+      ? 'मी तपासतो (Inspect Field)'
+      : (language == AppLanguage.hindi
+          ? 'मैं जांच करता हूं (Inspect)'
+          : "I'll Inspect Field");
+
+  String get riskCardRemindLaterAction => language == AppLanguage.marathi
+      ? 'नंतर आठवण करा'
+      : (language == AppLanguage.hindi ? 'बाद में याद दिलाएं' : 'Remind Later');
+
+  String get riskCardDefaultReason => language == AppLanguage.marathi
+      ? 'सलग ४ रात्री ९०% पेक्षा जास्त आर्द्रता आणि फुटव्यांची अवस्था.'
+      : (language == AppLanguage.hindi
+          ? 'लगातार ४ रातों तक ९०% से अधिक आर्द्रता।'
+          : 'Humidity above 90% for 4 consecutive nights at tillering stage.');
+
+  String get riskCardDefaultTask1 => language == AppLanguage.marathi
+      ? 'शेतातील १० झाडांची वरची पाने तपासा.'
+      : (language == AppLanguage.hindi
+          ? 'खेत के १० पौधों की ऊपरी पत्तियों की जांच करें।'
+          : 'Check the upper leaves on 10 plants across the field.');
+
+  String get riskCardDefaultTask2 => language == AppLanguage.marathi
+      ? 'राखाडी केंद्र असलेल्या ठिपक्याचा फोटो काढा.'
+      : (language == AppLanguage.hindi
+          ? 'धूसर केंद्र वाले किसी भी धब्बे का फोटो लें।'
+          : 'Photograph any spot with a grey centre.');
+
+  // --- 2. ConfidenceGateCard Strings ---
+  String get gateAdviseHeader => language == AppLanguage.marathi
+      ? 'उपचार मार्गदर्शनासाठी पुरेशी माहिती उपलब्ध'
+      : (language == AppLanguage.hindi
+          ? 'उपचार मार्गदर्शन के लिए पर्याप्त जानकारी उपलब्ध'
+          : 'Sufficient confidence for treatment guidance');
+
+  String get gateAdviseDetectedIssue => language == AppLanguage.marathi
+      ? 'ओळखलेली समस्या (Detected Issue)'
+      : (language == AppLanguage.hindi
+          ? 'पहचानी गई समस्या (Detected Issue)'
+          : 'Detected Issue');
+
+  String get gateAdviseMatchBadge => language == AppLanguage.marathi
+      ? 'तपासणी जुळणी'
+      : (language == AppLanguage.hindi ? 'सटीकता' : 'Match');
+
+  String get gateAdviseAlternativesHeader => language == AppLanguage.marathi
+      ? 'इतर विचारात घेतलेल्या शक्यता:'
+      : (language == AppLanguage.hindi
+          ? 'अन्य संभावित संभावनाएं:'
+          : 'Other Possibilities Considered:');
+
+  String get gateAdviseViewAdvisoryButton => language == AppLanguage.marathi
+      ? 'सल्ला व एकात्मिक उपाय पहा'
+      : (language == AppLanguage.hindi
+          ? 'सलाह और एकीकृत प्रबंधन देखें'
+          : 'View Advisory Treatment Ladder');
+
+  String get gateClarifyHeader => language == AppLanguage.marathi
+      ? 'डाउट डॉक्टर · स्पष्टीकरण आवश्यक'
+      : (language == AppLanguage.hindi
+          ? 'डाउट डॉक्टर · स्पष्टीकरण आवश्यक'
+          : 'Doubt Doctor · Clarification Needed');
+
+  String get gateClarifyPrompt => language == AppLanguage.marathi
+      ? 'दोन जवळच्या शक्यता दिसत आहेत:'
+      : (language == AppLanguage.hindi
+          ? 'दो समान संभावनाएं दिख रही हैं:'
+          : 'I see two close possibilities:');
+
+  String get gateClarifyObservationHeader => language == AppLanguage.marathi
+      ? 'शेतातील एक प्रत्यक्ष निरीक्षण प्रश्न:'
+      : (language == AppLanguage.hindi
+          ? 'खेत में एक प्रत्यक्ष अवलोकन प्रश्न:'
+          : 'One Field Observation Question:');
+
+  String get gateClarifyYes => language == AppLanguage.marathi
+      ? 'होय (Yes)'
+      : (language == AppLanguage.hindi ? 'हाँ (Yes)' : 'Yes');
+
+  String get gateClarifyNo => language == AppLanguage.marathi
+      ? 'नाही (No)'
+      : (language == AppLanguage.hindi ? 'नहीं (No)' : 'No');
+
+  String get gateClarifyUnknown => language == AppLanguage.marathi
+      ? 'सांगता येत नाही (Not Sure)'
+      : (language == AppLanguage.hindi ? 'पता नहीं (Not Sure)' : "Can't Tell");
+
+  String get gateEscalateHeader => language == AppLanguage.marathi
+      ? 'थेट कृषी तज्ञ संदर्भ (KVK Referral)'
+      : (language == AppLanguage.hindi
+          ? 'सीधे कृषि विशेषज्ञ परामर्श (KVK Referral)'
+          : 'Direct Agronomist Referral');
+
+  String get gateEscalatePrompt => language == AppLanguage.marathi
+      ? 'मला पुरेशी खात्री नाही. चुकीचा सल्ला टाळण्यासाठी तज्ञांची मदत घेऊया.'
+      : (language == AppLanguage.hindi
+          ? 'मुझे पर्याप्त विश्वास नहीं है। गलत सलाह से बचने के लिए विशेषज्ञ की मदद लें।'
+          : "I am not confident enough to advise you. Let's get expert help.");
+
+  String get gateEscalatePromptSub => language == AppLanguage.marathi
+      ? 'केव्हीके शास्त्रज्ञ आपल्या पिकाची तपासणी करतील.'
+      : (language == AppLanguage.hindi
+          ? 'केवीके वैज्ञानिक आपकी फसल की जांच करेंगे।'
+          : 'KVK agronomists will examine your crop record.');
+
+  String get gateEscalateAssignedTo => language == AppLanguage.marathi
+      ? 'नियुक्त तज्ञ'
+      : (language == AppLanguage.hindi ? 'नियुक्त विशेषज्ञ' : 'Assigned To');
+
+  String get gateEscalateDefaultAssigned => language == AppLanguage.marathi
+      ? 'केव्हीके कृषी शास्त्रज्ञ (KVK Nashik)'
+      : (language == AppLanguage.hindi
+          ? 'केवीके कृषि वैज्ञानिक (KVK)'
+          : 'KVK Agronomist (Krishi Vigyan Kendra)');
+
+  String get gateEscalateQueuePos => language == AppLanguage.marathi
+      ? 'प्रतीक्षा क्रमांक'
+      : (language == AppLanguage.hindi ? 'कतार स्थिति' : 'Queue Pos.');
+
+  String gateEscalateQueuePosValue(int pos) => language == AppLanguage.marathi
+      ? '#$pos नंबर'
+      : (language == AppLanguage.hindi ? '#$pos नंबर' : '#$pos in line');
+
+  String get gateEscalateEstWait => language == AppLanguage.marathi
+      ? 'अंदाजे वेळ'
+      : (language == AppLanguage.hindi ? 'अनुमानित समय' : 'Est. Wait');
+
+  String gateEscalateEstWaitValue(int mins) => language == AppLanguage.marathi
+      ? '~$mins मिनिटे'
+      : (language == AppLanguage.hindi ? '~$mins मिनट' : '~$mins mins');
+
+  String get gateEscalateCallHelpline => language == AppLanguage.marathi
+      ? 'किसान हेल्पलाईनला कॉल करा'
+      : (language == AppLanguage.hindi
+          ? 'किसान हेल्पलाइन को कॉल करें'
+          : 'Call Kisan Helpline');
+
+  // --- 3. PesticideVetoCard Strings ---
+  String get pesticideVerdictTitleNoObjection => language == AppLanguage.marathi
+      ? 'कोणताही आक्षेप आढळला नाही'
+      : (language == AppLanguage.hindi
+          ? 'कोई आपत्ति नहीं मिली'
+          : 'NO OBJECTION FOUND');
+
+  String get pesticideVerdictTitleNotInRecords => language == AppLanguage.marathi
+      ? 'उत्पादन नोंदणीत आढळले नाही'
+      : (language == AppLanguage.hindi
+          ? 'उत्पाद रिकॉर्ड में नहीं मिला'
+          : 'PRODUCT NOT IN RECORDS');
+
+  String get pesticideVerdictTitleVeto => language == AppLanguage.marathi
+      ? 'फवारणी करू नका — मनाई निकाल'
+      : (language == AppLanguage.hindi
+          ? 'छिड़काव न करें — निषेध निर्णय'
+          : 'DO NOT SPRAY — VETO VERDICT');
+
+  String get pesticideLabelOcrHeader => language == AppLanguage.marathi
+      ? 'बाटलीवरील लेबल माहिती (OCR Extraction):'
+      : (language == AppLanguage.hindi
+          ? 'बोतल के लेबल की जानकारी (OCR):'
+          : 'Bottle Label Information (OCR):');
+
+  String get pesticideActiveIngredient => language == AppLanguage.marathi
+      ? 'सक्रिय घटक (Active Ingredient):'
+      : (language == AppLanguage.hindi
+          ? 'सक्रिय घटक (Active Ingredient):'
+          : 'Active Ingredient:');
+
+  String get pesticideConcentrationForm => language == AppLanguage.marathi
+      ? 'प्रमाण व प्रकार:'
+      : (language == AppLanguage.hindi
+          ? 'सांद्रता और रूप:'
+          : 'Concentration & Form:');
+
+  String get pesticideRegulatoryVerdictHeader => language == AppLanguage.marathi
+      ? 'नियामक तपासणी निकाल:'
+      : (language == AppLanguage.hindi
+          ? 'नियामक जांच परिणाम:'
+          : 'Regulatory Safety Verdict:');
+
+  String get pesticideSafetyRule => language == AppLanguage.marathi
+      ? 'सुरक्षा नियम: ही केवळ मनाई तपासणी आहे. मात्रा आणि वापरासाठी छापील बाटलीवरील लेबल हाच अंतिम पुरावा आहे.'
+      : (language == AppLanguage.hindi
+          ? 'सुरक्षा नियम: यह केवल निषेध जांच है। मात्रा और उपयोग के लिए मुद्रित बोतल का लेबल ही अंतिम प्रमाण है।'
+          : 'Safety Rule: Veto check only. The printed bottle label remains the sole authority for dosage.');
+
+  String get pesticideRetakePhoto => language == AppLanguage.marathi
+      ? 'पुन्हा फोटो काढा'
+      : (language == AppLanguage.hindi ? 'फिर से फोटो लें' : 'Retake Photo');
+
+  String get pesticideAskExpert => language == AppLanguage.marathi
+      ? 'तज्ञांना विचारा'
+      : (language == AppLanguage.hindi ? 'विशेषज्ञ से पूछें' : 'Ask Expert');
+
+  String get pesticideAcknowledgeAndFollow => language == AppLanguage.marathi
+      ? 'माहिती वाचली, लेबलनुसार वापर करा'
+      : (language == AppLanguage.hindi
+          ? 'जानकारी समझी, लेबल का पालन करें'
+          : 'Acknowledge & Follow Label');
+
+  String getLocalizedVerdictMessage(String code, [String? custom]) {
+    if (custom != null && custom.isNotEmpty) return custom;
+    switch (code) {
+      case 'NO_OBJECTION_FOUND':
+        return language == AppLanguage.marathi
+            ? 'कोणताही आक्षेप आढळला नाही. बाटलीवरील छापील प्रमाणानुसार फवारणी करा.'
+            : (language == AppLanguage.hindi
+                ? 'कोई आपत्ति नहीं मिली। बोतल पर छपे निर्देशानुसार मात्रा का पालन करें।'
+                : 'No objection found. Follow the printed label for dosage.');
+      case 'NOT_REGISTERED_FOR_TARGET':
+        return language == AppLanguage.marathi
+            ? 'हे उत्पादन या किडीसाठी/रोगासाठी नोंदणीकृत नाही. येथे वापर करू नका.'
+            : (language == AppLanguage.hindi
+                ? 'यह उत्पाद इस कीट/रोग के लिए पंजीकृत नहीं है। इसका उपयोग न करें।'
+                : 'This product is not registered for this pest. Do not use it here.');
+      case 'WRONG_CROP':
+        return language == AppLanguage.marathi
+            ? 'हे उत्पादन भातासाठी (धान) नोंदणीकृत नाही.'
+            : (language == AppLanguage.hindi
+                ? 'यह उत्पाद धान की फसल के लिए पंजीकृत नहीं है।'
+                : 'This product is not registered for paddy.');
+      case 'WRONG_CLASS':
+        return language == AppLanguage.marathi
+            ? 'हे बुरशीनाशक आहे. तुमची समस्या कीटकांची आहे.'
+            : (language == AppLanguage.hindi
+                ? 'यह कवकनाशी (Fungicide) है। आपकी समस्या कीट की है।'
+                : 'This is a fungicide. Your problem is an insect pest.');
+      case 'PHI_CONFLICT':
+        return language == AppLanguage.marathi
+            ? 'कापणी खूप जवळ आली आहे. या उत्पादनाला कापणीपूर्वी अधिक दिवसांचा कालावधी (PHI) लागतो.'
+            : (language == AppLanguage.hindi
+                ? 'कटाई का समय बहुत पास है। इस उत्पाद को कटाई से पहले अधिक दिनों की आवश्यकता है।'
+                : 'Harvest is too close. This product needs more days before harvest.');
+      case 'NOT_IN_RECORDS':
+        return language == AppLanguage.marathi
+            ? 'या उत्पादनाची नोंद प्रणालीत नाही. वापरण्यापूर्वी कृषी तज्ञांचा सल्ला घ्या.'
+            : (language == AppLanguage.hindi
+                ? 'इस उत्पाद का हमारे पास रिकॉर्ड नहीं है। उपयोग से पहले विशेषज्ञ से पूछें।'
+                : 'I do not have a record of this product. Ask an expert before using it.');
+      default:
+        return language == AppLanguage.marathi
+            ? 'वापरण्यापूर्वी कृषी तज्ञांशी चर्चा करा.'
+            : (language == AppLanguage.hindi
+                ? 'उपयोग से पहले कृषि विशेषज्ञ से सलाह लें।'
+                : 'Check with an expert before application.');
+    }
+  }
+
+  // --- 4. AdvisoryIpmCard Strings ---
+  String get advisoryCardHeader => language == AppLanguage.marathi
+      ? 'सल्ला व एकात्मिक कीड व्यवस्थापन'
+      : (language == AppLanguage.hindi
+          ? 'सलाह और एकीकृत कीट प्रबंधन'
+          : 'Grounded Advisory & IPM Guide');
+
+  String get advisoryWhatToAvoidHeader => language == AppLanguage.marathi
+      ? 'हे अजिबात करू नका (What to Avoid):'
+      : (language == AppLanguage.hindi
+          ? 'यह बिल्कुल न करें (What to Avoid):'
+          : 'What to Avoid First (Crucial):');
+
+  String get advisoryWhatToCheckHeader => language == AppLanguage.marathi
+      ? 'शेतात काय तपासावे (Field Check):'
+      : (language == AppLanguage.hindi
+          ? 'खेत में क्या जांचें (Field Check):'
+          : 'What to Check in Field:');
+
+  String get advisoryIpmLadderHeader => language == AppLanguage.marathi
+      ? 'एकात्मिक कीड व्यवस्थापन पायऱ्या (IPM Action Ladder):'
+      : (language == AppLanguage.hindi
+          ? 'एकीकृत कीट प्रबंधन चरण (IPM Ladder):'
+          : 'IPM Action Ladder (Step-by-Step):');
+
+  String get advisoryStep1Title => language == AppLanguage.marathi
+      ? 'मशागतीय / यांत्रिक उपाय (Cultural Action)'
+      : (language == AppLanguage.hindi
+          ? 'कृषि / यांत्रिक उपाय (Cultural Action)'
+          : 'Cultural Management');
+
+  String get advisoryStep1Subtitle => language == AppLanguage.marathi
+      ? 'पहिली पायरी: बिन-रासायनिक पद्धती'
+      : (language == AppLanguage.hindi
+          ? 'प्रथम चरण: गैर-रासायनिक पद्धतियां'
+          : 'First-line non-chemical practices');
+
+  String get advisoryStep2Title => language == AppLanguage.marathi
+      ? 'जैविक नियंत्रण (Biological Action)'
+      : (language == AppLanguage.hindi
+          ? 'जैविक नियंत्रण (Biological Action)'
+          : 'Biological Management');
+
+  String get advisoryStep2Subtitle => language == AppLanguage.marathi
+      ? 'मित्र बुरशी, जीवाणू व नैसर्गिक भक्षक'
+      : (language == AppLanguage.hindi
+          ? 'जैव-नियंत्रक और प्राकृतिक मित्र कीट'
+          : 'Bio-agents & natural predators');
+
+  String get advisoryStep3Title => language == AppLanguage.marathi
+      ? 'रासायनिक फवारणी (Chemical Action)'
+      : (language == AppLanguage.hindi
+          ? 'रासायनिक छिड़काव (Chemical Action)'
+          : 'Chemical Management');
+
+  String get advisoryStep3Subtitle => language == AppLanguage.marathi
+      ? 'केवळ आवश्यक असल्यास — शेवटचा पर्याय'
+      : (language == AppLanguage.hindi
+          ? 'केवल आवश्यकता होने पर — अंतिम उपाय'
+          : 'Last resort — strictly use only if required');
+
+  String get advisoryLastResortBadge => language == AppLanguage.marathi
+      ? 'शेवटचा पर्याय'
+      : (language == AppLanguage.hindi ? 'अंतिम विकल्प' : 'Last Resort');
+
+  String get advisoryDosageLabel => language == AppLanguage.marathi
+      ? 'प्रमाण (Dosage):'
+      : (language == AppLanguage.hindi ? 'मात्रा (Dosage):' : 'Dosage:');
+
+  String get advisoryPhiLabel => language == AppLanguage.marathi
+      ? 'कापणीपूर्व सुरक्षित अंतर (PHI):'
+      : (language == AppLanguage.hindi
+          ? 'कटाई पूर्व सुरक्षित अंतराल (PHI):'
+          : 'Pre-Harvest Interval (PHI):');
+
+  String advisoryPhiDaysText(int days) => language == AppLanguage.marathi
+      ? '$days दिवस कापणीपूर्वी'
+      : (language == AppLanguage.hindi
+          ? '$days दिन कटाई से पहले'
+          : '$days days before harvest');
+
+  String get advisoryReentryLabel => language == AppLanguage.marathi
+      ? 'पुनः प्रवेश कालावधी:'
+      : (language == AppLanguage.hindi ? 'पुनः प्रवेश अवधि:' : 'Re-entry Period:');
+
+  String advisoryReentryHoursText(int hours) => language == AppLanguage.marathi
+      ? '$hours तास फवारणीनंतर'
+      : (language == AppLanguage.hindi
+          ? '$hours घंटे छिड़काव के बाद'
+          : '$hours hours after spraying');
+
+  String get advisoryExpertTriggerHeader => language == AppLanguage.marathi
+      ? 'तज्ञ मदतीची वेळ (Expert Escalation):'
+      : (language == AppLanguage.hindi
+          ? 'विशेषज्ञ सहायता का समय (Escalation):'
+          : 'Expert Escalation Trigger:');
+
+  String get advisorySourcePrefix => language == AppLanguage.marathi
+      ? 'संदर्भ स्रोत'
+      : (language == AppLanguage.hindi ? 'स्रोत' : 'Source');
+
+  String get advisoryReviewedPrefix => language == AppLanguage.marathi
+      ? 'तपासणी'
+      : (language == AppLanguage.hindi ? 'समीक्षा' : 'Reviewed');
+
+  // --- 5. HomeScreen, Followup & Activity Strings ---
+  String get homeRecentActivityHeader => language == AppLanguage.marathi
+      ? 'अलीकडील नोंदी'
+      : (language == AppLanguage.hindi ? 'हाल की गतिविधियां' : 'Recent Activity');
+
+  String get followupCheckinHeader => language == AppLanguage.marathi
+      ? 'पाठपुरावा तपासणी'
+      : (language == AppLanguage.hindi ? 'फॉलो-अप जांच' : 'Follow-up Check-in');
+
+  String get followupOptionImproved => language == AppLanguage.marathi
+      ? 'सुधारणा\n(Improved)'
+      : (language == AppLanguage.hindi ? 'सुधार\n(Improved)' : 'Improved');
+
+  String get followupOptionNoChange => language == AppLanguage.marathi
+      ? 'बदल नाही\n(No change)'
+      : (language == AppLanguage.hindi ? 'कोई बदलाव नहीं\n(No change)' : 'No change');
+
+  String get followupOptionGotWorse => language == AppLanguage.marathi
+      ? 'बिघडले\n(Got worse)'
+      : (language == AppLanguage.hindi ? 'खराब हुआ\n(Got worse)' : 'Got worse');
 }
 
 

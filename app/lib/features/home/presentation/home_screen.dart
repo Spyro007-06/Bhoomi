@@ -427,7 +427,7 @@ class HomeScreen extends ConsumerWidget {
                         : ['Check the upper leaves on 10 plants across the field.'];
 
                     return RiskCard(
-                      target: topAlert.target.replaceAll('_', ' ').toUpperCase(),
+                      target: topAlert.target,
                       riskLevel: topAlert.riskLevel,
                       reason: topAlert.reason,
                       inspectionTasks: tasks,
@@ -495,7 +495,7 @@ class HomeScreen extends ConsumerWidget {
                     return FollowUpCard(
                       question: topFollowup.question ?? strings.followupQuestionDefault,
                       questionLocalized: strings.followupQuestionDefault,
-                      target: (topFollowup.target ?? 'TREATMENT').replaceAll('_', ' ').toUpperCase(),
+                      target: topFollowup.target ?? 'treatment',
                       onResponse: (response) async {
                         try {
                           await ref.read(followUpRepositoryProvider).respondToFollowUp(
@@ -513,7 +513,7 @@ class HomeScreen extends ConsumerWidget {
 
                 // Section 3: Recent Activity (Timeline Snippet)
                 Text(
-                  'अलीकडील नोंदी (Recent Activity)',
+                  strings.homeRecentActivityHeader,
                   style: AppTypography.subheading.copyWith(
                     color: AppColors.soilCharcoal,
                     fontWeight: FontWeight.w700,

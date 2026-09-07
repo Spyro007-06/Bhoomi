@@ -98,9 +98,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Ensure key sections render cleanly without RenderFlex overflow exceptions
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsWidgets);
       expect(find.text('Do not apply nitrogen fertilizer now.'), findsOneWidget);
-      expect(find.text('Chemical Action (रासायनिक फवारणी)'), findsOneWidget);
+      expect(find.text('रासायनिक फवारणी (Chemical Action)'), findsOneWidget);
     });
 
     testWidgets('Primary buttons satisfy minimum touch target heights >= 48px',

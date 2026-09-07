@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_radius.dart';
+import '../core/localization/locale_provider.dart';
+import '../core/localization/app_strings.dart';
 import 'app_status_badge.dart';
 import 'app_button.dart';
 
@@ -10,7 +13,7 @@ import 'app_button.dart';
 ///
 /// Invariant: Every alert MUST carry at least one inspection task.
 /// Never a passive notification — always carries clear 'where to look' task and outcome action.
-class RiskCard extends StatelessWidget {
+class RiskCard extends ConsumerWidget {
   final String target;
   final String riskLevel; // 'high' | 'medium' | 'low'
   final String reason;
@@ -21,7 +24,7 @@ class RiskCard extends StatelessWidget {
 
   const RiskCard({
     super.key,
-    this.target = 'Paddy Blast (भातावरील करपा)',
+    this.target = 'blast',
     this.riskLevel = 'high',
     this.reason = 'Humidity above 90% for 4 consecutive nights at tillering stage.',
     this.inspectionTasks = const [
@@ -55,21 +58,30 @@ class RiskCard extends StatelessWidget {
     }
   }
 
-  String get _triggerLabel {
+  String _getTriggerLabel(AppStrings strings) {
     switch (triggerType.toLowerCase()) {
       case 'spread':
-        return 'Nearby Farm Outbreak Alert (शेजारील शेत इशारा)';
+        return strings.riskCardTriggerSpread;
       case 'seasonal':
-        return 'Seasonal Pest Alert (हंगामी इशारा)';
+        return strings.riskCardTriggerSeasonal;
       case 'combined':
-        return 'Combined Risk Alert';
+        return strings.riskCardTriggerCombined;
       default:
-        return 'Weather Risk Alert (हवामान आधारित इशारा)';
+        return strings.riskCardTriggerWeather;
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    AppStrings strings;
+    try {
+      strings = ref.watch(stringsProvider);
+    } catch (_) {
+      strings = AppStrings(AppLanguage.marathi);
+    }
+
+    final localizedTarget = strings.getLocalizedTargetName(target);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.warmSurface,
@@ -110,7 +122,7 @@ class RiskCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(
-                    _triggerLabel,
+                    _getTriggerLabel(strings),
                     style: AppTypography.caption.copyWith(
                       fontWeight: FontWeight.w600,
                       color: AppColors.soilCharcoal,
@@ -130,7 +142,7 @@ class RiskCard extends StatelessWidget {
               children: [
                 // Target Title
                 Text(
-                  target,
+                  localizedTarget,
                   style: AppTypography.sectionTitle.copyWith(
                     color: AppColors.soilCharcoal,
                   ),
@@ -159,7 +171,7 @@ class RiskCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'WHY (कारण):',
+                              strings.riskCardWhyHeader,
                               style: AppTypography.captionSmall.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.fieldSlate,
@@ -184,7 +196,7 @@ class RiskCard extends StatelessWidget {
 
                 // Go Look (Inspection Task)
                 Text(
-                  'GO LOOK (शेतात काय तपासावे):',
+                  strings.riskCardGoLookHeader,
                   style: AppTypography.caption.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.forest,
@@ -228,7 +240,7 @@ class RiskCard extends StatelessWidget {
                     Expanded(
                       flex: 6,
                       child: AppButton.primary(
-                        label: "I'LL CHECK (मी तपासतो)",
+                        label: strings.riskCardInspectNowAction,
                         onPressed: onInspectNow,
                         leadingIcon: const Icon(Icons.search_rounded, size: 20),
                       ),
@@ -238,7 +250,7 @@ class RiskCard extends StatelessWidget {
                       Expanded(
                         flex: 4,
                         child: AppButton.outline(
-                          label: 'Remind Later',
+                          label: strings.riskCardRemindLaterAction,
                           onPressed: onRemindTomorrow,
                         ),
                       ),

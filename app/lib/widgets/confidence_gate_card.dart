@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_radius.dart';
+import '../core/localization/locale_provider.dart';
+import '../core/localization/app_strings.dart';
 import 'app_status_badge.dart';
 import 'app_button.dart';
 
@@ -75,7 +78,7 @@ abstract class ConfidenceGateCard {
   static Widget escalate({
     required String reasonCode,
     required String reasonDescription,
-    String assignedTo = 'KVK Agronomist (नाशिक कृषी विज्ञान केंद्र)',
+    String? assignedTo,
     int queuePosition = 3,
     int etaMinutes = 45,
     VoidCallback? onCallHelpline,
@@ -94,7 +97,7 @@ abstract class ConfidenceGateCard {
 // ---------------------------------------------------------------------------
 // 1. ADVISE GATE CARD
 // ---------------------------------------------------------------------------
-class _AdviseGateCard extends StatelessWidget {
+class _AdviseGateCard extends ConsumerWidget {
   final String topDiagnosis;
   final double confidence;
   final List<PredictionItem> alternatives;
@@ -108,7 +111,16 @@ class _AdviseGateCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    AppStrings strings;
+    try {
+      strings = ref.watch(stringsProvider);
+    } catch (_) {
+      strings = AppStrings(AppLanguage.marathi);
+    }
+
+    final localizedTarget = strings.getLocalizedTargetName(topDiagnosis);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.warmSurface,
@@ -138,13 +150,13 @@ class _AdviseGateCard extends StatelessWidget {
                 topRight: Radius.circular(AppRadius.cardValue),
               ),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                AppStatusBadge.advise(),
-                SizedBox(width: AppSpacing.m12),
+                const AppStatusBadge.advise(),
+                const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(
-                    'Sufficient confidence for treatment guidance',
+                    strings.gateAdviseHeader,
                     style: AppTypography.caption,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -160,7 +172,7 @@ class _AdviseGateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'DETECTED ISSUE (ओळखलेली समस्या)',
+                  strings.gateAdviseDetectedIssue,
                   style: AppTypography.captionSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.forest,
@@ -172,7 +184,7 @@ class _AdviseGateCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        topDiagnosis,
+                        localizedTarget,
                         style: AppTypography.sectionTitle.copyWith(
                           color: AppColors.soilCharcoal,
                           fontSize: 22,
@@ -190,7 +202,7 @@ class _AdviseGateCard extends StatelessWidget {
                         border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                       ),
                       child: Text(
-                        '${(confidence * 100).toInt()}% Match',
+                        '${(confidence * 100).toInt()}% ${strings.gateAdviseMatchBadge}',
                         style: AppTypography.badge.copyWith(color: AppColors.success),
                       ),
                     ),
@@ -203,7 +215,7 @@ class _AdviseGateCard extends StatelessWidget {
 
                 // Alternatives List (Invariant 3: always show alternatives)
                 Text(
-                  'OTHER POSSIBILITIES CONSIDERED (इतर शक्यता):',
+                  strings.gateAdviseAlternativesHeader,
                   style: AppTypography.captionSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.fieldSlate,
@@ -211,33 +223,38 @@ class _AdviseGateCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s8),
                 ...alternatives.map(
-                  (alt) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.xs4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          alt.displayName,
-                          style: AppTypography.body.copyWith(
-                            color: AppColors.fieldSlate,
-                            fontSize: 14,
+                  (alt) {
+                    final altLocalized = strings.getLocalizedTargetName(alt.label);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.xs4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              altLocalized,
+                              style: AppTypography.body.copyWith(
+                                color: AppColors.fieldSlate,
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${(alt.confidence * 100).toInt()}%',
-                          style: AppTypography.captionSmall.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.fieldSlate,
+                          Text(
+                            '${(alt.confidence * 100).toInt()}%',
+                            style: AppTypography.captionSmall.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.fieldSlate,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: AppSpacing.l16),
                 AppButton.primary(
-                  label: 'View Advisory Treatment Ladder (सल्ला पहा)',
+                  label: strings.gateAdviseViewAdvisoryButton,
                   onPressed: onViewAdvisory,
                   isFullWidth: true,
                   trailingIcon: const Icon(Icons.arrow_forward_rounded, size: 20),
@@ -254,7 +271,7 @@ class _AdviseGateCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // 2. CLARIFY GATE CARD (DOUBT DOCTOR)
 // ---------------------------------------------------------------------------
-class _ClarifyGateCard extends StatelessWidget {
+class _ClarifyGateCard extends ConsumerWidget {
   final String question;
   final String? questionLocalized;
   final List<CandidateSignature> candidates;
@@ -268,7 +285,14 @@ class _ClarifyGateCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    AppStrings strings;
+    try {
+      strings = ref.watch(stringsProvider);
+    } catch (_) {
+      strings = AppStrings(AppLanguage.marathi);
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.warmSurface,
@@ -298,13 +322,13 @@ class _ClarifyGateCard extends StatelessWidget {
                 topRight: Radius.circular(AppRadius.cardValue),
               ),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                AppStatusBadge.clarify(),
-                SizedBox(width: AppSpacing.m12),
+                const AppStatusBadge.clarify(),
+                const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(
-                    'Doubt Doctor · Clarification',
+                    strings.gateClarifyHeader,
                     style: AppTypography.caption,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -320,7 +344,7 @@ class _ClarifyGateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'I see two close possibilities (दोन जवळच्या शक्यता):',
+                  strings.gateClarifyPrompt,
                   style: AppTypography.subhead.copyWith(
                     color: AppColors.soilCharcoal,
                   ),
@@ -329,47 +353,50 @@ class _ClarifyGateCard extends StatelessWidget {
 
                 // Candidates side-by-side / column
                 ...candidates.map(
-                  (cand) => Container(
-                    margin: const EdgeInsets.only(bottom: AppSpacing.s8),
-                    padding: const EdgeInsets.all(AppSpacing.m12),
-                    decoration: BoxDecoration(
-                      color: AppColors.ricePaper,
-                      borderRadius: AppRadius.button,
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.visibility_outlined,
-                          color: AppColors.turmeric,
-                          size: 20,
-                        ),
-                        const SizedBox(width: AppSpacing.s8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                cand.name,
-                                style: AppTypography.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.soilCharcoal,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                cand.visualSignature,
-                                style: AppTypography.caption.copyWith(
-                                  color: AppColors.fieldSlate,
-                                ),
-                              ),
-                            ],
+                  (cand) {
+                    final candLocalizedName = strings.getLocalizedTargetName(cand.label);
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: AppSpacing.s8),
+                      padding: const EdgeInsets.all(AppSpacing.m12),
+                      decoration: BoxDecoration(
+                        color: AppColors.ricePaper,
+                        borderRadius: AppRadius.button,
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.visibility_outlined,
+                            color: AppColors.turmeric,
+                            size: 20,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                          const SizedBox(width: AppSpacing.s8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  candLocalizedName,
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.soilCharcoal,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  cand.visualSignature,
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.fieldSlate,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: AppSpacing.l16),
@@ -394,7 +421,7 @@ class _ClarifyGateCard extends StatelessWidget {
                           ),
                           const SizedBox(width: AppSpacing.s8),
                           Text(
-                            'ONE FIELD OBSERVATION QUESTION',
+                            strings.gateClarifyObservationHeader,
                             style: AppTypography.captionSmall.copyWith(
                               fontWeight: FontWeight.w700,
                               color: AppColors.warning,
@@ -410,7 +437,7 @@ class _ClarifyGateCard extends StatelessWidget {
                           color: AppColors.soilCharcoal,
                         ),
                       ),
-                      if (questionLocalized != null) ...[
+                      if (questionLocalized != null && questionLocalized!.isNotEmpty) ...[
                         const SizedBox(height: AppSpacing.xs4),
                         Text(
                           questionLocalized!,
@@ -431,21 +458,21 @@ class _ClarifyGateCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: AppButton.primary(
-                        label: 'YES (होय)',
+                        label: strings.gateClarifyYes,
                         onPressed: () => onAnswerSelected('yes'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: AppButton.outline(
-                        label: 'NO (नाही)',
+                        label: strings.gateClarifyNo,
                         onPressed: () => onAnswerSelected('no'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: AppButton.secondary(
-                        label: "CAN'T TELL",
+                        label: strings.gateClarifyUnknown,
                         onPressed: () => onAnswerSelected('unknown'),
                         size: AppButtonSize.small,
                       ),
@@ -464,10 +491,10 @@ class _ClarifyGateCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // 3. ESCALATE GATE CARD
 // ---------------------------------------------------------------------------
-class _EscalateGateCard extends StatelessWidget {
+class _EscalateGateCard extends ConsumerWidget {
   final String reasonCode;
   final String reasonDescription;
-  final String assignedTo;
+  final String? assignedTo;
   final int queuePosition;
   final int etaMinutes;
   final VoidCallback? onCallHelpline;
@@ -475,14 +502,23 @@ class _EscalateGateCard extends StatelessWidget {
   const _EscalateGateCard({
     required this.reasonCode,
     required this.reasonDescription,
-    required this.assignedTo,
+    this.assignedTo,
     required this.queuePosition,
     required this.etaMinutes,
     this.onCallHelpline,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    AppStrings strings;
+    try {
+      strings = ref.watch(stringsProvider);
+    } catch (_) {
+      strings = AppStrings(AppLanguage.marathi);
+    }
+
+    final effectiveAssigned = assignedTo ?? strings.gateEscalateDefaultAssigned;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.warmSurface,
@@ -512,13 +548,13 @@ class _EscalateGateCard extends StatelessWidget {
                 topRight: Radius.circular(AppRadius.cardValue),
               ),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                AppStatusBadge.escalate(),
-                SizedBox(width: AppSpacing.m12),
+                const AppStatusBadge.escalate(),
+                const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(
-                    'Direct Agronomist Referral',
+                    strings.gateEscalateHeader,
                     style: AppTypography.caption,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -534,14 +570,14 @@ class _EscalateGateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "I am not confident enough to advise you. Let's get expert help.",
+                  strings.gateEscalatePrompt,
                   style: AppTypography.subhead.copyWith(
                     color: AppColors.soilCharcoal,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs4),
                 Text(
-                  '(मला पुरेशी खात्री नाही. तज्ञांचा सल्ला घेऊया.)',
+                  strings.gateEscalatePromptSub,
                   style: AppTypography.caption.copyWith(
                     color: AppColors.forest,
                     fontWeight: FontWeight.w600,
@@ -581,24 +617,24 @@ class _EscalateGateCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildCaseMetric(
-                        title: 'Assigned To',
-                        value: assignedTo,
+                        title: strings.gateEscalateAssignedTo,
+                        value: effectiveAssigned,
                         icon: Icons.person_pin_rounded,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: _buildCaseMetric(
-                        title: 'Queue Pos.',
-                        value: '#$queuePosition in line',
+                        title: strings.gateEscalateQueuePos,
+                        value: strings.gateEscalateQueuePosValue(queuePosition),
                         icon: Icons.format_list_numbered_rounded,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: _buildCaseMetric(
-                        title: 'Est. Wait',
-                        value: '~$etaMinutes mins',
+                        title: strings.gateEscalateEstWait,
+                        value: strings.gateEscalateEstWaitValue(etaMinutes),
                         icon: Icons.timer_outlined,
                       ),
                     ),
@@ -608,7 +644,7 @@ class _EscalateGateCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xxl24),
 
                 AppButton.danger(
-                  label: 'Call Kisan Helpline (कॉल करा)',
+                  label: strings.gateEscalateCallHelpline,
                   onPressed: onCallHelpline,
                   isFullWidth: true,
                   leadingIcon: const Icon(Icons.phone_in_talk_rounded, size: 20),

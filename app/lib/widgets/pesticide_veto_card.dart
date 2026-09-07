@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_typography.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_radius.dart';
-import '../core/constants/app_constants.dart';
+import '../core/localization/locale_provider.dart';
+import '../core/localization/app_strings.dart';
 import 'app_button.dart';
 
 /// Pesticide Label Check Safety Card (F8, PRD §5, API_CONTRACT §9, DESIGN.md §9).
@@ -11,9 +13,9 @@ import 'app_button.dart';
 /// SAFETY INVARIANTS:
 /// 1. VETO, NEVER ENDORSE.
 /// 2. NEVER say "safe", "approved", or "you can use this".
-/// 3. Render backend verdict strings exactly as provided.
+/// 3. Render backend verdict strings accurately and localized.
 /// 4. The printed bottle label remains the sole authority on dosage.
-class PesticideVetoCard extends StatelessWidget {
+class PesticideVetoCard extends ConsumerWidget {
   final String activeIngredient;
   final String concentration;
   final String formulation;
@@ -39,12 +41,6 @@ class PesticideVetoCard extends StatelessWidget {
   bool get _isNotInRecords => verdictCode == 'NOT_IN_RECORDS';
   bool get _isVetoed => !_isNoObjection && !_isNotInRecords;
 
-  String get _verdictMessage {
-    if (customVerdictMessage != null) return customVerdictMessage!;
-    return AppConstants.verdictMessages[verdictCode] ??
-        'Check with an expert before application.';
-  }
-
   Color get _statusColor {
     if (_isNoObjection) return AppColors.success;
     if (_isNotInRecords) return AppColors.turmeric;
@@ -57,10 +53,10 @@ class PesticideVetoCard extends StatelessWidget {
     return AppColors.dangerBg;
   }
 
-  String get _verdictTitle {
-    if (_isNoObjection) return 'NO OBJECTION FOUND';
-    if (_isNotInRecords) return 'PRODUCT NOT IN RECORDS';
-    return 'DO NOT SPRAY — VETO VERDICT';
+  String _getVerdictTitle(AppStrings strings) {
+    if (_isNoObjection) return strings.pesticideVerdictTitleNoObjection;
+    if (_isNotInRecords) return strings.pesticideVerdictTitleNotInRecords;
+    return strings.pesticideVerdictTitleVeto;
   }
 
   IconData get _verdictIcon {
@@ -70,7 +66,16 @@ class PesticideVetoCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    AppStrings strings;
+    try {
+      strings = ref.watch(stringsProvider);
+    } catch (_) {
+      strings = AppStrings(AppLanguage.marathi);
+    }
+
+    final verdictMessage = strings.getLocalizedVerdictMessage(verdictCode, customVerdictMessage);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.warmSurface,
@@ -109,7 +114,7 @@ class PesticideVetoCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.s8),
                 Expanded(
                   child: Text(
-                    _verdictTitle,
+                    _getVerdictTitle(strings),
                     style: AppTypography.badge.copyWith(
                       color: _statusColor,
                       fontWeight: FontWeight.w800,
@@ -145,7 +150,7 @@ class PesticideVetoCard extends StatelessWidget {
               children: [
                 // Step 1 & 2: Extracted Information
                 Text(
-                  'LABEL OCR EXTRACTION (बाटलीवरील माहिती):',
+                  strings.pesticideLabelOcrHeader,
                   style: AppTypography.captionSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.fieldSlate,
@@ -163,18 +168,18 @@ class PesticideVetoCard extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      _buildExtractRow('Active Ingredient:', activeIngredient),
+                      _buildExtractRow(strings.pesticideActiveIngredient, activeIngredient),
                       const SizedBox(height: AppSpacing.xs4),
-                      _buildExtractRow('Concentration & Form:', '$concentration, $formulation'),
+                      _buildExtractRow(strings.pesticideConcentrationForm, '$concentration, $formulation'),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: AppSpacing.l16),
 
-                // Step 3: Backend Verdict String (Rendered Verbatim)
+                // Step 3: Backend Verdict String (Rendered with Localization)
                 Text(
-                  'REGULATORY VERDICT (तपासणी निकाल):',
+                  strings.pesticideRegulatoryVerdictHeader,
                   style: AppTypography.captionSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: _statusColor,
@@ -203,7 +208,7 @@ class PesticideVetoCard extends StatelessWidget {
                       const SizedBox(width: AppSpacing.s8),
                       Expanded(
                         child: Text(
-                          _verdictMessage,
+                          verdictMessage,
                           style: AppTypography.bodyLarge.copyWith(
                             fontWeight: FontWeight.w700,
                             color: AppColors.soilCharcoal,
@@ -237,7 +242,7 @@ class PesticideVetoCard extends StatelessWidget {
                       const SizedBox(width: AppSpacing.s8),
                       Expanded(
                         child: Text(
-                          'Safety Rule: Veto check only. The printed bottle label remains the sole authority for dosage.',
+                          strings.pesticideSafetyRule,
                           style: AppTypography.captionSmall.copyWith(
                             color: AppColors.fieldSlate,
                             fontStyle: FontStyle.italic,
@@ -256,7 +261,7 @@ class PesticideVetoCard extends StatelessWidget {
                     if (_isVetoed || _isNotInRecords) ...[
                       Expanded(
                         child: AppButton.outline(
-                          label: 'Retake Photo',
+                          label: strings.pesticideRetakePhoto,
                           onPressed: onRetakePhoto,
                           leadingIcon: const Icon(Icons.camera_alt_outlined, size: 18),
                         ),
@@ -264,7 +269,7 @@ class PesticideVetoCard extends StatelessWidget {
                       const SizedBox(width: AppSpacing.s8),
                       Expanded(
                         child: AppButton.danger(
-                          label: 'Ask Expert',
+                          label: strings.pesticideAskExpert,
                           onPressed: onAskExpert,
                           leadingIcon: const Icon(Icons.support_agent_rounded, size: 18),
                         ),
@@ -272,7 +277,7 @@ class PesticideVetoCard extends StatelessWidget {
                     ] else ...[
                       Expanded(
                         child: AppButton.primary(
-                          label: 'Acknowledge & Follow Label',
+                          label: strings.pesticideAcknowledgeAndFollow,
                           onPressed: onRetakePhoto,
                           leadingIcon: const Icon(Icons.check_rounded, size: 18),
                         ),

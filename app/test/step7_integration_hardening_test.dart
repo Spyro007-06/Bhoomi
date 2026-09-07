@@ -573,13 +573,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify IPM Order: What to avoid is rendered first and loud
-      expect(find.text('WHAT TO AVOID FIRST (हे अजिबात करू नका):'), findsOneWidget);
+      expect(find.text('हे अजिबात करू नका (What to Avoid):'), findsOneWidget);
       expect(find.text('Do not top-dress nitrogen now. It accelerates spread.'), findsOneWidget);
-      expect(find.text('Cultural Action (मशागतीय / जैविक उपाय)'), findsOneWidget);
+      expect(find.text('मशागतीय / यांत्रिक उपाय (Cultural Action)'), findsOneWidget);
 
       // Chemical details collapsed by default
-      expect(find.text('Chemical Action (रासायनिक फवारणी)'), findsOneWidget);
-      await tester.tap(find.text('Chemical Action (रासायनिक फवारणी)'));
+      expect(find.text('रासायनिक फवारणी (Chemical Action)'), findsOneWidget);
+      await tester.tap(find.text('रासायनिक फवारणी (Chemical Action)'));
       await tester.pumpAndSettle();
       expect(find.text('Tricyclazole 75 WP'), findsOneWidget);
       expect(find.text('0.6 g/L'), findsOneWidget);
@@ -665,12 +665,12 @@ void main() {
       await tester.pumpWidget(createTestApp(const AlertsScreen(), container));
       await tester.pumpAndSettle();
 
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsOneWidget);
       expect(find.text('Inspect upper leaves on 10 plants across field.'), findsOneWidget);
-      expect(find.text("I'LL CHECK (मी तपासतो)"), findsOneWidget);
+      expect(find.text("मी तपासतो (Inspect Field)"), findsOneWidget);
 
       // Tap I'll check
-      await tester.tap(find.text("I'LL CHECK (मी तपासतो)"));
+      await tester.tap(find.text("मी तपासतो (Inspect Field)"));
       await tester.pumpAndSettle();
 
       expect(alertRepo.lastRespondedAlertId, 'alert_step7_1');
@@ -697,10 +697,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('How is the crop doing 3 days after draining the field?'), findsOneWidget);
-      expect(find.text('Got worse\n(बिघडले)'), findsOneWidget);
+      expect(find.text('बिघडले\n(Got worse)'), findsOneWidget);
 
       // Tap Got Worse
-      await tester.tap(find.text('Got worse\n(बिघडले)'));
+      await tester.tap(find.text('बिघडले\n(Got worse)'));
       await tester.pumpAndSettle();
 
       expect(followUpRepo.lastFollowUpId, 'followup_step7_1');

@@ -129,7 +129,7 @@ class AdvisoryResultScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.s8),
                     Text(
-                      diagnosis?.label.replaceAll('_', ' ').toUpperCase() ?? 'PADDY BLAST (भातावरील करपा)',
+                      strings.getLocalizedTargetName(diagnosis?.label ?? 'blast'),
                       style: AppTypography.title.copyWith(
                         color: AppColors.primaryDark,
                         fontWeight: FontWeight.w800,
@@ -142,7 +142,7 @@ class AdvisoryResultScreen extends ConsumerWidget {
 
               // Grounded Advisory with Mandatory IPM Ordering
               AdvisoryIpmCard(
-                possibleIssue: advisory?.possibleIssue ?? 'Early Blast (भातावरील करपा - सुरुवातीची अवस्था)',
+                possibleIssue: advisory?.possibleIssue ?? diagnosis?.label ?? 'blast',
                 whatToAvoid: advisory?.whatToAvoid ?? 'Do not top-dress nitrogen now. It accelerates spread.',
                 whatToCheck: advisory?.whatToCheck ?? 'Diamond-shaped lesions with grey centres on upper leaves.',
                 ladder: ladderRungs.isNotEmpty
@@ -170,7 +170,7 @@ class AdvisoryResultScreen extends ConsumerWidget {
                 onPlayAudio: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(spokenSummary ?? 'Playing Marathi spoken advisory audio.'),
+                      content: Text(spokenSummary ?? 'Playing spoken advisory audio.'),
                       duration: const Duration(seconds: 2),
                     ),
                   );
@@ -200,7 +200,7 @@ class AdvisoryResultScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            alt.label.replaceAll('_', ' ').toUpperCase(),
+                            strings.getLocalizedTargetName(alt.label),
                             style: AppTypography.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -223,7 +223,7 @@ class AdvisoryResultScreen extends ConsumerWidget {
               // Contextual Voice Assistant Action (Level 2 Contextual)
               FarmerContextualVoiceAction.outline(
                 label: strings.voiceContextDiagnosis,
-                contextTopic: diagnosis?.label.replaceAll('_', ' ') ?? 'Crop Issue',
+                contextTopic: strings.getLocalizedTargetName(diagnosis?.label ?? 'treatment'),
               ),
               const SizedBox(height: AppSpacing.m12),
 

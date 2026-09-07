@@ -55,15 +55,82 @@ abstract final class AppConstants {
       'mr': 'जीवाणूजन्य करपा',
       'hi': 'जीवाणु पत्ती झुलसा',
     },
+    'sheath_blight': {
+      'en': 'Sheath Blight',
+      'mr': 'पर्णकोष करपा',
+      'hi': 'शीथ ब्लाइट',
+    },
+    'false_smut': {
+      'en': 'False Smut',
+      'mr': 'काजळी रोग',
+      'hi': 'झूठा कंड',
+    },
     'yellow_stem_borer': {
       'en': 'Yellow Stem Borer',
       'mr': 'खोडकिडा',
       'hi': 'तने का पीला छेदक',
+    },
+    'stem_borer': {
+      'en': 'Stem Borer',
+      'mr': 'खोडकिडा',
+      'hi': 'तना छेदक',
     },
     'brown_planthopper': {
       'en': 'Brown Planthopper (BPH)',
       'mr': 'तुडतुडे (तपकिरी मावा)',
       'hi': 'भूरा माहू / फुदका',
     },
+    'leaf_folder': {
+      'en': 'Leaf Folder',
+      'mr': 'पाने गुंडाळणारी अळी',
+      'hi': 'पत्ता लपेटक कीट',
+    },
+    'gall_midge': {
+      'en': 'Gall Midge',
+      'mr': 'गादमाशी',
+      'hi': 'गाल मिज',
+    },
+    'treatment': {
+      'en': 'Crop Treatment',
+      'mr': 'पीक उपचार',
+      'hi': 'फसल उपचार',
+    },
   };
+
+  /// Safely resolves a raw backend identifier into a farmer-friendly localized display string.
+  /// Never exposes raw snake_case or raw English technical identifiers without proper mapping.
+  static String getLocalizedTarget(String? rawTarget, {String lang = 'mr'}) {
+    if (rawTarget == null || rawTarget.isEmpty) {
+      switch (lang) {
+        case 'hi':
+          return 'फसल की समस्या';
+        case 'en':
+          return 'Crop Issue';
+        default:
+          return 'पिकाची समस्या';
+      }
+    }
+
+    final normalized = rawTarget.toLowerCase().trim().replaceAll(' ', '_');
+    final entry = targetDisplayNames[normalized];
+    if (entry != null && entry.containsKey(lang)) {
+      return entry[lang]!;
+    }
+    if (entry != null && entry.containsKey('mr')) {
+      return entry['mr']!;
+    }
+
+    // If string already contains localized brackets or formatted text, keep it clean
+    if (rawTarget.contains('(') || rawTarget.contains(' - ')) {
+      return rawTarget;
+    }
+
+    // Clean word-case fallback without raw underscores
+    final words = rawTarget
+        .split('_')
+        .where((w) => w.isNotEmpty)
+        .map((w) => '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
+        .join(' ');
+    return words.isNotEmpty ? words : 'Crop Issue';
+  }
 }

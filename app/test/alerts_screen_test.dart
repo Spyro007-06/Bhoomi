@@ -83,14 +83,14 @@ void main() {
       // 1. Verify Header and Alert Title
       expect(find.text('कीड व रोग सतर्कता'), findsOneWidget);
       expect(find.byType(RiskCard), findsOneWidget);
-      expect(find.text('BLAST'), findsOneWidget);
+      expect(find.text('भातावरील करपा'), findsOneWidget);
       expect(find.text('Continuous rainfall with high humidity.'), findsOneWidget);
 
       // 2. Verify mandatory inspection tasks
       expect(find.text('Inspect upper leaf surfaces for spindle lesions.'), findsOneWidget);
 
-      // 3. Tap "I'LL CHECK"
-      await tester.tap(find.textContaining("I'LL CHECK"));
+      // 3. Tap "मी तपासतो"
+      await tester.tap(find.textContaining("मी तपासतो"));
       await tester.pumpAndSettle();
 
       // 4. Verify API was invoked
