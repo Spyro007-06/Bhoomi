@@ -76,10 +76,10 @@ class AppStrings {
 
   // Auth - Demo Mode
   String get tryDemoAccount => language == AppLanguage.marathi
-      ? '🌾 डेमो खाते वापरून पहा'
+      ? 'डेमो खाते वापरून पहा'
       : (language == AppLanguage.hindi
-          ? '🌾 डेमो खाता आज़माएँ'
-          : '🌾 Try Demo Account');
+          ? 'डेमो खाता आज़माएँ'
+          : 'Try Demo Account');
 
   String get demoModalTitle => language == AppLanguage.marathi
       ? '🌾 भूमी डेमो'

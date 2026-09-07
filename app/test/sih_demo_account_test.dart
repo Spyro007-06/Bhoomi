@@ -242,7 +242,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('🌾 डेमो खाते वापरून पहा'), findsOneWidget);
+      expect(find.text('डेमो खाते वापरून पहा'), findsOneWidget);
       expect(find.text('OTP पाठवा'), findsOneWidget);
     });
 
@@ -260,7 +260,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap demo button
-      await tester.tap(find.text('🌾 डेमो खाते वापरून पहा'));
+      await tester.tap(find.text('डेमो खाते वापरून पहा'));
       await tester.pumpAndSettle();
 
       // Modal content
@@ -293,7 +293,7 @@ void main() {
       }
 
       // Tap demo button and enter demo
-      await tester.tap(find.text('🌾 डेमो खाते वापरून पहा'));
+      await tester.tap(find.text('डेमो खाते वापरून पहा'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('डेमो मध्ये प्रवेश करा'));
@@ -328,10 +328,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // English button text
-      expect(find.text('🌾 Try Demo Account'), findsOneWidget);
+      expect(find.text('Try Demo Account'), findsOneWidget);
 
       // Open modal in English
-      await tester.tap(find.text('🌾 Try Demo Account'));
+      await tester.tap(find.text('Try Demo Account'));
       await tester.pumpAndSettle();
 
       expect(find.text('🌾 Bhoomi Demo'), findsOneWidget);

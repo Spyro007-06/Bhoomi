@@ -399,12 +399,11 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
                         if (DemoConfig.isDemoMode) ...[
                           const SizedBox(height: AppSpacing.s8),
                           Center(
-                            child: TextButton.icon(
+                            child: TextButton(
                               onPressed: _isLoading
                                   ? null
                                   : () => _showDemoConfirmationModal(context),
-                              icon: const Text('🌾', style: TextStyle(fontSize: 16)),
-                              label: Text(
+                              child: Text(
                                 strings.tryDemoAccount,
                                 style: AppTypography.bodyMedium.copyWith(
                                   color: AppColors.forest,
