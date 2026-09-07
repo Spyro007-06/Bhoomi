@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_radius.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/utils/camera_service.dart';
 import '../../../core/utils/image_compression_service.dart';
@@ -17,11 +16,12 @@ import '../../../models/inspection_target.dart';
 import 'diagnosis_controller.dart';
 import 'image_preview_screen.dart';
 
-/// Redesigned, farmer-centric Camera Capture Screen for Crop Diagnosis.
+/// Clean, agricultural crop inspection camera screen (V2).
 ///
-/// Provides a clear, uncluttered viewfinder with a single contextual guidance instruction,
-/// dominant primary capture button, secondary gallery/flash actions, and friendly
-/// non-technical fallback states.
+/// Designed around Bhoomi's warm natural palette:
+/// 1. TOP: Compact header with back navigation and title.
+/// 2. MIDDLE: Direct, unboxed guidance instruction + cleanly framed camera preview.
+/// 3. BOTTOM: Dominant 76dp tactile shutter button with quiet secondary gallery/flash actions.
 class CameraCaptureScreen extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
   final CameraPlatformWrapper? cameraPlatformWrapper;
@@ -295,8 +295,12 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
         widget.inspectionTarget?.getLocalizedPrompt(strings) ??
         strings.cameraInstruction;
 
+    final isCameraReady = _cameraStatus == CameraStateStatus.ready &&
+        _cameraController != null &&
+        _cameraController!.value.isInitialized;
+
     return Scaffold(
-      backgroundColor: AppColors.soilCharcoal,
+      backgroundColor: AppColors.ricePaper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -304,7 +308,7 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
           label: strings.backButton,
           button: true,
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.soilCharcoal),
             tooltip: strings.backButton,
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             onPressed: () {
@@ -319,64 +323,54 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
         title: Text(
           strings.cameraTitle,
           style: AppTypography.screenTitle.copyWith(
-            color: Colors.white,
+            color: AppColors.soilCharcoal,
+            fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
         ),
         actions: const [
-          LanguageSelectorButton(isDarkBackground: true),
+          LanguageSelectorButton(isDarkBackground: false),
         ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // ONE Concise Guidance Header (No duplicate banners or scanner text)
+            // ZONE 1: Direct, unboxed agricultural guidance instruction
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.l16,
+                horizontal: AppSpacing.l24,
                 vertical: AppSpacing.s8,
               ),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.l16,
-                  vertical: AppSpacing.s10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.inspectionTarget?.framingIcon ?? Icons.eco_rounded,
+                    color: AppColors.forest,
+                    size: 22,
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      widget.inspectionTarget?.framingIcon ?? Icons.eco_rounded,
-                      color: AppColors.primaryLight,
-                      size: 22,
-                    ),
-                    const SizedBox(width: AppSpacing.m12),
-                    Expanded(
-                      child: Text(
-                        singleInstruction,
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          height: 1.3,
-                        ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Flexible(
+                    child: Text(
+                      singleInstruction,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.subheading.copyWith(
+                        color: AppColors.soilCharcoal,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-            // Camera Viewfinder (Clean framing, rounded corners, no scanner reticles)
+            // ZONE 2: Clean, framed Camera Viewfinder or Calm Fallback
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.m16,
+                  horizontal: AppSpacing.l16,
                   vertical: AppSpacing.s8,
                 ),
                 child: Center(
@@ -384,16 +378,16 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                     aspectRatio: 3 / 4,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.85),
-                        borderRadius: AppRadius.card,
+                        color: isCameraReady ? Colors.black : AppColors.warmSurface,
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: AppColors.border,
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            blurRadius: 16,
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ],
@@ -412,36 +406,27 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
               ),
             ),
 
-            // Bottom Controls Bar (Dominant capture with secondary actions)
+            // ZONE 3: Bottom Control Bar with clean visual hierarchy
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.l24,
+                horizontal: AppSpacing.xl32,
                 vertical: AppSpacing.m16,
               ),
-              color: Colors.black.withValues(alpha: 0.45),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Secondary Gallery Button
                   Semantics(
                     label: strings.galleryButton,
                     button: true,
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.15),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          width: 1.5,
-                        ),
+                    child: IconButton(
+                      iconSize: 26,
+                      icon: const Icon(
+                        Icons.photo_library_outlined,
+                        color: AppColors.soilCharcoal,
                       ),
-                      child: IconButton(
-                        iconSize: 24,
-                        icon: const Icon(Icons.photo_library_outlined, color: Colors.white),
-                        onPressed: _onGalleryPressed,
-                      ),
+                      tooltip: strings.galleryButton,
+                      onPressed: _onGalleryPressed,
                     ),
                   ),
 
@@ -456,13 +441,13 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                         height: 76,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.ricePaper,
-                          border: Border.all(color: AppColors.forest, width: 4),
+                          color: AppColors.primaryLight,
+                          border: Border.all(color: AppColors.forest, width: 3.5),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.25),
-                              blurRadius: 12,
-                              spreadRadius: 2,
+                              color: AppColors.forest.withValues(alpha: 0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
@@ -500,29 +485,18 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                   Semantics(
                     label: strings.semanticsToggleFlash,
                     button: true,
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.15),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          width: 1.5,
-                        ),
+                    child: IconButton(
+                      iconSize: 26,
+                      icon: Icon(
+                        _currentFlashMode == FlashMode.always
+                            ? Icons.flash_on_rounded
+                            : (_currentFlashMode == FlashMode.off
+                                ? Icons.flash_off_rounded
+                                : Icons.flash_auto_rounded),
+                        color: AppColors.soilCharcoal,
                       ),
-                      child: IconButton(
-                        iconSize: 24,
-                        icon: Icon(
-                          _currentFlashMode == FlashMode.always
-                              ? Icons.flash_on_rounded
-                              : (_currentFlashMode == FlashMode.off
-                                  ? Icons.flash_off_rounded
-                                  : Icons.flash_auto_rounded),
-                          color: Colors.white,
-                        ),
-                        onPressed: _toggleFlash,
-                      ),
+                      tooltip: strings.semanticsToggleFlash,
+                      onPressed: _toggleFlash,
                     ),
                   ),
                 ],
@@ -550,12 +524,12 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
               child: _cameraController!.buildPreview(),
             ),
           ),
-          // Subtle, calm watermark icon indicating inspection target without fake AI lines
+          // Subtle target icon watermark
           Center(
             child: Icon(
               widget.inspectionTarget?.framingIcon ?? Icons.eco_rounded,
               size: 72,
-              color: Colors.white.withValues(alpha: 0.12),
+              color: Colors.white.withValues(alpha: 0.15),
             ),
           ),
         ],
@@ -568,14 +542,14 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             const CircularProgressIndicator(
-              color: AppColors.primaryLight,
+              color: AppColors.forest,
               strokeWidth: 3,
             ),
             const SizedBox(height: AppSpacing.m16),
             Text(
               strings.cameraInitializing,
               style: AppTypography.bodyMedium.copyWith(
-                color: Colors.white,
+                color: AppColors.fieldSlate,
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
@@ -591,23 +565,16 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.m16),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.turmeric.withValues(alpha: 0.2),
-              ),
-              child: const Icon(
-                Icons.camera_alt_outlined,
-                color: AppColors.turmeric,
-                size: 36,
-              ),
+            const Icon(
+              Icons.camera_alt_outlined,
+              color: AppColors.forest,
+              size: 44,
             ),
-            const SizedBox(height: AppSpacing.m16),
+            const SizedBox(height: AppSpacing.m12),
             Text(
               strings.cameraPermissionRequired,
-              style: AppTypography.subheading.copyWith(
-                color: Colors.white,
+              style: AppTypography.sectionTitle.copyWith(
+                color: AppColors.soilCharcoal,
                 fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
@@ -615,8 +582,8 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
             const SizedBox(height: AppSpacing.s8),
             Text(
               strings.cameraPermissionRequiredDesc,
-              style: AppTypography.bodySmall.copyWith(
-                color: Colors.white.withValues(alpha: 0.8),
+              style: AppTypography.body.copyWith(
+                color: AppColors.fieldSlate,
               ),
               textAlign: TextAlign.center,
             ),
@@ -636,23 +603,16 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.m16),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.turmeric.withValues(alpha: 0.2),
-              ),
-              child: const Icon(
-                Icons.settings_outlined,
-                color: AppColors.turmeric,
-                size: 36,
-              ),
+            const Icon(
+              Icons.settings_outlined,
+              color: AppColors.forest,
+              size: 44,
             ),
-            const SizedBox(height: AppSpacing.m16),
+            const SizedBox(height: AppSpacing.m12),
             Text(
               strings.cameraPermissionDeniedForever,
-              style: AppTypography.subheading.copyWith(
-                color: Colors.white,
+              style: AppTypography.sectionTitle.copyWith(
+                color: AppColors.soilCharcoal,
                 fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
@@ -660,8 +620,8 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
             const SizedBox(height: AppSpacing.s8),
             Text(
               strings.cameraPermissionDeniedForeverDesc,
-              style: AppTypography.bodySmall.copyWith(
-                color: Colors.white.withValues(alpha: 0.8),
+              style: AppTypography.body.copyWith(
+                color: AppColors.fieldSlate,
               ),
               textAlign: TextAlign.center,
             ),
@@ -681,23 +641,16 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.m16),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.turmeric.withValues(alpha: 0.2),
-              ),
-              child: const Icon(
-                Icons.no_photography_outlined,
-                color: AppColors.turmeric,
-                size: 36,
-              ),
+            const Icon(
+              Icons.no_photography_outlined,
+              color: AppColors.fieldSlate,
+              size: 44,
             ),
-            const SizedBox(height: AppSpacing.m16),
+            const SizedBox(height: AppSpacing.m12),
             Text(
               strings.cameraUnavailable,
-              style: AppTypography.subheading.copyWith(
-                color: Colors.white,
+              style: AppTypography.sectionTitle.copyWith(
+                color: AppColors.soilCharcoal,
                 fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
@@ -705,8 +658,8 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
             const SizedBox(height: AppSpacing.s8),
             Text(
               strings.cameraUnavailableDesc,
-              style: AppTypography.bodySmall.copyWith(
-                color: Colors.white.withValues(alpha: 0.8),
+              style: AppTypography.body.copyWith(
+                color: AppColors.fieldSlate,
               ),
               textAlign: TextAlign.center,
             ),
@@ -725,23 +678,16 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.m16),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.danger.withValues(alpha: 0.2),
-            ),
-            child: const Icon(
-              Icons.error_outline_rounded,
-              color: AppColors.danger,
-              size: 36,
-            ),
+          const Icon(
+            Icons.error_outline_rounded,
+            color: AppColors.danger,
+            size: 44,
           ),
-          const SizedBox(height: AppSpacing.m16),
+          const SizedBox(height: AppSpacing.m12),
           Text(
             strings.cameraError,
-            style: AppTypography.subheading.copyWith(
-              color: Colors.white,
+            style: AppTypography.sectionTitle.copyWith(
+              color: AppColors.soilCharcoal,
               fontWeight: FontWeight.w700,
             ),
             textAlign: TextAlign.center,
@@ -749,8 +695,8 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
           const SizedBox(height: AppSpacing.s8),
           Text(
             _errorMessage ?? strings.cameraErrorDesc,
-            style: AppTypography.bodySmall.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+            style: AppTypography.body.copyWith(
+              color: AppColors.fieldSlate,
             ),
             textAlign: TextAlign.center,
           ),
