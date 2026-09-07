@@ -1708,9 +1708,8 @@
             "type": "number"
           },
           "label": {
-            "description": "Pest species or disease, from the bounded set",
-            "title": "Label",
-            "type": "string"
+            "$ref": "#/components/schemas/TargetLabel",
+            "description": "Pest species or disease, from the bounded set"
           }
         },
         "required": [

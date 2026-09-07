@@ -354,7 +354,12 @@ async def diagnose_farm(
     decision = decide(topk, retrieval_score)
 
     top1 = topk.predictions[0]
-    target_label = TargetLabel(top1.label)
+    # top1.label is already a TargetLabel -- Prediction.label carries that type
+    # now (contract C1), and app/vision/classifier.py is the one place a
+    # checkpoint's own label names get translated into it. Re-wrapping it in
+    # TargetLabel(...) here used to be where a v2 checkpoint name (e.g.
+    # "blast") blew up; that conversion no longer belongs at this call site.
+    target_label = top1.label
     problem = await _upsert_open_problem(session, farm.id, target_label)
 
     session.add(

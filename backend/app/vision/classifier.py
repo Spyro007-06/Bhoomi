@@ -33,6 +33,7 @@ from app.config import (
     VISION_MIN_VEGETATION_FRACTION,
     settings,
 )
+from app.contracts.enums import TargetLabel
 from app.contracts.vision import Prediction, TopK
 
 log = logging.getLogger("bhoomi.vision")
@@ -42,6 +43,46 @@ STUB_MODEL_VERSION = "stub-0"
 WEIGHTS_DIR = Path(__file__).resolve().parent / "weights"
 WEIGHTS_PATH = WEIGHTS_DIR / "bhoomi_vision_v1.pth"
 METADATA_PATH = WEIGHTS_DIR / "bhoomi_vision_v1.json"
+
+# Checkpoint label name -> v3 namespaced TargetLabel. bhoomi_vision_v1.json's
+# "labels" are v2 names (unnamespaced, pre-multi-crop); TargetLabel is the v3
+# join key used by the corpus, distinguishing_cues, registered_use.csv and
+# moa_groups.csv (docs/API_CONTRACT.md, enums.py). This adapter is the one
+# place that translation happens — everything past classify() sees only v3
+# TargetLabel values, and nothing downstream (diagnose.py, intelligence/,
+# core/) ever needs to know a v2 name existed.
+#
+# Deliberately explicit rather than a f"paddy_{name}" rewrite: the checkpoint
+# is paddy-only today, but an explicit table doesn't silently "work" if a
+# future checkpoint adds a non-paddy label — it raises instead (see below).
+CHECKPOINT_LABEL_ALIASES: dict[str, TargetLabel] = {
+    "blast": TargetLabel.PADDY_BLAST,
+    "brown_spot": TargetLabel.PADDY_BROWN_SPOT,
+    "bacterial_leaf_blight": TargetLabel.PADDY_BACTERIAL_LEAF_BLIGHT,
+    "yellow_stem_borer": TargetLabel.PADDY_YELLOW_STEM_BORER,
+}
+
+
+def _resolve_checkpoint_labels(raw_labels: list[str]) -> list[TargetLabel]:
+    """Translate checkpoint metadata label names to v3 `TargetLabel`s.
+
+    Raises inside the vision module — not at the call site in diagnose.py —
+    so a checkpoint retrained with an unmapped class name fails loudly at
+    model-load time rather than producing a `TargetLabel(...)` crash on the
+    first request that happens to predict it.
+    """
+    resolved: list[TargetLabel] = []
+    for raw in raw_labels:
+        target = CHECKPOINT_LABEL_ALIASES.get(raw)
+        if target is None:
+            raise RuntimeError(
+                f"{METADATA_PATH.name} declares checkpoint label {raw!r}, which has "
+                "no entry in CHECKPOINT_LABEL_ALIASES (app/vision/classifier.py). "
+                "Add an explicit alias to the v3 TargetLabel this checkpoint class "
+                "corresponds to — do not guess a mapping here."
+            )
+        resolved.append(target)
+    return resolved
 
 # Fallback normalization, used only if bhoomi_vision_v1.json has no
 # "normalization" key. The current artifact does carry one (confirmed by the
@@ -143,7 +184,7 @@ class _VisionModel:
             )
         self.sha256 = actual_sha256
 
-        self.labels: list[str] = meta["labels"]
+        self.labels: list[TargetLabel] = _resolve_checkpoint_labels(meta["labels"])
         self.model_version: str = meta["model_version"]
         self.model_name: str = meta["model_name"]
         self.img_size: int = meta["img_size"]
