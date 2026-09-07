@@ -8,5 +8,65 @@
     ],
     "answer_yes_implies": "paddy_blast",
     "doc_id": null
+  },
+  {
+    "cue_text": "Both bore into squares/bolls and leave round holes with damaged seeds and lint — the entry damage alone doesn't tell them apart.",
+    "question_text": "Cut open the damaged boll — are the larvae inside pink or rose-colored?",
+    "discriminates": [
+      "cotton_american_bollworm",
+      "cotton_pink_bollworm"
+    ],
+    "answer_yes_implies": "cotton_pink_bollworm",
+    "doc_id": "cotton_bollworm_complex_v1"
+  },
+  {
+    "cue_text": "Both cause leaf yellowing, curling and distortion on young growth — the curling shape alone doesn't distinguish sap-suckers from thrips scarring.",
+    "question_text": "Is the leaf surface sticky, or coated with a black sooty growth?",
+    "discriminates": [
+      "cotton_whitefly",
+      "cotton_thrips"
+    ],
+    "answer_yes_implies": "cotton_whitefly",
+    "doc_id": "cotton_sap_suckers_v1"
+  },
+  {
+    "cue_text": "Whitefly is the vector for cotton leaf curl virus, so both a live infestation and an established viral infection can show leaf curling on the same plant — the curl shape doesn't say which is the active problem.",
+    "question_text": "Tap the leaf — do small white insects fly up from the underside?",
+    "discriminates": [
+      "cotton_whitefly",
+      "cotton_leaf_curl_virus"
+    ],
+    "answer_yes_implies": "cotton_whitefly",
+    "doc_id": "cotton_leaf_curl_v1"
+  },
+  {
+    "cue_text": "Both distort and curl young leaves — thrips scarring and viral vein-thickening can look similar in a single top-down photo.",
+    "question_text": "Turn the leaf over — are there small leaf-like outgrowths (enations) along the veins?",
+    "discriminates": [
+      "cotton_leaf_curl_virus",
+      "cotton_thrips"
+    ],
+    "answer_yes_implies": "cotton_leaf_curl_virus",
+    "doc_id": "cotton_leaf_curl_v1"
+  },
+  {
+    "cue_text": "Both progress to blackening and plant death — a photo of a wilted, dying plant late in the disease doesn't show which one started it.",
+    "question_text": "Are there angular, water-soaked spots visible on the leaves?",
+    "discriminates": [
+      "cotton_bacterial_blight",
+      "cotton_fusarium_wilt"
+    ],
+    "answer_yes_implies": "cotton_bacterial_blight",
+    "doc_id": "cotton_bacterial_blight_v1"
+  },
+  {
+    "cue_text": "Pink bollworm causes poor boll opening; bacterial blight causes boll rot — both can leave a boll looking damaged and discolored from outside.",
+    "question_text": "Does the boll have black, water-soaked lesions on its surface?",
+    "discriminates": [
+      "cotton_bacterial_blight",
+      "cotton_pink_bollworm"
+    ],
+    "answer_yes_implies": "cotton_bacterial_blight",
+    "doc_id": "cotton_bacterial_blight_v1"
   }
 ]
