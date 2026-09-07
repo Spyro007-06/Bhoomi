@@ -369,45 +369,107 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
               ),
             ),
 
-            // Camera Viewfinder Area (Balanced for 343x689 and standard devices)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.l20,
-                  vertical: AppSpacing.xs4,
-                ),
+            // Body Composition: Adaptive based on camera hardware availability
+            if (_cameraStatus == CameraStateStatus.noCameraAvailable)
+              Expanded(
                 child: Center(
-                  child: AspectRatio(
-                    aspectRatio: 3 / 4,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.l24,
+                      vertical: AppSpacing.m16,
+                    ),
                     child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.l20,
+                        vertical: AppSpacing.l24,
+                      ),
                       decoration: BoxDecoration(
-                        color: isCameraReady ? Colors.black : AppColors.warmSurface,
-                        borderRadius: BorderRadius.circular(18),
+                        color: AppColors.warmSurface,
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: AppColors.border,
-                          width: 1.2,
+                          width: 1.0,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        alignment: Alignment.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildCameraViewfinderContent(strings),
+                          const Icon(
+                            Icons.no_photography_outlined,
+                            color: AppColors.fieldSlate,
+                            size: 36,
+                          ),
+                          const SizedBox(height: AppSpacing.m12),
+                          Text(
+                            strings.cameraUnavailable,
+                            style: AppTypography.subheading.copyWith(
+                              color: AppColors.soilCharcoal,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppSpacing.s6),
+                          Text(
+                            strings.cameraUnavailableDesc,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.fieldSlate,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppSpacing.l20),
+                          AppButton.primary(
+                            label: strings.galleryButton,
+                            onPressed: _onGalleryPressed,
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
+              )
+            else
+              // Camera Viewfinder Area (Balanced for 343x689 and standard devices)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.l20,
+                    vertical: AppSpacing.xs4,
+                  ),
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 3 / 4,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isCameraReady ? Colors.black : AppColors.warmSurface,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: AppColors.border,
+                            width: 1.2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          alignment: Alignment.center,
+                          children: [
+                            _buildCameraViewfinderContent(strings),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
 
             // Bottom Controls Bar with Clean Hierarchy (Hidden when camera is unavailable to prevent duplicate gallery controls)
             if (_cameraStatus != CameraStateStatus.noCameraAvailable)
@@ -693,43 +755,6 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
       );
     }
 
-    if (_cameraStatus == CameraStateStatus.noCameraAvailable) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l20, vertical: AppSpacing.m12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.no_photography_outlined,
-              color: AppColors.fieldSlate,
-              size: 36,
-            ),
-            const SizedBox(height: AppSpacing.s10),
-            Text(
-              strings.cameraUnavailable,
-              style: AppTypography.subheading.copyWith(
-                color: AppColors.soilCharcoal,
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xs4),
-            Text(
-              strings.cameraUnavailableDesc,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.fieldSlate,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.m16),
-            AppButton.primary(
-              label: strings.galleryButton,
-              onPressed: _onGalleryPressed,
-            ),
-          ],
-        ),
-      );
-    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l20, vertical: AppSpacing.m12),
