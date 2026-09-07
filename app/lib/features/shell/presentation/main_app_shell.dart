@@ -83,14 +83,18 @@ class _MainAppShellState extends ConsumerState<MainAppShell> {
               labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
                 (states) {
                   if (states.contains(WidgetState.selected)) {
-                    return AppTypography.caption.copyWith(
+                    return AppTypography.captionSmall.copyWith(
                       color: AppColors.forest,
                       fontWeight: FontWeight.w700,
+                      fontSize: 11.5,
+                      letterSpacing: -0.2,
                     );
                   }
-                  return AppTypography.caption.copyWith(
+                  return AppTypography.captionSmall.copyWith(
                     color: AppColors.fieldSlate,
                     fontWeight: FontWeight.w500,
+                    fontSize: 11.5,
+                    letterSpacing: -0.2,
                   );
                 },
               ),
@@ -99,7 +103,7 @@ class _MainAppShellState extends ConsumerState<MainAppShell> {
                   if (states.contains(WidgetState.selected)) {
                     return const IconThemeData(
                       color: AppColors.forest,
-                      size: 26,
+                      size: 24,
                     );
                   }
                   return const IconThemeData(
@@ -123,20 +127,8 @@ class _MainAppShellState extends ConsumerState<MainAppShell> {
                   tooltip: strings.navHome,
                 ),
                 NavigationDestination(
-                  icon: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: _currentIndex == 1
-                          ? AppColors.forest
-                          : AppColors.forest.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.camera_alt_rounded,
-                      color: _currentIndex == 1 ? Colors.white : AppColors.forest,
-                      size: 20,
-                    ),
-                  ),
+                  icon: const Icon(Icons.camera_alt_outlined),
+                  selectedIcon: const Icon(Icons.camera_alt_rounded),
                   label: strings.navCheckCrop,
                   tooltip: strings.navCheckCrop,
                 ),
