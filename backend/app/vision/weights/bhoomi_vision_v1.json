@@ -1,0 +1,122 @@
+{
+  "model_name": "efficientnet_b0",
+  "model_version": "vision-v1",
+  "contract_labels": [
+    "blast",
+    "brown_spot",
+    "bacterial_leaf_blight",
+    "yellow_stem_borer",
+    "brown_planthopper"
+  ],
+  "labels": [
+    "blast",
+    "brown_spot",
+    "bacterial_leaf_blight",
+    "yellow_stem_borer"
+  ],
+  "unsupported_labels": [
+    "brown_planthopper"
+  ],
+  "source_dataset": "Project-AgML/paddy_disease_classification",
+  "img_size": 224,
+  "sha256": "da61d0dc6d1d7e0b5f9638cd8fa3d934a9d80bbce09767855c4f29cb9dfa5363",
+  "normalization": {
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225]
+  },
+  "temperature": 1.567124843597412,
+  "val": {
+    "accuracy": 0.9794594645500183,
+    "macro_f1": 0.980044545180049,
+    "ece_before": 0.011521076607177938,
+    "ece_after": 0.0070243951517699466,
+    "n_train": 3699,
+    "n_val": 925,
+    "train_dist": {
+      "blast": 1390,
+      "brown_spot": 772,
+      "bacterial_leaf_blight": 383,
+      "yellow_stem_borer": 1154
+    },
+    "val_dist": {
+      "blast": 348,
+      "brown_spot": 193,
+      "bacterial_leaf_blight": 96,
+      "yellow_stem_borer": 288
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.322359087588691,
+      "val_acc": 0.8670270442962646,
+      "val_macro_f1": 0.8391304905200336
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.4152083115566096,
+      "val_acc": 0.8886486291885376,
+      "val_macro_f1": 0.8692904963758443
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.27619399728767613,
+      "val_acc": 0.9481081366539001,
+      "val_macro_f1": 0.934767209840103
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.15196156452623177,
+      "val_acc": 0.9448648691177368,
+      "val_macro_f1": 0.936943869297626
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.10665634203179522,
+      "val_acc": 0.9643242955207825,
+      "val_macro_f1": 0.9633730151124906
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.06888187469254396,
+      "val_acc": 0.9729729890823364,
+      "val_macro_f1": 0.9680705825616229
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.05931691991738828,
+      "val_acc": 0.9783783555030823,
+      "val_macro_f1": 0.9724654616323636
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.04697389612676816,
+      "val_acc": 0.9751351475715637,
+      "val_macro_f1": 0.9726657881487595
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.033613260778381705,
+      "val_acc": 0.9794594645500183,
+      "val_macro_f1": 0.980044545180049
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.026919053042008888,
+      "val_acc": 0.9794594645500183,
+      "val_macro_f1": 0.9770420612437173
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.02696108007383092,
+      "val_acc": 0.9805405139923096,
+      "val_macro_f1": 0.9765041300784741
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.026218030944911732,
+      "val_acc": 0.9816216230392456,
+      "val_macro_f1": 0.9784470796954516
+    }
+  ]
+}

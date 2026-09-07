@@ -29,6 +29,7 @@ from app.core.routers import (
 from app.db import dispose_engine
 from app.errors import register_exception_handlers
 from app.scheduler import shutdown_scheduler, start_scheduler
+from app.vision.classifier import warmup as vision_warmup
 from app.voice import router as voice_router
 
 logging.basicConfig(level=settings.log_level)
@@ -78,6 +79,10 @@ async def lifespan(_: FastAPI):
             "VISION_MODEL=stub - every TopK carries is_stub=true and clients MUST "
             "render a stub banner. See docs/DESIGN.md section 12."
         )
+    else:
+        log.info("vision: warming up real classifier (VISION_MODEL=real)")
+        vision_warmup()
+        log.info("vision: real classifier warm")
     start_scheduler()
     yield
     shutdown_scheduler()
