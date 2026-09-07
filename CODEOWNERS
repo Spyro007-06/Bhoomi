@@ -8,6 +8,24 @@
 # someone else's review to a stranger.
 # ---------------------------------------------------------------------------
 #
+# RESOLUTION PASS (2026-09-07): every @TODO-* below was matched against a real
+# GitHub handle using `git log --format='%an %ae'` plus the repo's own
+# contributors API (github.com/Spyro007-06/SIH26131-Bhoomi/contributors),
+# which resolves a commit's author email to the GitHub account GitHub itself
+# attributes it to -- more reliable than trusting a free-text author name.
+#
+#   @TODO-suchit    -> @suchitchopade3110-arch  (10 commits under
+#                       246987394+suchitchopade3110-arch@users.noreply.github.com)
+#   @TODO-shruthi   -> @Shruthi-Senthilkumar    (10 commits under shruthi8083@gmail.com,
+#                       display names "Shruthi-Senthilkumar"/"Shruthi S")
+#   @TODO-santheesh -> @santheesh73             (10 commits under santheesh737@gmail.com,
+#                       display names "santheesh73"/"Santheesh S")
+#
+#   @TODO-tharun and @TODO-thaariha are NOT resolved below. See the two notes
+#   further down, at the point each first occurs, rather than guessed here --
+#   a plausible-but-wrong handle is exactly the failure this file's header
+#   already warns about.
+#
 # Ownership follows worksplitV1 (the "Owns:" lines) and docs/DESIGN.md §3, which
 # agree. Note that worksplitV1's section *titles* and its Owns: lines disagree
 # after commit b5b18a6 — Tharun is titled "apprentice" while owning the Flutter
@@ -20,6 +38,18 @@
 # Last match wins in CODEOWNERS, so the file runs general to specific.
 
 # --- Default ---------------------------------------------------------------
+# UNVERIFIED, flagged, not changed here: the same contributors-API check that
+# resolved the TODOs above also shows @Spyro007-06 (used everywhere below as
+# "Shreekumar") resolving to the 13 commits made under b.l.tharun1465@gmail.com
+# ("Spyro007-06" / "THARUN B L" as author names) -- i.e. it looks like
+# THARUN's GitHub account, not Shreekumar's. Shreekumar's own commits
+# (bsrikumar855@gmail.com, 67 of them) resolve to @bsrikumar855-dot instead.
+# Left exactly as it was rather than reinterpreted: every occurrence of
+# @Spyro007-06 below is the file's PRE-EXISTING, already-"resolved" owner, not
+# a @TODO-* this pass touched, and a change with this much blast radius (it
+# is the default `*` owner and the standing owner of backend/, docs/,
+# CODEOWNERS itself, and more) needs the person who wrote it to confirm which
+# account was meant before every rule using it is repointed.
 *                               @Spyro007-06
 
 # --- Top-level directories -------------------------------------------------
@@ -30,20 +60,37 @@
 /CODEOWNERS                     @Spyro007-06
 /worksplitV1                    @Spyro007-06
 
-/app/                           @TODO-tharun @TODO-santheesh
-/portal/                        @TODO-santheesh
+# @TODO-tharun: NOT resolved. The only two candidate handles the log yields
+# both trace back to the same person and neither is a clean pick --
+# @Spyro007-06 (13 commits, and the account this whole repo is hosted under)
+# looks the stronger candidate on the evidence, but it is already in heavy
+# use elsewhere in this file for what looks like a DIFFERENT person
+# (Shreekumar -- see the note on the `*` rule above). Reusing it here without
+# resolving that conflict first risks silently merging two people's review
+# routing into one account. @THARUNBL (1 commit, tharunbl@users.noreply.github.com)
+# is the other real account his commits resolve to, but one commit is a thin
+# basis for "this is his working account." Left as @TODO-tharun rather than
+# guessed.
+/app/                           @TODO-tharun @santheesh73
+/portal/                        @santheesh73
 /backend/                       @Spyro007-06
 
 # --- backend/app/ subpackages ----------------------------------------------
 
 # FROZEN at hour 2. A change here needs a team decision, not a pull request.
 # Routed to everyone so nobody can land one quietly.
-/backend/app/contracts/         @Spyro007-06 @TODO-thaariha @TODO-suchit @TODO-shruthi @TODO-tharun @TODO-santheesh
+/backend/app/contracts/         @Spyro007-06 @TODO-thaariha @suchitchopade3110-arch @Shruthi-Senthilkumar @TODO-tharun @santheesh73
 
 /backend/app/core/              @Spyro007-06
-/backend/app/vision/            @TODO-suchit
+/backend/app/vision/            @suchitchopade3110-arch
+# @TODO-thaariha: NOT resolved. No commit anywhere in `git log --all` (any
+# spelling of "Thaariha", case-insensitive) is attributed to her, under any
+# name or email -- she has never committed to this repository, so there is no
+# author identity here to match to a GitHub account. A guessed handle would
+# be pure invention, not an inference from evidence. Needs asking her
+# directly for her GitHub username.
 /backend/app/intelligence/      @TODO-thaariha
-/backend/app/voice/             @TODO-shruthi
+/backend/app/voice/             @Shruthi-Senthilkumar
 
 # App foundation
 /backend/app/main.py            @Spyro007-06
@@ -54,13 +101,13 @@
 
 # --- Routers whose owner is not the owner of core/ -------------------------
 # Everything else under core/routers/ falls to the /backend/app/core/ rule.
-/backend/app/core/routers/diagnose.py    @TODO-thaariha @TODO-suchit @Spyro007-06
+/backend/app/core/routers/diagnose.py    @TODO-thaariha @suchitchopade3110-arch @Spyro007-06
 /backend/app/core/routers/clarify.py     @TODO-thaariha
 /backend/app/core/routers/advisory.py    @TODO-thaariha
 /backend/app/core/routers/cases.py       @TODO-thaariha
-/backend/app/core/routers/labelcheck.py  @TODO-suchit @Spyro007-06 @TODO-thaariha
+/backend/app/core/routers/labelcheck.py  @suchitchopade3110-arch @Spyro007-06 @TODO-thaariha
 /backend/app/core/routers/referrals.py   @TODO-tharun
-/backend/app/core/routers/officials.py   @TODO-santheesh @Spyro007-06
+/backend/app/core/routers/officials.py   @santheesh73 @Spyro007-06
 
 # --- Backend supporting trees ----------------------------------------------
 /backend/tests/                 @Spyro007-06
