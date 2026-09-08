@@ -155,7 +155,7 @@ export function LandingPage() {
       {/* ============================================================
           2. HERO SECTION
           ============================================================ */}
-      <section id="overview" className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex items-center py-8 lg:py-12">
+      <section id="overview" className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex items-center py-8 lg:py-12 scroll-mt-16">
         {/* Subtle background natural contour atmosphere */}
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/40 via-transparent to-transparent pointer-events-none" />
         <div className="absolute right-0 top-0 -mt-20 -mr-20 h-96 w-96 rounded-full bg-emerald-100/30 blur-3xl pointer-events-none" />
@@ -287,53 +287,53 @@ export function LandingPage() {
       {/* ============================================================
           3. PORTAL WORKSPACES ENTRY (AGRONOMIST & OFFICIALS)
           ============================================================ */}
-      <section id="portals" className="border-t border-slate-200 bg-slate-50/60 py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
+      <section id="portals" className="border-t border-slate-200 bg-slate-50/60 min-h-[calc(100vh-4rem)] flex flex-col justify-center py-6 sm:py-8 lg:py-10 scroll-mt-16">
+        <div className="mx-auto w-full max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
               Operational Workspaces
             </span>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
               Two Dedicated Workspaces for Extension & Governance
             </h2>
-            <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+            <p className="mt-1 text-sm sm:text-base text-slate-600 leading-relaxed">
               Dedicated operational surfaces for expert plant pathologists and district
               surveillance officers.
             </p>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="mt-5 lg:mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
             {/* Workspace 1: KVK Agronomist Portal */}
-            <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs hover:border-emerald-700/40 hover:shadow-md transition-all">
-              <div className="space-y-4">
+            <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs hover:border-emerald-700/40 hover:shadow-md transition-all">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                    <Sprout className="h-6 w-6 text-[#1B5E20]" />
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                    <Sprout className="h-5 w-5 text-[#1B5E20]" />
                   </div>
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-[#1B5E20] border border-emerald-200">
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-[#1B5E20] border border-emerald-200">
                     KVK Expert Review
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                     Agronomist Case Management Portal
                   </h3>
-                  <p className="mt-1 text-xs text-slate-500 font-medium">
+                  <p className="mt-0.5 text-xs text-slate-500 font-medium">
                     ICAR-Krishi Vigyan Kendra (KVK) & Extension Specialists
                   </p>
                 </div>
 
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Review pre-assembled case bundles with field photographs, growth stages, and model
                   uncertainty metrics in under three minutes.
                 </p>
 
-                <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="pt-2.5 border-t border-slate-100 space-y-1.5">
                   <span className="text-xs font-semibold text-slate-700 block">
                     Supported Workflows:
                   </span>
-                  <ul className="space-y-1.5 text-xs text-slate-600">
+                  <ul className="space-y-1 text-xs text-slate-600">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                       <span>Live prioritized case queue with triage indicators</span>
@@ -354,7 +354,7 @@ export function LandingPage() {
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-slate-100">
+              <div className="mt-4 pt-3 border-t border-slate-100">
                 <Link to="/login">
                   <Button className="w-full bg-[#1B5E20] hover:bg-[#14532D] text-white font-medium text-xs h-10 gap-2 shadow-xs">
                     <span>Open Agronomist Queue</span>
@@ -365,36 +365,36 @@ export function LandingPage() {
             </div>
 
             {/* Workspace 2: Agriculture Officials Portal */}
-            <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs hover:border-emerald-700/40 hover:shadow-md transition-all">
-              <div className="space-y-4">
+            <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs hover:border-emerald-700/40 hover:shadow-md transition-all">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-800 border border-blue-200/80">
-                    <Building2 className="h-6 w-6 text-blue-700" />
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-800 border border-blue-200/80">
+                    <Building2 className="h-5 w-5 text-blue-700" />
                   </div>
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-800 border border-blue-200">
+                  <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-800 border border-blue-200">
                     District Surveillance
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                     Agriculture Officials Surveillance Portal
                   </h3>
-                  <p className="mt-1 text-xs text-slate-500 font-medium">
+                  <p className="mt-0.5 text-xs text-slate-500 font-medium">
                     Department of Agriculture, Maharashtra · Surveillance Officers
                   </p>
                 </div>
 
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   District-level command surface for outbreak clusters, containment approvals, and
                   real-time field model accuracy tracking.
                 </p>
 
-                <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="pt-2.5 border-t border-slate-100 space-y-1.5">
                   <span className="text-xs font-semibold text-slate-700 block">
                     Supported Workflows:
                   </span>
-                  <ul className="space-y-1.5 text-xs text-slate-600">
+                  <ul className="space-y-1 text-xs text-slate-600">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                       <span>Live District Hotspot Map with cluster severity tracking</span>
@@ -415,7 +415,7 @@ export function LandingPage() {
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-slate-100">
+              <div className="mt-4 pt-3 border-t border-slate-100">
                 <Link to="/login">
                   <Button
                     variant="secondary"
@@ -434,7 +434,7 @@ export function LandingPage() {
       {/* ============================================================
           4. THE PRODUCT STORY / OPERATIONAL LIFECYCLE
           ============================================================ */}
-      <section id="how-it-works" className="py-16 lg:py-24 border-t border-slate-200">
+      <section id="how-it-works" className="py-16 lg:py-24 border-t border-slate-200 scroll-mt-16">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
@@ -557,7 +557,7 @@ export function LandingPage() {
       {/* ============================================================
           5. CORE CAPABILITIES (EDITORIAL GRID)
           ============================================================ */}
-      <section id="capabilities" className="py-16 lg:py-24 bg-slate-50/60 border-t border-slate-200">
+      <section id="capabilities" className="py-16 lg:py-24 bg-slate-50/60 border-t border-slate-200 scroll-mt-16">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
@@ -702,7 +702,7 @@ export function LandingPage() {
       {/* ============================================================
           6. ENGINEERING & DESIGN PRINCIPLES
           ============================================================ */}
-      <section id="principles" className="py-16 lg:py-24 border-t border-slate-200">
+      <section id="principles" className="py-16 lg:py-24 border-t border-slate-200 scroll-mt-16">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
