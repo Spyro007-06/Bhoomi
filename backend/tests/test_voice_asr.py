@@ -4,6 +4,8 @@
 re-prompts." The stub's confidence is always below ASR_FLOOR by construction
 (app.voice.providers.StubSpeechToText), so this exercises the gate end to end
 without a key or network.
+
+`session=None` throughout: the stub-backed default path never touches it.
 """
 
 from __future__ import annotations
@@ -15,23 +17,23 @@ from app.voice.asr import transcribe
 from app.voice.providers import TranscriptResult
 
 
-def test_below_floor_omits_parsed_intent() -> None:
-    result = transcribe("a_1", "mr-IN", "query")
+async def test_below_floor_omits_parsed_intent() -> None:
+    result = await transcribe(None, "a_1", "mr-IN", "query")
     assert result.parsed_intent is None
 
 
-def test_below_floor_needs_confirmation_is_false() -> None:
-    result = transcribe("a_1", "mr-IN", "query")
+async def test_below_floor_needs_confirmation_is_false() -> None:
+    result = await transcribe(None, "a_1", "mr-IN", "query")
     assert result.needs_confirmation is False
 
 
-def test_transcribe_result_is_detectable_as_a_stub() -> None:
-    result = transcribe("a_1", "mr-IN", "query")
+async def test_transcribe_result_is_detectable_as_a_stub() -> None:
+    result = await transcribe(None, "a_1", "mr-IN", "query")
     assert result.is_stub is True
 
 
-def test_transcribe_echoes_the_requested_lang() -> None:
-    result = transcribe("a_1", "hi-IN", "onboarding")
+async def test_transcribe_echoes_the_requested_lang() -> None:
+    result = await transcribe(None, "a_1", "hi-IN", "onboarding")
     assert result.lang == "hi-IN"
 
 
@@ -42,7 +44,9 @@ class _FakeLiveStyleProvider:
 
     text: str
 
-    def transcribe(self, asset_id: str, lang: str, context: str) -> TranscriptResult:
+    async def transcribe(
+        self, session: object, asset_id: str, lang: str, context: str
+    ) -> TranscriptResult:
         return TranscriptResult(
             text=self.text,
             confidence=None,
@@ -53,18 +57,20 @@ class _FakeLiveStyleProvider:
         )
 
 
-def test_none_confidence_with_empty_transcript_omits_parsed_intent(monkeypatch) -> None:
+async def test_none_confidence_with_empty_transcript_omits_parsed_intent(monkeypatch) -> None:
     """The live-mode floor fallback: no numeric confidence to compare against
     ASR_FLOOR, so an empty transcript takes the below-floor path on transcript
     quality alone."""
     monkeypatch.setattr(asr_module, "get_speech_to_text", lambda: _FakeLiveStyleProvider(""))
 
-    result = transcribe("a_1", "mr-IN", "query")
+    result = await transcribe(None, "a_1", "mr-IN", "query")
     assert result.parsed_intent is None
     assert result.needs_confirmation is False
 
 
-def test_none_confidence_with_usable_transcript_still_has_no_parsed_intent(monkeypatch) -> None:
+async def test_none_confidence_with_usable_transcript_still_has_no_parsed_intent(
+    monkeypatch,
+) -> None:
     """Documents a real, flagged gap from the original S3 ask: even a "usable"
     (non-empty) live transcript never gets needs_confirmation=True, because no
     live intent-extraction exists anywhere in this stack (Sarvam Saaras
@@ -77,6 +83,6 @@ def test_none_confidence_with_usable_transcript_still_has_no_parsed_intent(monke
         asr_module, "get_speech_to_text", lambda: _FakeLiveStyleProvider("माझं भात तिळरी अवस्थेत आहे")
     )
 
-    result = transcribe("a_1", "mr-IN", "query")
+    result = await transcribe(None, "a_1", "mr-IN", "query")
     assert result.parsed_intent is None
     assert result.needs_confirmation is False

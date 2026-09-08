@@ -13,16 +13,19 @@ strings, which are fixed server copy read verbatim, never slang-rephrased.
 
 from __future__ import annotations
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.voice.providers import SynthesisResult, get_text_to_speech
 
 
-def synthesize(text: str, lang: str) -> SynthesisResult:
+async def synthesize(session: AsyncSession, text: str, lang: str) -> SynthesisResult:
     """Render text to an audio object and return a presigned URL.
 
-    Return shape is docs/API_CONTRACT.md §4: audio_url, expires_in.
+    `session` is forwarded to the live provider (which needs it to store the
+    synthesized audio via core.services.assets.store_bytes) and ignored by
+    the stub. tts.py never queries with it itself — core/ is the only
+    package that touches the database or object storage (docs/DESIGN.md §3).
 
-    Raises:
-        NotImplementedError: when the live Sarvam provider is selected; that
-            call is implemented in S3.
+    Return shape is docs/API_CONTRACT.md §4: audio_url, expires_in.
     """
-    return get_text_to_speech().synthesize(text, lang)
+    return await get_text_to_speech().synthesize(session, text, lang)

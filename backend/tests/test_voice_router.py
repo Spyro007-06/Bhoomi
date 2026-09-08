@@ -1,18 +1,22 @@
 """HTTP surface for /voice/transcribe and /voice/synthesize. docs/API_CONTRACT.md §4.
 
-No network, no DB — the router calls straight through to the S0 stub-backed
-transcribe()/synthesize().
+No network, no real DB — the router calls straight through to the S0
+stub-backed transcribe()/synthesize(). S4 threaded a `session` dependency
+through this router for the live provider's benefit, but the stub never
+touches it, so `get_session` is overridden here with a sentinel-yielding fake
+rather than the real engine — these tests stay hermetic exactly as before.
 
-This router is not yet mounted on the shared app in app/main.py (that one-line
-mount is Shreekumar's to add — see the PR notes). These tests build a small,
-isolated app that mounts only app.voice.router under the real settings.api_prefix,
-with the same exception handlers main.py registers, so the tests exercise real
-HTTP behaviour without depending on, or making, that mount edit.
+This router is also mounted on the shared app in app/main.py (`api.include_router
+(voice_router.router)`). These tests still build a small, isolated app that
+mounts only app.voice.router under the real settings.api_prefix, with the same
+exception handlers main.py registers, so the tests exercise real HTTP behaviour
+without depending on the rest of the app (auth, DB-backed routers, etc.).
 """
 
 from __future__ import annotations
 
 import uuid
+from collections.abc import AsyncIterator
 
 import jwt
 import pytest
@@ -21,6 +25,7 @@ from fastapi.testclient import TestClient
 
 from app.config import settings
 from app.contracts.enums import Role
+from app.db import get_session
 from app.errors import register_exception_handlers
 from app.voice.router import router as voice_router
 
@@ -28,11 +33,22 @@ TRANSCRIBE_BODY = {"asset_id": str(uuid.uuid4()), "lang": "mr-IN", "context": "q
 SYNTHESIZE_BODY = {"text": "hello", "lang": "mr-IN"}
 
 
+async def _fake_get_session() -> AsyncIterator[None]:
+    """Stands in for `app.db.get_session` — never opens a real connection.
+
+    The stub-backed providers this router exercises never touch `session`
+    (providers.py's Stub* docstrings), so a sentinel `None` satisfies the
+    dependency without a live database.
+    """
+    yield None
+
+
 @pytest.fixture(scope="module")
 def voice_client() -> TestClient:
     app = FastAPI()
     register_exception_handlers(app)
     app.include_router(voice_router, prefix=settings.api_prefix)
+    app.dependency_overrides[get_session] = _fake_get_session
     return TestClient(app)
 
 

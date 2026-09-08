@@ -29,6 +29,8 @@ always-numeric `confidence` example, flagged for the doc to catch up.
 
 from __future__ import annotations
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.config import ASR_FLOOR
 from app.voice.providers import TranscriptResult, get_speech_to_text
 
@@ -41,10 +43,17 @@ def _is_usable_transcript(text: str) -> bool:
     return bool(text.strip())
 
 
-def transcribe(asset_id: str, lang: str, context: str) -> TranscriptResult:
+async def transcribe(
+    session: AsyncSession, asset_id: str, lang: str, context: str
+) -> TranscriptResult:
     """Transcribe an uploaded audio asset.
 
     Args:
+        session: the request's DB session, forwarded to the live provider
+            (which needs it to resolve `asset_id` -> bytes via
+            core.services.assets.get_asset_bytes) and ignored by the stub.
+            asr.py never queries with it itself — core/ is the only package
+            that touches the database (docs/DESIGN.md §3).
         asset_id: the object the client PUT via /assets/presign.
         lang: BCP-47 tag, e.g. "mr-IN".
         context: "onboarding" | "doubt_doctor" | "query".
@@ -56,11 +65,10 @@ def transcribe(asset_id: str, lang: str, context: str) -> TranscriptResult:
     re-prompts rather than being asked to confirm something it was never shown.
 
     Raises:
-        NotImplementedError: when the live Sarvam provider is selected but its
-            core dependency (asset-bytes read) is not yet wired; see
-            providers.LiveSpeechToText's docstring.
+        NotFound: live mode, when `asset_id` cannot be resolved to audio
+            bytes — farmer-safe copy; see providers.LiveSpeechToText.
     """
-    raw = get_speech_to_text().transcribe(asset_id, lang, context)
+    raw = await get_speech_to_text().transcribe(session, asset_id, lang, context)
     if raw.confidence is not None:
         exposed = raw.confidence >= ASR_FLOOR
     else:
