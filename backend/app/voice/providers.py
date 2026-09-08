@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import (
     ASR_FLOOR,
@@ -31,8 +32,9 @@ from app.config import (
     SARVAM_TTS_MODEL,
     settings,
 )
-from app.contracts.enums import Lang
-from app.errors import BhoomiError, ErrorCode
+from app.contracts.enums import AssetKind, Lang
+from app.core.services.assets import get_asset_bytes, store_bytes
+from app.errors import BhoomiError, ErrorCode, NotFound
 
 log = logging.getLogger("bhoomi.voice")
 
@@ -86,11 +88,13 @@ class TranslationResult:
 
 
 class SpeechToText(Protocol):
-    def transcribe(self, asset_id: str, lang: str, context: str) -> TranscriptResult: ...
+    async def transcribe(
+        self, session: AsyncSession, asset_id: str, lang: str, context: str
+    ) -> TranscriptResult: ...
 
 
 class TextToSpeech(Protocol):
-    def synthesize(self, text: str, lang: str) -> SynthesisResult: ...
+    async def synthesize(self, session: AsyncSession, text: str, lang: str) -> SynthesisResult: ...
 
 
 class Translator(Protocol):
@@ -116,9 +120,15 @@ class StubSpeechToText:
     `needs_confirmation` here is a placeholder (False); `asr.transcribe()` is
     the sole authority on that field and recomputes it from whether
     `parsed_intent` survives the floor gate.
+
+    Takes `session` only to satisfy the `SpeechToText` protocol shared with
+    `LiveSpeechToText` — never touches it, never awaits anything real. A
+    caller may pass anything here, including `None`.
     """
 
-    def transcribe(self, asset_id: str, lang: str, context: str) -> TranscriptResult:
+    async def transcribe(
+        self, session: AsyncSession, asset_id: str, lang: str, context: str
+    ) -> TranscriptResult:
         log.warning(
             "voice.transcribe() served by STUB — fixed transcript, audio not "
             "read. is_stub=true. docs/DESIGN.md §12."
@@ -139,9 +149,14 @@ class StubSpeechToText:
 
 
 class StubTextToSpeech:
-    """Fixed placeholder audio URL. Never reads or renders `text`."""
+    """Fixed placeholder audio URL. Never reads or renders `text`.
 
-    def synthesize(self, text: str, lang: str) -> SynthesisResult:
+    Takes `session` only to satisfy the `TextToSpeech` protocol shared with
+    `LiveTextToSpeech` — never touches it, never writes to storage. A caller
+    may pass anything here, including `None`.
+    """
+
+    async def synthesize(self, session: AsyncSession, text: str, lang: str) -> SynthesisResult:
         log.warning(
             "voice.synthesize() served by STUB — fixed audio_url, text not "
             "rendered. is_stub=true. docs/DESIGN.md §12."
@@ -170,19 +185,18 @@ class StubTranslator:
 
 
 # ---------------------------------------------------------------------------
-# Live providers. S3: Sarvam over HTTP via httpx — no sarvamai SDK, no other
+# Live providers. S4: Sarvam over HTTP via httpx — no sarvamai SDK, no other
 # network call. Endpoints, headers and field names verified against
 # docs.sarvam.ai (2026-08); see the S3 PR notes for the exact pages checked.
 #
-# core/ has no way for voice to read or write asset bytes: the only S3 code in
-# core/ is the private, upload-only `_s3()` client inside
-# core/routers/assets.py (presigned PUT for the client's own uploads). There is
-# no presigned GET, no download helper, no bytes-fetch, and no "write bytes the
-# server generated and get a URL back" helper anywhere in core/. That gap
-# blocks LiveSpeechToText (needs to READ audio by asset_id) and
-# LiveTextToSpeech (needs to STORE audio) in both directions — flagged for
-# Shreekumar below, not worked around with a direct DB or boto3 call from
-# voice/, which would break the module boundary docs/DESIGN.md §3 draws.
+# core/services/assets.py (Shreekumar) exposes the two functions that closed
+# the gap S3 flagged here: `get_asset_bytes(session, asset_id) -> bytes` for
+# the read side (LiveSpeechToText) and `store_bytes(session, kind,
+# content_type, data) -> StoredAsset` for the write side (LiveTextToSpeech).
+# Both take the request's `session` — passed down from the router via
+# asr.transcribe()/tts.synthesize(), never created here — so voice/ still
+# never touches the database or S3 directly, preserving the module boundary
+# docs/DESIGN.md §3 draws.
 # ---------------------------------------------------------------------------
 
 _SARVAM_BASE_URL = "https://api.sarvam.ai"
@@ -219,32 +233,69 @@ def _sarvam_post(path: str, provider: str, **kwargs: object) -> dict:
     return response.json()
 
 
+async def _sarvam_post_async(path: str, provider: str, **kwargs: object) -> dict:
+    """Async twin of `_sarvam_post`, for the two Live providers that now run
+    inside an async call chain (LiveSpeechToText, LiveTextToSpeech).
+
+    Deliberately NOT unified with `_sarvam_post`: that sync helper is also
+    used by `LiveTranslator.translate()`, which is called synchronously from
+    `voice/embedding_text.py::to_embedding_text()`, itself called
+    synchronously from `intelligence/rag.py` (Thaariha's module, out of S4's
+    scope). Making `_sarvam_post` async would force that whole chain async
+    too. Small, deliberate duplication instead — flagged in the S4 PR
+    description as a follow-up: unify once/if Translator's callers go async.
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{_SARVAM_BASE_URL}{path}", headers=_sarvam_headers(), **kwargs
+            )
+    except httpx.HTTPError as exc:
+        raise BhoomiError(
+            ErrorCode.VOICE_PROVIDER_UNAVAILABLE,
+            f"Voice service ({provider}) is temporarily unavailable. Try again shortly.",
+            details={"error": str(exc)},
+        ) from exc
+    if response.status_code != 200:
+        raise BhoomiError(
+            ErrorCode.VOICE_PROVIDER_UNAVAILABLE,
+            f"Voice service ({provider}) is temporarily unavailable. Try again shortly.",
+            details={"status_code": response.status_code},
+        )
+    return response.json()
+
+
 class LiveSpeechToText:
     """Sarvam Saaras, transcribe mode. docs.sarvam.ai/api-reference/speech-to-text/transcribe.
 
-    BLOCKED: `transcribe()` receives only `asset_id`; Sarvam's endpoint needs
-    the raw audio bytes as a multipart `file` field. Resolving asset_id ->
-    bytes needs either a DB read (core/'s exclusive boundary, docs/DESIGN.md
-    §3) or an S3 GET keyed by the Asset row's `object_key` (itself only
-    resolvable via that same DB read) — voice has no legitimate path to
-    either. Needed, exposed by Shreekumar: something like
-    `core.assets.get_asset_bytes(asset_id) -> bytes` (or a presigned GET URL).
-    Not built here.
+    `transcribe()` resolves `asset_id` -> bytes via
+    `core.services.assets.get_asset_bytes(session, asset_id)`, then hands the
+    bytes to `_transcribe_bytes()` for the actual Sarvam call.
 
-    `_transcribe_bytes()` below is the real Sarvam call — endpoint, header,
-    model, language_code, mode, response parsing, and the confidence-shape
-    decision — fully built and unit-tested against a mocked audio payload, so
-    wiring this in is a one-line change once that helper exists.
+    `get_asset_bytes` raises `NotFound` for two distinct core-level failures —
+    no such Asset row, or a row whose presigned PUT was minted but never
+    completed — collapsed into one code because the correct client action is
+    identical either way: record and upload again. This method re-raises
+    `NotFound` with farmer-safe copy (no "presigned"/"PUT" wording) and moves
+    core's diagnostic message into `details.cause` for logs. `ValidationFailed`
+    (wrong asset kind) passes through unchanged — that is a real client bug
+    with an already-clear message, not a re-record case.
     """
 
-    def transcribe(self, asset_id: str, lang: str, context: str) -> TranscriptResult:
-        raise NotImplementedError(
-            "live Sarvam call — implemented in S3, blocked on a core "
-            "asset-bytes-read helper for `asset_id`. See LiveSpeechToText's "
-            "docstring."
-        )
+    async def transcribe(
+        self, session: AsyncSession, asset_id: str, lang: str, context: str
+    ) -> TranscriptResult:
+        try:
+            audio = await get_asset_bytes(session, asset_id)
+        except NotFound as exc:
+            raise NotFound(
+                "That recording could not be found. Please record your message "
+                "again and try once more.",
+                details={"asset_id": str(asset_id), "cause": exc.message},
+            ) from exc
+        return await self._transcribe_bytes(audio, lang)
 
-    def _transcribe_bytes(self, audio: bytes, lang: str) -> TranscriptResult:
+    async def _transcribe_bytes(self, audio: bytes, lang: str) -> TranscriptResult:
         """The Sarvam call itself, given raw audio bytes already in hand.
 
         Sarvam's response carries no transcript-confidence field — only
@@ -259,7 +310,7 @@ class LiveSpeechToText:
         stack. Building one is out of S3's Sarvam-only scope — flagged as a
         deliberate default, not an oversight.
         """
-        body = _sarvam_post(
+        body = await _sarvam_post_async(
             "/speech-to-text",
             "speech-to-text",
             data={"model": SARVAM_STT_MODEL, "language_code": lang, "mode": "transcribe"},
@@ -278,34 +329,26 @@ class LiveSpeechToText:
 class LiveTextToSpeech:
     """Sarvam Bulbul. docs.sarvam.ai/api-reference/text-to-speech/convert.
 
-    BLOCKED: Sarvam returns base64-encoded audio bytes in the response body
-    (`audios: [str]`), but `synthesize()` must return `audio_url` +
-    `expires_in` — voice must not write to object storage directly (core/'s
-    exclusive boundary, docs/DESIGN.md §3). core/ exposes presigned PUT for
-    the client's OWN uploads (core/routers/assets.py) but nothing the *server*
-    can call to write bytes it generated itself and get a URL back. Needed,
-    exposed by Shreekumar: something like `core.assets.store_bytes(kind,
-    content_type, data: bytes) -> (asset_id, presigned_url)`. Not built here.
-
-    `_synthesize_bytes()` below is the real Sarvam call, returning decoded
-    audio bytes — fully built and unit-tested — so wiring this in is a
-    one-line change once that helper exists.
+    `synthesize()` gets decoded audio bytes from `_synthesize_bytes()`, then
+    hands them to `core.services.assets.store_bytes(session, AssetKind.AUDIO,
+    "audio/wav", data)` — the write side of the same gap `LiveSpeechToText`
+    read from — and maps the returned `StoredAsset.url`/`.expires_in` onto
+    this module's `SynthesisResult` shape. voice/ never touches S3 or the
+    database directly; that boundary is core's (docs/DESIGN.md §3).
     """
 
-    def synthesize(self, text: str, lang: str) -> SynthesisResult:
-        raise NotImplementedError(
-            "live Sarvam call — implemented in S3, blocked on a core "
-            "bytes-write/presign helper for synthesized audio. See "
-            "LiveTextToSpeech's docstring."
-        )
+    async def synthesize(self, session: AsyncSession, text: str, lang: str) -> SynthesisResult:
+        data = await self._synthesize_bytes(text, lang)
+        stored = await store_bytes(session, AssetKind.AUDIO, "audio/wav", data)
+        return SynthesisResult(audio_url=stored.url, expires_in=stored.expires_in, is_stub=False)
 
-    def _synthesize_bytes(self, text: str, lang: str) -> bytes:
+    async def _synthesize_bytes(self, text: str, lang: str) -> bytes:
         """The Sarvam call itself; returns decoded audio bytes.
 
         Storing these bytes and minting a URL is core's boundary — see the
         class docstring. This method stops at the bytes.
         """
-        body = _sarvam_post(
+        body = await _sarvam_post_async(
             "/text-to-speech",
             "text-to-speech",
             json={"text": text, "language_code": lang, "model": SARVAM_TTS_MODEL},
