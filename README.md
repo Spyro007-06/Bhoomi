@@ -183,7 +183,7 @@ The three files in `docs/` are frozen. If a task and the docs disagree, the docs
 | Shreekumar | Backend, database, alerts, follow-ups |
 | Thaariha | Confidence gate, Doubt Doctor, advice generation |
 | Shruthi | Voice pipeline |
-| Tharun | Flutter farmer app |
+| Tharun BL | Flutter farmer app |
 | Santheesh | Web portal and dashboard |
 
 ## License
