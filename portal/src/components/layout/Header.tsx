@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks';
 import { Button } from '@/components/ui/Button';
-import { LogOut, Sprout, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
 
 export function Header() {
@@ -19,14 +20,20 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-[70px] w-full items-center justify-between border-b border-bhoomi-border bg-bhoomi-surface px-6 shadow-xs transition-colors select-none">
       {/* Brand & Portal Identity Area */}
-      <div className="flex items-center gap-3.5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1B5E20] text-white shadow-xs">
-          <Sprout className="h-6 w-6" />
-        </div>
+      <Link
+        to="/"
+        className="flex items-center gap-3.5 group cursor-pointer rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#166534]"
+        title="Return to Landing Page"
+      >
+        <img
+          src="/icons/bhoomi-logo.png"
+          alt="BHOOMI Logo"
+          className="h-10 w-10 shrink-0 object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105"
+        />
 
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2.5">
-            <span className="text-xl font-extrabold tracking-tight text-bhoomi-text-primary">
+            <span className="text-xl font-extrabold tracking-tight text-bhoomi-text-primary group-hover:text-emerald-900 transition-colors">
               BHOOMI
             </span>
             {user?.role && (
@@ -39,7 +46,7 @@ export function Header() {
             {subtitleText}
           </p>
         </div>
-      </div>
+      </Link>
 
       {/* User Session & Actions Area */}
       <div className="flex items-center gap-4">

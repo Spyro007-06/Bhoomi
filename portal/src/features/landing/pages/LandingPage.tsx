@@ -26,12 +26,14 @@ export function LandingPage() {
           1. HEADER NAVIGATION
           ============================================================ */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl xl:max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Brand Identity */}
           <Link to="/" className="flex items-center gap-3 group focus:outline-none">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1B5E20] text-white shadow-xs transition-transform group-hover:scale-105">
-              <Sprout className="h-6 w-6" />
-            </div>
+            <img
+              src="/icons/bhoomi-logo.png"
+              alt="BHOOMI Logo"
+              className="h-10 w-10 shrink-0 object-contain drop-shadow-xs transition-transform group-hover:scale-105"
+            />
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <span className="text-xl font-bold tracking-tight text-slate-900">BHOOMI</span>
@@ -48,19 +50,19 @@ export function LandingPage() {
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
             <a href="#overview" className="hover:text-emerald-800 transition-colors">
-              Platform Overview
+              Overview
             </a>
             <a href="#how-it-works" className="hover:text-emerald-800 transition-colors">
-              Field Lifecycle
+              Lifecycle
             </a>
             <a href="#portals" className="hover:text-emerald-800 transition-colors">
               Workspaces
             </a>
             <a href="#capabilities" className="hover:text-emerald-800 transition-colors">
-              Core Capabilities
+              Capabilities
             </a>
             <a href="#principles" className="hover:text-emerald-800 transition-colors">
-              Engineering Principles
+              Principles
             </a>
           </nav>
 
@@ -108,14 +110,14 @@ export function LandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-1 hover:text-emerald-800"
               >
-                Platform Overview
+                Overview
               </a>
               <a
                 href="#how-it-works"
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-1 hover:text-emerald-800"
               >
-                Field Lifecycle
+                Lifecycle
               </a>
               <a
                 href="#portals"
@@ -129,14 +131,14 @@ export function LandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-1 hover:text-emerald-800"
               >
-                Core Capabilities
+                Capabilities
               </a>
               <a
                 href="#principles"
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-1 hover:text-emerald-800"
               >
-                Engineering Principles
+                Principles
               </a>
             </nav>
             <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
@@ -153,12 +155,12 @@ export function LandingPage() {
       {/* ============================================================
           2. HERO SECTION
           ============================================================ */}
-      <section id="overview" className="relative overflow-hidden pt-12 pb-16 lg:pt-20 lg:pb-24">
+      <section id="overview" className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex items-center py-8 lg:py-12">
         {/* Subtle background natural contour atmosphere */}
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/40 via-transparent to-transparent pointer-events-none" />
         <div className="absolute right-0 top-0 -mt-20 -mr-20 h-96 w-96 rounded-full bg-emerald-100/30 blur-3xl pointer-events-none" />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto w-full max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 items-center">
             {/* Left Content Column */}
             <div className="lg:col-span-7 space-y-6">
@@ -175,13 +177,13 @@ export function LandingPage() {
 
               {/* Editorial Value Statement */}
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">
-                Early detection and proactive surveillance of 26 crop diseases and pest infestations
-                across <strong className="font-semibold text-slate-900">Paddy</strong>,{' '}
+                Early detection and proactive surveillance across{' '}
+                <strong className="font-semibold text-slate-900">Paddy</strong>,{' '}
                 <strong className="font-semibold text-slate-900">Cotton</strong>,{' '}
                 <strong className="font-semibold text-slate-900">Soybean</strong>, and{' '}
-                <strong className="font-semibold text-slate-900">Jowar</strong>. Built on a strict
-                principle: admitting uncertainty when torn, asking clarifying field cues, and
-                vetoing wrong pesticides before application.
+                <strong className="font-semibold text-slate-900">Jowar</strong>. Detects 26 crop
+                targets, resolves ambiguous symptoms with field cues, and vetoes unauthorized
+                chemical sprays.
               </p>
 
               {/* Action Buttons */}
@@ -286,7 +288,7 @@ export function LandingPage() {
           3. PORTAL WORKSPACES ENTRY (AGRONOMIST & OFFICIALS)
           ============================================================ */}
       <section id="portals" className="border-t border-slate-200 bg-slate-50/60 py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
               Operational Workspaces
@@ -294,10 +296,9 @@ export function LandingPage() {
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
               Two Dedicated Workspaces for Extension & Governance
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
-              BHOOMI separates high-speed case triage from macro surveillance, providing custom
-              surfaces tailored to the specific responsibilities of plant pathologists and
-              agriculture officials.
+            <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+              Dedicated operational surfaces for expert plant pathologists and district
+              surveillance officers.
             </p>
           </div>
 
@@ -324,9 +325,8 @@ export function LandingPage() {
                 </div>
 
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Engineered to protect expert time. Escalated cases arrive pre-assembled with
-                  photographic evidence, growth stage, historical weather risk, and model
-                  uncertainty breakdowns, enabling confident review in under three minutes.
+                  Review pre-assembled case bundles with field photographs, growth stages, and model
+                  uncertainty metrics in under three minutes.
                 </p>
 
                 <div className="pt-3 border-t border-slate-100 space-y-2">
@@ -336,19 +336,19 @@ export function LandingPage() {
                   <ul className="space-y-1.5 text-xs text-slate-600">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>Live Case Queue with priority indicators & triage statuses</span>
+                      <span>Live prioritized case queue with triage indicators</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>One-click Diagnosis Verification (Confirm / Correct / Request Info)</span>
+                      <span>One-click verification (Confirm, Correct, or Request Info)</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>Inspection of Doubt Doctor field cues & farmer observations</span>
+                      <span>Inspection of Doubt Doctor physical cues & farmer notes</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>Closed-loop Treatment Efficacy & resolved case history</span>
+                      <span>Closed-loop treatment efficacy & resolution history</span>
                     </li>
                   </ul>
                 </div>
@@ -386,9 +386,8 @@ export function LandingPage() {
                 </div>
 
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  A high-level command surface providing district and taluka-level outbreak
-                  monitoring, epidemic hotspot tracking, and real-time field model accuracy metrics
-                  across all four supported crops.
+                  District-level command surface for outbreak clusters, containment approvals, and
+                  real-time field model accuracy tracking.
                 </p>
 
                 <div className="pt-3 border-t border-slate-100 space-y-2">
@@ -398,19 +397,19 @@ export function LandingPage() {
                   <ul className="space-y-1.5 text-xs text-slate-600">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                      <span>Live District Hotspot Map with epidemic clustering & severity levels</span>
+                      <span>Live District Hotspot Map with cluster severity tracking</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                      <span>Official Confirmation Queue for containment approvals</span>
+                      <span>Official confirmation queue for containment action</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                      <span>Model Field Accuracy Analytics (confirmed vs. corrected ratios)</span>
+                      <span>Field accuracy analytics (confirmed vs. corrected ratios)</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                      <span>Verified same-crop radius outbreak alerts propagation</span>
+                      <span>Targeted outbreak radius alert broadcasts</span>
                     </li>
                   </ul>
                 </div>
@@ -436,7 +435,7 @@ export function LandingPage() {
           4. THE PRODUCT STORY / OPERATIONAL LIFECYCLE
           ============================================================ */}
       <section id="how-it-works" className="py-16 lg:py-24 border-t border-slate-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
               End-to-End Field Lifecycle
@@ -444,9 +443,8 @@ export function LandingPage() {
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
               From Ground Risk Alert to Regional Surveillance
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-slate-600">
-              How BHOOMI connects farmers, plant pathologists, and government officials into a
-              single closed-loop intelligence architecture.
+            <p className="mt-2 text-sm sm:text-base text-slate-600">
+              A closed-loop diagnostic and surveillance lifecycle connecting farm to state.
             </p>
           </div>
 
@@ -463,9 +461,8 @@ export function LandingPage() {
                   </div>
                   <h4 className="font-bold text-sm text-slate-900">Forward Risk Alert</h4>
                   <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                    Micro-climate, weather forecasts, and growth stage combine into an alert naming{' '}
-                    <strong className="text-slate-800">where on the plant to inspect</strong> before
-                    damage spreads.
+                    Predictive micro-climate alerts directing farmers where on the plant to
+                    inspect before symptoms spread.
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
@@ -484,9 +481,8 @@ export function LandingPage() {
                   </div>
                   <h4 className="font-bold text-sm text-slate-900">Confidence Gate</h4>
                   <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                    Photo evaluated against 3 bands. If ambiguous, the{' '}
-                    <strong className="text-slate-800">Doubt Doctor</strong> asks one physical cue
-                    rather than guessing.
+                    Three-band evaluation that prompts for a physical cue when symptoms are
+                    ambiguous rather than guessing.
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
@@ -505,8 +501,8 @@ export function LandingPage() {
                   </div>
                   <h4 className="font-bold text-sm text-slate-900">Pesticide Veto</h4>
                   <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                    OCR bottle scan checks active ingredients against CIB&RC records to veto the
-                    wrong chemical before spraying.
+                    OCR bottle verification against CIB&RC records to veto unapproved chemicals
+                    before spraying.
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
@@ -525,8 +521,8 @@ export function LandingPage() {
                   </div>
                   <h4 className="font-bold text-sm text-slate-900">KVK Expert Triage</h4>
                   <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                    Escalations compile into complete case bundles. Agronomists confirm, correct,
-                    or request information in &lt; 3 mins.
+                    Escalated case bundles reviewed and confirmed by certified agronomists in
+                    under 3 minutes.
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
@@ -545,8 +541,8 @@ export function LandingPage() {
                   </div>
                   <h4 className="font-bold text-sm text-slate-900">State Surveillance</h4>
                   <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                    Confirmed diagnoses adjust regional priors, light up the district hotspot map,
-                    and trigger radius alerts.
+                    Verified diagnoses update district hotspot maps and broadcast regional radius
+                    containment alerts.
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
@@ -562,7 +558,7 @@ export function LandingPage() {
           5. CORE CAPABILITIES (EDITORIAL GRID)
           ============================================================ */}
       <section id="capabilities" className="py-16 lg:py-24 bg-slate-50/60 border-t border-slate-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
               PRD-Enforced Specifications
@@ -570,10 +566,9 @@ export function LandingPage() {
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
               Engineered Against the Confident Wrong Answer
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-slate-600">
-              The named harm in crop protection is not "no answer." It is the confident wrong
-              answer that leads to crop failure and chemical over-spraying. Every capability in
-              BHOOMI is built around this reality.
+            <p className="mt-2 text-sm sm:text-base text-slate-600">
+              Preventing the confident wrong answer that causes crop loss and chemical
+              over-spraying.
             </p>
           </div>
 
@@ -589,11 +584,8 @@ export function LandingPage() {
                   Three-Band Gate & The Doubt Doctor
                 </h3>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                  One strict mathematical function gates every single prediction. If the model is
-                  confident (top1 ≥ 0.70 and margin ≥ 0.15), it composes an advisory. If it falls
-                  into the ambiguous band (0.45 to 0.70), it activates the Doubt Doctor: presenting
-                  both candidates transparently and asking the farmer a single physical
-                  discriminating cue rather than taking a guess.
+                  Predictions pass through a strict mathematical threshold. Ambiguous cases activate
+                  the Doubt Doctor to ask a single physical cue rather than guessing.
                 </p>
 
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -635,9 +627,8 @@ export function LandingPage() {
                   Veto, Never Endorse
                 </h3>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                  Advisory schema requires Cultural → Biological → Chemical hierarchy. OCR bottle
-                  checks match ingredients against official CIB&RC registered-use records. If a
-                  chemical is unregistered for that target or crop, it is vetoed immediately.
+                  Enforces Cultural → Biological → Chemical hierarchy. OCR bottle scans verify CIB&RC
+                  registration to veto unapproved chemicals before spraying.
                 </p>
               </div>
 
@@ -657,9 +648,8 @@ export function LandingPage() {
                   The Farm as a Clinical Case File
                 </h3>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                  Farms maintain persistent memory across seasons: variety, growth stage, soil type,
-                  and past pest records. History acts as a mathematical risk prior rather than a
-                  passive archive.
+                  Maintains longitudinal soil, variety, and infestation history as an active Bayesian
+                  risk prior across growing seasons.
                 </p>
               </div>
 
@@ -679,10 +669,9 @@ export function LandingPage() {
                   District Outbreak Hotspots & Spread Radius
                 </h3>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                  Only verified expert confirmations propagate radius spread alerts to nearby farms
-                  of the same crop. Officials monitor active clusters across Maharashtra with live
-                  outbreak counts, severity indices, and accuracy verification metrics (confirmed
-                  vs. corrected diagnoses).
+                  Only agronomist-verified diagnoses propagate radius alerts to nearby farms.
+                  Officials monitor active clusters with live outbreak counts, severity indices, and
+                  accuracy tracking.
                 </p>
 
                 <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-700">
@@ -714,7 +703,7 @@ export function LandingPage() {
           6. ENGINEERING & DESIGN PRINCIPLES
           ============================================================ */}
       <section id="principles" className="py-16 lg:py-24 border-t border-slate-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
               Architectural Guardrails
@@ -722,9 +711,8 @@ export function LandingPage() {
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
               Non-Negotiable Product Principles
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-slate-600">
-              Enforced directly in code and verified by automated testing. These are not marketing
-              aspirations; they dictate every state transition.
+            <p className="mt-2 text-sm sm:text-base text-slate-600">
+              Enforced directly in code and verified by automated testing.
             </p>
           </div>
 
@@ -735,8 +723,8 @@ export function LandingPage() {
               </span>
               <h4 className="mt-2 text-base font-bold text-slate-900">Never Fabricate</h4>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                No retrieval above threshold means zero advice. No corpus entry for a chemical means
-                no verdict on that chemical. The system says what it does not know.
+                No retrieval above threshold means zero advice. The system explicitly states what it
+                does not know.
               </p>
             </div>
 
@@ -746,8 +734,8 @@ export function LandingPage() {
               </span>
               <h4 className="mt-2 text-base font-bold text-slate-900">Uncertainty as a Feature</h4>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                When torn, the farmer sees both candidate diagnoses and gets asked one physical cue.
-                Uncertainty becomes the most trustworthy moment in the interaction.
+                When ambiguous, the farmer sees both candidate diagnoses and answers one physical
+                discriminating cue.
               </p>
             </div>
 
@@ -757,8 +745,8 @@ export function LandingPage() {
               </span>
               <h4 className="mt-2 text-base font-bold text-slate-900">Veto, Never Endorse</h4>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                The system may declare "this is wrong here." It may never say "this is safe." The
-                printed label remains the authority on dosage and application.
+                The system may veto an unapproved chemical, but never endorses chemical safety. The
+                label remains the sole authority.
               </p>
             </div>
 
@@ -768,8 +756,8 @@ export function LandingPage() {
               </span>
               <h4 className="mt-2 text-base font-bold text-slate-900">Chemical Last, Structurally</h4>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                The action ladder is cultural → biological → chemical as schema, not as writing
-                style. The system is structurally incapable of leading with a pesticide.
+                The action hierarchy is cultural → biological → chemical as enforced schema, never
+                leading with a pesticide.
               </p>
             </div>
 
@@ -779,8 +767,7 @@ export function LandingPage() {
               </span>
               <h4 className="mt-2 text-base font-bold text-slate-900">Every Alert Carries a Task</h4>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                "Risk is high" without "examine the base of the stems this week" is noise.
-                Inspection tasks are non-nullable and require explicit outcome recording.
+                Alerts always specify actionable inspection tasks with required outcome recording.
               </p>
             </div>
 
@@ -790,8 +777,8 @@ export function LandingPage() {
               </span>
               <h4 className="mt-2 text-base font-bold text-slate-900">The Farm is a Case File</h4>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                Persistent history, not isolated sessions. Prior treatments, follow-ups, and
-                confirmed diagnoses form the context required for high-speed expert triage.
+                Persistent multi-season history provides the clinical context required for
+                rapid expert triage.
               </p>
             </div>
           </div>
@@ -802,7 +789,7 @@ export function LandingPage() {
           7. FINAL CALL TO ACTION
           ============================================================ */}
       <section className="border-t border-slate-200 bg-slate-900 text-white py-16 lg:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-6">
+        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-950/60 px-3.5 py-1 text-xs font-semibold text-emerald-300">
             <span>BHOOMI Operations Portal Access</span>
           </div>
@@ -811,12 +798,12 @@ export function LandingPage() {
             Ready to Access the BHOOMI Portal?
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Secure entry point for ICAR-KVK Agronomists, Extension Research Specialists, and
-            Government of Maharashtra Agriculture Surveillance Officers.
+          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+            Secure entry point for ICAR-KVK Agronomists and Maharashtra Agriculture Surveillance
+            Officers.
           </p>
 
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-3.5">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3.5">
             <Link to="/login">
               <Button
                 size="lg"
@@ -828,8 +815,8 @@ export function LandingPage() {
             </Link>
           </div>
 
-          <p className="text-xs text-slate-400 pt-4">
-            Supports official single sign-on & demo instant credentials for authorized roles.
+          <p className="text-xs text-slate-400 pt-2">
+            Supports official credentials and demo instant access for authorized roles.
           </p>
         </div>
       </section>
@@ -838,12 +825,16 @@ export function LandingPage() {
           8. FOOTER
           ============================================================ */}
       <footer className="border-t border-slate-800 bg-slate-950 py-12 text-slate-400 text-xs">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Brand in footer */}
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1B5E20] text-white">
-                <Sprout className="h-5 w-5" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/95 p-1 shadow-xs ring-1 ring-white/20">
+                <img
+                  src="/icons/bhoomi-logo.png"
+                  alt="BHOOMI Logo"
+                  className="h-7 w-7 object-contain"
+                />
               </div>
               <div>
                 <span className="font-bold text-sm text-slate-200 block">BHOOMI Portal</span>
@@ -857,6 +848,9 @@ export function LandingPage() {
             <div className="flex flex-wrap items-center gap-6 text-slate-400">
               <a href="#overview" className="hover:text-white transition-colors">
                 Overview
+              </a>
+              <a href="#how-it-works" className="hover:text-white transition-colors">
+                Lifecycle
               </a>
               <a href="#portals" className="hover:text-white transition-colors">
                 Workspaces

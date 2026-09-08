@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -169,10 +169,20 @@ export function LoginPage() {
             <span>GOVERNMENT OF MAHARASHTRA</span>
           </div>
 
-          {/* Logo Squircle with Sprout Emblem */}
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#15803D] via-[#166534] to-[#14532D] text-white shadow-xl shadow-emerald-950/40 ring-2 ring-white/30 transition-transform duration-300 hover:scale-105">
-            <Sprout className="h-8 w-8 text-[#FAF7EF]" />
-          </div>
+          {/* Official Bhoomi Emblem */}
+          <Link
+            to="/"
+            className="mx-auto block w-fit rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            title="Return to Landing Page"
+          >
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/95 p-2 shadow-xl shadow-emerald-950/50 ring-2 ring-emerald-400/30 transition-transform duration-300 hover:scale-105">
+              <img
+                src="/icons/bhoomi-logo.png"
+                alt="BHOOMI Logo"
+                className="h-12 w-12 object-contain"
+              />
+            </div>
+          </Link>
 
           {/* Title & Subtitle */}
           <div className="space-y-1">
