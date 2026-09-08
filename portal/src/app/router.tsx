@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { LandingPage } from '@/features/landing/pages/LandingPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { RoleRoute } from '@/routes/RoleRoute';
 import { AppShell } from '@/components/layout/AppShell';
@@ -91,11 +92,15 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/',
-    element: <Navigate to="/login" replace />,
+    element: <LandingPage />,
+  },
+  {
+    path: '/landing',
+    element: <LandingPage />,
   },
   {
     path: '*',
-    element: <Navigate to="/login" replace />,
+    element: <Navigate to="/" replace />,
   },
 ];
 

@@ -30,3 +30,61 @@
     }
   }
 }
+
+/* Tasteful Entrance & Subtle Ambient Animations */
+@keyframes bhmFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bhmFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bhmAmbientSway {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@keyframes bhmPulseSoft {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.03);
+  }
+}
+
+.animate-bhm-fade-in {
+  animation: bhmFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bhm-fade-in-up {
+  animation: bhmFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bhm-ambient-sway {
+  animation: bhmAmbientSway 10s ease-in-out infinite;
+}
+
+.animate-bhm-pulse-soft {
+  animation: bhmPulseSoft 8s ease-in-out infinite;
+}
+
