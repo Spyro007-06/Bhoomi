@@ -182,9 +182,8 @@ export function LandingPage() {
                 <strong className="font-semibold text-slate-900">Paddy</strong>,{' '}
                 <strong className="font-semibold text-slate-900">Cotton</strong>,{' '}
                 <strong className="font-semibold text-slate-900">Soybean</strong>, and{' '}
-                <strong className="font-semibold text-slate-900">Jowar</strong>. Detects 26 crop
-                targets, resolves ambiguous symptoms with field cues, and vetoes unauthorized
-                chemical sprays.
+                <strong className="font-semibold text-slate-900">Jowar</strong>. Resolves ambiguous
+                symptoms with field cues and vetoes unauthorized sprays.
               </p>
 
               {/* Action Buttons */}
@@ -291,7 +290,7 @@ export function LandingPage() {
       <section id="portals" className="border-t border-slate-200 bg-slate-50/60 min-h-[calc(100vh-4rem)] flex flex-col justify-center py-6 sm:py-8 lg:py-10 scroll-mt-16">
         <div className="mx-auto w-full max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <div className="max-w-2xl">
+            <div className="text-center max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
                 Operational Workspaces
               </span>
@@ -329,8 +328,8 @@ export function LandingPage() {
                   </div>
 
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    Review pre-assembled case bundles with field photographs, growth stages, and model
-                    uncertainty metrics in under three minutes.
+                    Review case bundles with field photos, growth stages, and model uncertainty in
+                    under 3 minutes.
                   </p>
 
                   <div className="pt-2.5 border-t border-slate-100 space-y-1.5">
@@ -344,15 +343,15 @@ export function LandingPage() {
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        <span>One-click verification (Confirm, Correct, or Request Info)</span>
+                        <span>One-click verification (Confirm, Correct, Request Info)</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        <span>Inspection of Doubt Doctor physical cues & farmer notes</span>
+                        <span>Doubt Doctor physical cues & farmer notes inspection</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        <span>Closed-loop treatment efficacy & resolution history</span>
+                        <span>Treatment efficacy & resolution history tracking</span>
                       </li>
                     </ul>
                   </div>
@@ -390,8 +389,8 @@ export function LandingPage() {
                   </div>
 
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    District-level command surface for outbreak clusters, containment approvals, and
-                    real-time field model accuracy tracking.
+                    District command for outbreak clusters, containment approvals, and real-time
+                    accuracy tracking.
                   </p>
 
                   <div className="pt-2.5 border-t border-slate-100 space-y-1.5">
@@ -401,7 +400,7 @@ export function LandingPage() {
                     <ul className="space-y-1 text-xs text-slate-600">
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                        <span>Live District Hotspot Map with cluster severity tracking</span>
+                        <span>Live District Hotspot Map with severity tracking</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
@@ -409,7 +408,7 @@ export function LandingPage() {
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                        <span>Field accuracy analytics (confirmed vs. corrected ratios)</span>
+                        <span>Field accuracy analytics (confirmed vs. corrected)</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
@@ -569,7 +568,7 @@ export function LandingPage() {
       <section id="capabilities" className="py-16 lg:py-24 bg-slate-50/60 border-t border-slate-200 scroll-mt-16">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <div className="max-w-2xl">
+            <div className="text-center max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
                 PRD-Enforced Specifications
               </span>
@@ -595,7 +594,7 @@ export function LandingPage() {
                     Three-Band Gate & The Doubt Doctor
                   </h3>
                   <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                    Predictions pass through strict mathematical thresholds. Ambiguous cases activate
+                    Predictions pass through strict mathematical thresholds. Ambiguous cases prompt
                     the Doubt Doctor to verify physical cues rather than guessing.
                   </p>
 
@@ -609,13 +608,13 @@ export function LandingPage() {
                     <div className="rounded-lg bg-amber-50/80 border border-amber-200/70 p-3 transition-colors hover:bg-amber-50">
                       <span className="font-bold text-amber-900 block">Ambiguous (0.45 - 0.70)</span>
                       <span className="text-amber-800 text-[11px] mt-0.5 block">
-                        Doubt Doctor clarifying question
+                        Doubt Doctor clarifying cue
                       </span>
                     </div>
                     <div className="rounded-lg bg-red-50/80 border border-red-200/70 p-3 transition-colors hover:bg-red-50">
                       <span className="font-bold text-red-900 block">Below Floor (&lt; 0.45)</span>
                       <span className="text-red-800 text-[11px] mt-0.5 block">
-                        Direct KVK agronomist escalation
+                        Direct KVK agronomist triage
                       </span>
                     </div>
                   </div>
@@ -639,7 +638,7 @@ export function LandingPage() {
                   </h3>
                   <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                     Enforces Cultural → Biological → Chemical hierarchy. OCR bottle scans verify CIB&RC
-                    registration to veto unapproved chemicals before spraying.
+                    registration to veto unapproved chemicals.
                   </p>
                 </div>
 
@@ -659,8 +658,8 @@ export function LandingPage() {
                     The Farm as a Clinical Case File
                   </h3>
                   <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                    Maintains longitudinal soil, variety, and infestation history as an active Bayesian
-                    risk prior across growing seasons.
+                    Maintains multi-season soil, variety, and infestation history as an active
+                    Bayesian risk prior.
                   </p>
                 </div>
 
@@ -680,8 +679,8 @@ export function LandingPage() {
                     District Outbreak Hotspots & Spread Radius
                   </h3>
                   <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                    Only verified diagnoses propagate radius alerts to nearby farms. Officials
-                    monitor active clusters with live outbreak counts and accuracy tracking.
+                    Only verified diagnoses broadcast radius alerts to nearby farms. Officials
+                    monitor active clusters with live accuracy tracking.
                   </p>
 
                   <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-700">
@@ -716,7 +715,7 @@ export function LandingPage() {
       <section id="principles" className="py-16 lg:py-24 border-t border-slate-200 scroll-mt-16">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <div className="max-w-2xl">
+            <div className="text-center max-w-2xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
                 Architectural Guardrails
               </span>
@@ -737,8 +736,7 @@ export function LandingPage() {
                 </span>
                 <h4 className="mt-2 text-base font-bold text-slate-900">Never Fabricate</h4>
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                  No retrieval above threshold means zero advice. The system explicitly states what it
-                  does not know.
+                  Zero advice below threshold. The system explicitly states what it does not know.
                 </p>
               </div>
 
@@ -748,8 +746,7 @@ export function LandingPage() {
                 </span>
                 <h4 className="mt-2 text-base font-bold text-slate-900">Uncertainty as a Feature</h4>
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                  When ambiguous, the farmer sees candidate diagnoses and answers one physical
-                  discriminating cue.
+                  When ambiguous, the farmer inspects one physical discriminating cue.
                 </p>
               </div>
 
@@ -759,8 +756,8 @@ export function LandingPage() {
                 </span>
                 <h4 className="mt-2 text-base font-bold text-slate-900">Veto, Never Endorse</h4>
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                  The system may veto an unapproved chemical, but never endorses chemical safety. The
-                  label remains the sole authority.
+                  Vetoes unapproved chemicals without endorsing safety. The label is the sole
+                  authority.
                 </p>
               </div>
 
@@ -770,8 +767,7 @@ export function LandingPage() {
                 </span>
                 <h4 className="mt-2 text-base font-bold text-slate-900">Chemical Last, Structurally</h4>
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                  The action hierarchy is cultural → biological → chemical as enforced schema, never
-                  leading with a pesticide.
+                  Hierarchy is cultural → biological → chemical, never leading with pesticides.
                 </p>
               </div>
 
@@ -781,7 +777,7 @@ export function LandingPage() {
                 </span>
                 <h4 className="mt-2 text-base font-bold text-slate-900">Every Alert Carries a Task</h4>
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                  Alerts always specify actionable inspection tasks with required outcome recording.
+                  Alerts specify actionable inspection tasks with mandatory outcome recording.
                 </p>
               </div>
 
@@ -791,8 +787,7 @@ export function LandingPage() {
                 </span>
                 <h4 className="mt-2 text-base font-bold text-slate-900">The Farm is a Case File</h4>
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                  Persistent multi-season history provides the clinical context required for
-                  rapid expert triage.
+                  Persistent multi-season history provides clinical context for rapid expert triage.
                 </p>
               </div>
             </div>
