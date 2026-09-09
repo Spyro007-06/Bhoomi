@@ -209,11 +209,11 @@ void main() {
 
       // RESULT & ANSWER
       expect(find.text('Bhoomi चे उत्तर'), findsOneWidget);
-      expect(find.text('सल्ला ऐका (Listen)'), findsOneWidget);
+      expect(find.text('सल्ला ऐका'), findsOneWidget);
       expect(find.text('आणखी विचारा'), findsOneWidget);
 
       // AUDIO PLAYBACK
-      await tester.tap(find.text('सल्ला ऐका (Listen)'));
+      await tester.tap(find.text('सल्ला ऐका'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
@@ -285,8 +285,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // What to do & High Confidence
-      expect(find.text('उच्च अचूकता (High Confidence)'), findsOneWidget);
-      expect(find.text('हे अजिबात करू नका (What to Avoid):'), findsOneWidget);
+      expect(find.text('उच्च अचूकता'), findsOneWidget);
+      expect(find.text('हे अजिबात करू नका:'), findsOneWidget);
       expect(find.text('या समस्येबद्दल विचारा'), findsOneWidget);
       expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
     });

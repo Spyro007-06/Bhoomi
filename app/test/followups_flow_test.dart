@@ -82,12 +82,12 @@ void main() {
       expect(find.text('Are lesions drying up after bio-control spray?'), findsOneWidget);
 
       // 2. Verify 3 tactile buttons
-      expect(find.textContaining('Improved'), findsOneWidget);
-      expect(find.textContaining('No change'), findsOneWidget);
-      expect(find.textContaining('Got worse'), findsOneWidget);
+      expect(find.textContaining('सुधारणा'), findsOneWidget);
+      expect(find.textContaining('बदल नाही'), findsOneWidget);
+      expect(find.textContaining('बिघडले'), findsOneWidget);
 
       // 3. Tap "Improved"
-      await tester.tap(find.textContaining('Improved'));
+      await tester.tap(find.textContaining('सुधारणा'));
       await tester.pumpAndSettle();
 
       // 4. Verify API response

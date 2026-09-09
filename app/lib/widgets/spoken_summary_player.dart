@@ -224,8 +224,8 @@ class _SpokenSummaryPlayerState extends ConsumerState<SpokenSummaryPlayer>
                     const SizedBox(height: 2),
                     Text(
                       _isPlaying
-                          ? 'Audio advisory playing...'
-                          : 'Tap to listen to this advisory in your language',
+                          ? strings.audioPlayingSubtitle
+                          : strings.audioTapToListenSubtitle,
                       style: AppTypography.captionSmall.copyWith(
                         color: AppColors.fieldSlate,
                       ),

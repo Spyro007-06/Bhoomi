@@ -210,7 +210,7 @@ class ReferralsScreen extends ConsumerWidget {
                     // District Diagnostic Labs
                     if (labs.isNotEmpty) ...[
                       Text(
-                        'जिल्हा कृषी प्रयोगशाळा (Diagnostic Labs)',
+                        strings.diagnosticLabsHeader,
                         style: AppTypography.subheading.copyWith(
                           color: AppColors.soilCharcoal,
                           fontWeight: FontWeight.w700,

@@ -573,13 +573,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify IPM Order: What to avoid is rendered first and loud
-      expect(find.text('हे अजिबात करू नका (What to Avoid):'), findsOneWidget);
+      expect(find.text('हे अजिबात करू नका:'), findsOneWidget);
       expect(find.text('Do not top-dress nitrogen now. It accelerates spread.'), findsOneWidget);
-      expect(find.text('मशागतीय / यांत्रिक उपाय (Cultural Action)'), findsOneWidget);
+      expect(find.text('मशागतीय / यांत्रिक उपाय'), findsOneWidget);
 
       // Chemical details collapsed by default
-      expect(find.text('रासायनिक फवारणी (Chemical Action)'), findsOneWidget);
-      await tester.tap(find.text('रासायनिक फवारणी (Chemical Action)'));
+      expect(find.text('रासायनिक फवारणी'), findsOneWidget);
+      await tester.tap(find.text('रासायनिक फवारणी'));
       await tester.pumpAndSettle();
       expect(find.text('Tricyclazole 75 WP'), findsOneWidget);
       expect(find.text('0.6 g/L'), findsOneWidget);
@@ -635,10 +635,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('पान उलटून पहा. करडी बुरशी दिसते का?'), findsOneWidget);
-      expect(find.text("सांगता येत नाही (CAN'T TELL)"), findsOneWidget);
+      expect(find.text('सांगता येत नाही'), findsOneWidget);
 
       // Tap CAN'T TELL
-      await tester.tap(find.text("सांगता येत नाही (CAN'T TELL)"));
+      await tester.tap(find.text('सांगता येत नाही'));
       await tester.pumpAndSettle();
 
       // Verifies navigation to EscalationStatusScreen
@@ -697,10 +697,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('How is the crop doing 3 days after draining the field?'), findsOneWidget);
-      expect(find.text('बिघडले\n(Got worse)'), findsOneWidget);
+      expect(find.text('बिघडले'), findsOneWidget);
 
       // Tap Got Worse
-      await tester.tap(find.text('बिघडले\n(Got worse)'));
+      await tester.tap(find.text('बिघडले'));
       await tester.pumpAndSettle();
 
       expect(followUpRepo.lastFollowUpId, 'followup_step7_1');

@@ -266,7 +266,7 @@ void main() {
       // Modal content
       expect(find.text('🌾 भूमी डेमो'), findsOneWidget);
       expect(find.text('शेतकरी: रमेश पाटील'), findsOneWidget);
-      expect(find.text('शेत: डेमो भात शेत (Demo Paddy Farm)'), findsOneWidget);
+      expect(find.text('शेत: डेमो भात शेत'), findsOneWidget);
       expect(find.text('स्थान: नाशिक, महाराष्ट्र'), findsOneWidget);
       expect(find.text('डेमो मध्ये प्रवेश करा'), findsOneWidget);
       expect(find.text('रद्द करा'), findsOneWidget);

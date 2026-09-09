@@ -228,7 +228,7 @@ void main() {
       expect(find.text('बाधित पानाचा स्पष्ट फोटो दाखवा.'), findsOneWidget);
 
       // Step 4: Play advisory audio
-      await tester.tap(find.text('सल्ला ऐका (Listen)'));
+      await tester.tap(find.text('सल्ला ऐका'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 

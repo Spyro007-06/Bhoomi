@@ -74,17 +74,17 @@ void main() {
 
       // 2. Verify Diagnosis label & High confidence
       expect(find.text('भातावरील करपा'), findsWidgets);
-      expect(find.text('उच्च अचूकता (High Confidence)'), findsOneWidget);
+      expect(find.text('उच्च अचूकता'), findsOneWidget);
 
       // 3. Verify WHAT TO AVOID is displayed
       expect(find.text('Do not apply urea nitrogen fertilizer now.'), findsOneWidget);
 
       // 4. Verify Chemical details are COLLAPSED by default
       expect(find.textContaining('0.6 g per litre'), findsNothing);
-      expect(find.text('रासायनिक फवारणी (Chemical Action)'), findsOneWidget);
+      expect(find.text('रासायनिक फवारणी'), findsOneWidget);
 
       // 5. Tap to expand chemical details
-      await tester.tap(find.text('रासायनिक फवारणी (Chemical Action)'));
+      await tester.tap(find.text('रासायनिक फवारणी'));
       await tester.pumpAndSettle();
       expect(find.textContaining('0.6 g per litre'), findsOneWidget);
 
@@ -182,11 +182,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(EscalationStatusScreen), findsOneWidget);
-      expect(find.text('तज्ञांकडे वर्ग केले (Escalated)'), findsWidgets);
+      expect(find.text('तज्ञांकडे वर्ग केले'), findsWidgets);
       expect(find.text('CASE-2026-NASHIK-99'), findsOneWidget);
       expect(find.text('KVK Nashik Agronomy Cell'), findsOneWidget);
       expect(find.text('2 (लवकरच संपर्क होईल)'), findsOneWidget);
-      expect(find.text('45 मिनिटे (Minutes)'), findsOneWidget);
+      expect(find.text('45 मिनिटे'), findsOneWidget);
     });
   });
 }

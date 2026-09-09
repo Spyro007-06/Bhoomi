@@ -600,7 +600,7 @@ void main() {
       expect(find.byType(MoreScreen), findsOneWidget);
 
       // Phase 9: Open Referrals Directory
-      await tester.tap(find.text('कृषी विज्ञान केंद्र (KVK) व मदत केंद्र'));
+      await tester.tap(find.text('कृषी विज्ञान केंद्र व मदत केंद्र'));
       await tester.pumpAndSettle();
       expect(find.byType(ReferralsScreen), findsOneWidget);
       expect(find.text('Krishi Vigyan Kendra (KVK) Nashik'), findsOneWidget);
@@ -612,7 +612,7 @@ void main() {
       expect(find.byType(MoreScreen), findsOneWidget);
 
       // Phase 10: Local Logout confirmation
-      await tester.tap(find.text('बाहेर पडा (Log Out)'));
+      await tester.tap(find.text('बाहेर पडा'));
       await tester.pumpAndSettle();
       expect(find.text('तुम्हाला बाहेर पडायचे आहे का?'), findsOneWidget);
       await tester.tap(find.text('हो, बाहेर पडा'));
@@ -740,17 +740,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('How is the crop 4 days after draining the field?'), findsOneWidget);
-      expect(find.text('बिघडले\n(Got worse)'), findsOneWidget);
+      expect(find.text('बिघडले'), findsOneWidget);
 
       // Tap Got Worse -> triggers auto-escalation
-      await tester.tap(find.text('बिघडले\n(Got worse)'));
+      await tester.tap(find.text('बिघडले'));
       await tester.pumpAndSettle();
 
       expect(find.text('Auto-Escalated to Expert (Case ID: CASE-AUTO-ESC-888)'), findsOneWidget);
       expect(find.text('Severity: early → severe'), findsOneWidget);
 
       // Verify second tap is rejected (non-duplicated, idempotent)
-      await tester.tap(find.text('बिघडले\n(Got worse)'));
+      await tester.tap(find.text('बिघडले'));
       await tester.pumpAndSettle();
       expect(find.text('Auto-Escalated to Expert (Case ID: CASE-AUTO-ESC-888)'), findsOneWidget);
     });

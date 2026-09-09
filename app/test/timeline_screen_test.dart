@@ -100,7 +100,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Verify Timeline Title & Events
-      expect(find.text('पीक इतिहास (Timeline)'), findsOneWidget);
+      expect(find.text('पीक इतिहास व नोंदी'), findsOneWidget);
       expect(find.text('Paddy Blast Detected'), findsOneWidget);
       expect(find.text('Humidity Alert'), findsOneWidget);
 

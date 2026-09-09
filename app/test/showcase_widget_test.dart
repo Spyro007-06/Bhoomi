@@ -120,25 +120,25 @@ void main() {
       await tester.scrollUntilVisible(find.byType(VoiceActionButton), 300, scrollable: find.byType(Scrollable).first);
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Tap to Speak (बोलण्यासाठी टॅप करा)'), findsOneWidget);
+      expect(find.text('बोलण्यासाठी टॅप करा'), findsOneWidget);
 
       // Tap to start listening
       await tester.tap(find.byType(VoiceActionButton));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Listening... Tap to stop (ऐकत आहे...)'), findsOneWidget);
+      expect(find.text('ऐकत आहे... थांबवण्यासाठी टॅप करा'), findsOneWidget);
 
       // Tap to stop listening -> transcribing
       await tester.tap(find.byType(VoiceActionButton));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Transcribing speech... (प्रक्रिया करत आहे...)'), findsOneWidget);
+      expect(find.text('प्रक्रिया करत आहे...'), findsOneWidget);
 
       // Tap -> playback
       await tester.tap(find.byType(VoiceActionButton));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Playing audio summary (आवाज सुरू आहे)'), findsOneWidget);
+      expect(find.text('आवाज सुरू आहे'), findsOneWidget);
     });
 
     testWidgets('Confidence gate tab switcher toggles between Advise, Clarify, and Escalate',

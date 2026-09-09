@@ -165,14 +165,14 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
                     Expanded(
                       child: _CandidateCard(
                         candidate: candidates[0],
-                        candidateTag: 'शक्यता १ (Candidate A)',
+                        candidateTag: strings.candidateOneTag,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.m12),
                     Expanded(
                       child: _CandidateCard(
                         candidate: candidates[1],
-                        candidateTag: 'शक्यता २ (Candidate B)',
+                        candidateTag: strings.candidateTwoTag,
                       ),
                     ),
                   ],
@@ -194,7 +194,7 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
                         const SizedBox(width: AppSpacing.s8),
                         Expanded(
                           child: Text(
-                            'प्रत्यक्ष निरीक्षण प्रश्न (Field Check):',
+                            strings.fieldCheckPrompt,
                             style: AppTypography.bodyMedium.copyWith(
                               color: AppColors.soilCharcoal,
                               fontWeight: FontWeight.w700,
@@ -216,7 +216,7 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
                     // Voice prompt player
                     SpokenSummaryPlayer(
                       text: question,
-                      title: 'प्रश्न ऐका (Listen to Question)',
+                      title: strings.listenQuestion,
                     ),
                   ],
                 ),

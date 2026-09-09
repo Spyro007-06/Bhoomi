@@ -89,8 +89,8 @@ void main() {
       expect(find.text('विचारणा करा'), findsOneWidget);
 
       // 5. Test Listen audio preview button
-      expect(find.text('सल्ला ऐका (Listen)'), findsOneWidget);
-      await tester.tap(find.text('सल्ला ऐका (Listen)'));
+      expect(find.text('सल्ला ऐका'), findsOneWidget);
+      await tester.tap(find.text('सल्ला ऐका'));
       await tester.pumpAndSettle();
 
       expect(find.text('सल्ला ऐकत आहात'), findsOneWidget);
@@ -119,7 +119,7 @@ void main() {
               body: Center(
                 child: SpokenSummaryPlayer(
                   text: 'Do not apply nitrogen fertilizer. Drain field water for 48 hours.',
-                  title: 'सल्ला ऐका (Listen to Advisory)',
+                  title: 'सल्ला ऐका',
                   onPlayAudio: () {
                     playCallbackCalled = true;
                   },
@@ -132,7 +132,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Initial state: not auto-playing
-      expect(find.text('सल्ला ऐका (Listen to Advisory)'), findsOneWidget);
+      expect(find.text('सल्ला ऐका'), findsOneWidget);
       expect(playCallbackCalled, isFalse);
 
       // Tap Play

@@ -4,6 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/localization/app_strings.dart';
+import '../../../models/timeline_models.dart';
 import '../../../providers/farm_providers.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../widgets/app_loading.dart';
@@ -48,6 +50,20 @@ class HistoryScreen extends ConsumerWidget {
       default:
         return AppColors.fieldSlate;
     }
+  }
+
+  String _getLocalizedTitle(TimelineEventModel event, AppStrings strings) {
+    if (event.id == 'tl_demo_01') return strings.timelineAdvisoryTitle;
+    if (event.id == 'tl_demo_02') return strings.timelineDiagnosisTitle;
+    if (event.id == 'tl_demo_03') return strings.timelineAlertTitle;
+    return event.title;
+  }
+
+  String? _getLocalizedDescription(TimelineEventModel event, AppStrings strings) {
+    if (event.id == 'tl_demo_01') return strings.timelineAdvisoryDesc;
+    if (event.id == 'tl_demo_02') return strings.timelineDiagnosisDesc;
+    if (event.id == 'tl_demo_03') return strings.timelineAlertDesc;
+    return event.description;
   }
 
   @override
@@ -109,6 +125,8 @@ class HistoryScreen extends ConsumerWidget {
                   final event = events[index];
                   final icon = _getEventIcon(event.eventType);
                   final color = _getEventColor(event.eventType);
+                  final title = _getLocalizedTitle(event, strings);
+                  final description = _getLocalizedDescription(event, strings);
 
                   return InkWell(
                     borderRadius: BorderRadius.circular(16),
@@ -149,7 +167,7 @@ class HistoryScreen extends ConsumerWidget {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        event.title,
+                                        title,
                                         style: AppTypography.bodyMedium.copyWith(
                                           color: AppColors.soilCharcoal,
                                           fontWeight: FontWeight.w700,
@@ -165,10 +183,10 @@ class HistoryScreen extends ConsumerWidget {
                                     ],
                                   ],
                                 ),
-                                if (event.description != null) ...[
+                                if (description != null) ...[
                                   const SizedBox(height: AppSpacing.s4),
                                   Text(
-                                    event.description!,
+                                    description,
                                     style: AppTypography.bodySmall.copyWith(
                                       color: AppColors.fieldSlate,
                                     ),
@@ -190,7 +208,7 @@ class HistoryScreen extends ConsumerWidget {
                                       Row(
                                         children: [
                                           Text(
-                                            'तपशील पहा',
+                                            strings.viewDetails,
                                             style: AppTypography.caption.copyWith(
                                               color: AppColors.forest,
                                               fontWeight: FontWeight.w700,

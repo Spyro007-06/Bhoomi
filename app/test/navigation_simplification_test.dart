@@ -181,14 +181,14 @@ void main() {
 
       // Check secondary options
       expect(find.text('माझे शेत व पीक माहिती'), findsOneWidget);
-      expect(find.text('कृषी विज्ञान केंद्र (KVK) व मदत केंद्र'), findsOneWidget);
+      expect(find.text('कृषी विज्ञान केंद्र व मदत केंद्र'), findsOneWidget);
       expect(find.text('तपासणी व सल्ला इतिहास'), findsOneWidget);
-      expect(find.text('भाषा बदला (Change Language)'), findsOneWidget);
+      expect(find.text('भाषा बदला'), findsOneWidget);
       expect(find.text('भूमीबद्दल माहिती'), findsOneWidget);
-      expect(find.text('बाहेर पडा (Log Out)'), findsOneWidget);
+      expect(find.text('बाहेर पडा'), findsOneWidget);
 
       // Tap KVK & Helpline
-      await tester.tap(find.text('कृषी विज्ञान केंद्र (KVK) व मदत केंद्र'));
+      await tester.tap(find.text('कृषी विज्ञान केंद्र व मदत केंद्र'));
       await tester.pumpAndSettle();
       expect(find.byType(ReferralsScreen), findsOneWidget);
 

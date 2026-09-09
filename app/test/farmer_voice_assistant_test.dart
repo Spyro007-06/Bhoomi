@@ -91,12 +91,12 @@ void main() {
       expect(find.text('तुमचा प्रश्न'), findsOneWidget);
       expect(find.text('पानांवर करडे ठिपके दिसत आहेत, काय उपाय करावा?'), findsOneWidget);
       expect(find.text('Bhoomi चे उत्तर'), findsOneWidget);
-      expect(find.text('सल्ला ऐका (Listen)'), findsOneWidget);
+      expect(find.text('सल्ला ऐका'), findsOneWidget);
       expect(find.text('आणखी विचारा'), findsOneWidget);
       expect(find.text('विचारणा करा'), findsOneWidget);
 
       // 5. Test Listen audio playback
-      await tester.tap(find.text('सल्ला ऐका (Listen)'));
+      await tester.tap(find.text('सल्ला ऐका'));
       await tester.pumpAndSettle();
 
       expect(find.text('सल्ला ऐकत आहात'), findsOneWidget);

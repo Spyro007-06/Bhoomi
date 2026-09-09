@@ -148,7 +148,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Modal options visible
-      expect(find.text('भाषा निवडा / Select Language'), findsOneWidget);
+      expect(find.text('भाषा निवडा'), findsOneWidget);
       expect(find.text('मराठी'), findsWidgets);
       expect(find.text('हिंदी'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);

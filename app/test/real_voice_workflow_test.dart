@@ -345,8 +345,8 @@ void main() {
       expect(fakeVoiceRepo.transcribeCallCount, 1);
 
       // 5. Playback Audio
-      expect(find.text('सल्ला ऐका (Listen)'), findsOneWidget);
-      await tester.tap(find.text('सल्ला ऐका (Listen)'));
+      expect(find.text('सल्ला ऐका'), findsOneWidget);
+      await tester.tap(find.text('सल्ला ऐका'));
       await tester.pumpAndSettle();
       expect(fakeVoiceRepo.synthesizeCallCount, 1);
       expect(fakePlayer.playCallCount, 1);
@@ -376,7 +376,7 @@ void main() {
               body: Center(
                 child: SpokenSummaryPlayer(
                   text: 'Spray copper oxychloride 3g per litre of water.',
-                  title: 'सल्ला ऐका (Listen to Advisory)',
+                  title: 'सल्ला ऐका',
                   onPlayAudio: () {
                     playCallbackFired = true;
                   },
@@ -389,7 +389,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Initial state
-      expect(find.text('सल्ला ऐका (Listen to Advisory)'), findsOneWidget);
+      expect(find.text('सल्ला ऐका'), findsOneWidget);
       expect(playCallbackFired, isFalse);
 
       // Tap Play

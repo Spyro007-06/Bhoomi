@@ -98,15 +98,27 @@ class _VoiceActionButtonState extends State<VoiceActionButton>
   }
 
   String get _stateLabel {
+    final lang = widget.activeLanguage.toLowerCase();
+    final isMarathi = lang.startsWith('mr');
+    final isHindi = lang.startsWith('hi');
+
     switch (widget.state) {
       case VoiceState.idle:
-        return 'Tap to Speak (बोलण्यासाठी टॅप करा)';
+        if (isMarathi) return 'बोलण्यासाठी टॅप करा';
+        if (isHindi) return 'बोलने के लिए टैप करें';
+        return 'Tap to Speak';
       case VoiceState.listening:
-        return 'Listening... Tap to stop (ऐकत आहे...)';
+        if (isMarathi) return 'ऐकत आहे... थांबवण्यासाठी टॅप करा';
+        if (isHindi) return 'सुन रहा है... रोकने के लिए टैप करें';
+        return 'Listening... Tap to stop';
       case VoiceState.transcribing:
-        return 'Transcribing speech... (प्रक्रिया करत आहे...)';
+        if (isMarathi) return 'प्रक्रिया करत आहे...';
+        if (isHindi) return 'प्रक्रिया की जा रही है...';
+        return 'Transcribing speech...';
       case VoiceState.playback:
-        return 'Playing audio summary (आवाज सुरू आहे)';
+        if (isMarathi) return 'आवाज सुरू आहे';
+        if (isHindi) return 'ऑडियो चल रहा है';
+        return 'Playing audio summary';
     }
   }
 

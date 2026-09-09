@@ -96,8 +96,8 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'किसान: रमेश पाटिल' : 'Farmer: Ramesh Patil');
 
   String get demoFarmNameLabel => language == AppLanguage.marathi
-      ? 'शेत: डेमो भात शेत (Demo Paddy Farm)'
-      : (language == AppLanguage.hindi ? 'खेत: डेमो धान खेत (Demo Paddy Farm)' : 'Farm: Demo Paddy Farm');
+      ? 'शेत: डेमो भात शेत'
+      : (language == AppLanguage.hindi ? 'खेत: डेमो धान खेत' : 'Farm: Demo Paddy Farm');
 
   String get demoLocationLabel => language == AppLanguage.marathi
       ? 'स्थान: नाशिक, महाराष्ट्र'
@@ -327,12 +327,12 @@ class AppStrings {
           : 'Set up Farm Profile');
 
   String get cropLabel => language == AppLanguage.marathi
-      ? 'पीक (Crop)'
-      : (language == AppLanguage.hindi ? 'फसल (Crop)' : 'Crop');
+      ? 'पीक'
+      : (language == AppLanguage.hindi ? 'फसल' : 'Crop');
 
   String get cropPaddy => language == AppLanguage.marathi
-      ? 'भात / धान (Paddy)'
-      : (language == AppLanguage.hindi ? 'धान (Paddy)' : 'Paddy / Rice');
+      ? 'भात'
+      : (language == AppLanguage.hindi ? 'धान' : 'Paddy / Rice');
 
   String get cropHint => language == AppLanguage.marathi
       ? 'उदा. भात / कापूस / सोयाबीन'
@@ -341,8 +341,8 @@ class AppStrings {
           : 'e.g. Paddy / Rice, Cotton, Soybean');
 
   String get varietyLabel => language == AppLanguage.marathi
-      ? 'वाण / प्रकार (Variety)'
-      : (language == AppLanguage.hindi ? 'किस्म (Variety)' : 'Variety');
+      ? 'वाण / प्रकार'
+      : (language == AppLanguage.hindi ? 'किस्म' : 'Variety');
 
   String get varietyHint => language == AppLanguage.marathi
       ? 'उदा. इंद्रायणी, बासमती, कर्जत'
@@ -351,40 +351,40 @@ class AppStrings {
           : 'e.g. Indrayani, Karjat-4');
 
   String get growthStageLabel => language == AppLanguage.marathi
-      ? 'पिकाची अवस्था (Growth Stage)'
+      ? 'पिकाची अवस्था'
       : (language == AppLanguage.hindi
-          ? 'फसल की अवस्था (Growth Stage)'
+          ? 'फसल की अवस्था'
           : 'Growth Stage');
 
   String get growthStageNursery => language == AppLanguage.marathi
-      ? 'रोपवाटिका (Nursery)'
-      : (language == AppLanguage.hindi ? 'नर्सरी (Nursery)' : 'Nursery');
+      ? 'रोपवाटिका'
+      : (language == AppLanguage.hindi ? 'नर्सरी' : 'Nursery');
 
   String get growthStageTillering => language == AppLanguage.marathi
-      ? 'फुटवे फुटण्याची अवस्था (Tillering)'
+      ? 'फुटवे फुटण्याची अवस्था'
       : (language == AppLanguage.hindi
-          ? 'कल्ले निकलने की अवस्था (Tillering)'
+          ? 'कल्ले निकलने की अवस्था'
           : 'Tillering');
 
   String get growthStagePanicle => language == AppLanguage.marathi
-      ? 'पोटरी / लोंबी निघणे (Panicle Initiation)'
+      ? 'पोटरी / लोंबी निघणे'
       : (language == AppLanguage.hindi
-          ? 'बालियां निकलना (Panicle Initiation)'
+          ? 'बालियां निकलना'
           : 'Panicle Initiation');
 
   String get growthStageFlowering => language == AppLanguage.marathi
-      ? 'फुलोरा (Flowering)'
-      : (language == AppLanguage.hindi ? 'फूल आना (Flowering)' : 'Flowering');
+      ? 'फुलोरा'
+      : (language == AppLanguage.hindi ? 'फूल आना' : 'Flowering');
 
   String get growthStageGrainFilling => language == AppLanguage.marathi
-      ? 'दाणे भरणे / पक्वता (Grain Filling / Maturity)'
+      ? 'दाणे भरणे / पक्वता'
       : (language == AppLanguage.hindi
-          ? 'दाना भरना / पकना (Grain Filling / Maturity)'
+          ? 'दाना भरना / पकना'
           : 'Grain Filling / Maturity');
 
   String get regionLabel => language == AppLanguage.marathi
-      ? 'जिल्हा / तालुका (Region)'
-      : (language == AppLanguage.hindi ? 'जिला (Region)' : 'District / Region');
+      ? 'जिल्हा / तालुका'
+      : (language == AppLanguage.hindi ? 'जिला' : 'District / Region');
 
   String get regionHint => language == AppLanguage.marathi
       ? 'उदा. नाशिक, रायगड, ठाणे'
@@ -393,9 +393,9 @@ class AppStrings {
           : 'e.g. Nashik, Raigad, Pune');
 
   String get locationLabel => language == AppLanguage.marathi
-      ? 'शेताचे स्थान (GPS Location)'
+      ? 'शेताचे स्थान'
       : (language == AppLanguage.hindi
-          ? 'खेत का स्थान (GPS Location)'
+          ? 'खेत का स्थान'
           : 'Farm GPS Location');
 
   String get locationFetching => language == AppLanguage.marathi
@@ -424,21 +424,21 @@ class AppStrings {
           : 'Farmer Profile');
 
   String get selectLanguageTitle => language == AppLanguage.marathi
-      ? 'भाषा निवडा / Select Language'
+      ? 'भाषा निवडा'
       : (language == AppLanguage.hindi
-          ? 'भाषा चुनें / Select Language'
-          : 'Select Language / भाषा निवडा');
+          ? 'भाषा चुनें'
+          : 'Select Language');
 
   String get languageOption => language == AppLanguage.marathi
-      ? 'भाषा बदला (Change Language)'
+      ? 'भाषा बदला'
       : (language == AppLanguage.hindi
-          ? 'भाषा बदलें (Change Language)'
-          : 'Language (भाषा)');
+          ? 'भाषा बदलें'
+          : 'Language');
 
   String get referralsOption => language == AppLanguage.marathi
-      ? 'कृषी विज्ञान केंद्र (KVK) व मदत केंद्र'
+      ? 'कृषी विज्ञान केंद्र व मदत केंद्र'
       : (language == AppLanguage.hindi
-          ? 'कृषि विज्ञान केंद्र (KVK) और हेल्पलाइन'
+          ? 'कृषि विज्ञान केंद्र और हेल्पलाइन'
           : 'KVK & Agricultural Helpline');
 
   String get aboutOption => language == AppLanguage.marathi
@@ -454,9 +454,9 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'जांच व सलाह इतिहास' : 'Check & Advisory History');
 
   String get logoutButton => language == AppLanguage.marathi
-      ? 'बाहेर पडा (Log Out)'
+      ? 'बाहेर पडा'
       : (language == AppLanguage.hindi
-          ? 'लॉग आउट करें (Log Out)'
+          ? 'लॉग आउट करें'
           : 'Log Out');
 
   String get logoutConfirmTitle => language == AppLanguage.marathi
@@ -648,40 +648,40 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'निदान और सलाह' : 'Diagnosis & Advisory');
 
   String get highConfidence => language == AppLanguage.marathi
-      ? 'उच्च अचूकता (High Confidence)'
-      : (language == AppLanguage.hindi ? 'उच्च सटीकता (High Confidence)' : 'High Confidence');
+      ? 'उच्च अचूकता'
+      : (language == AppLanguage.hindi ? 'उच्च सटीकता' : 'High Confidence');
 
   String get moderateConfidence => language == AppLanguage.marathi
-      ? 'मध्यम अचूकता (Moderate Confidence)'
-      : (language == AppLanguage.hindi ? 'मध्यम सटीकता (Moderate Confidence)' : 'Moderate Confidence');
+      ? 'मध्यम अचूकता'
+      : (language == AppLanguage.hindi ? 'मध्यम सटीकता' : 'Moderate Confidence');
 
   String get otherPossibilities => language == AppLanguage.marathi
-      ? 'इतर शक्यता (Other Possibilities)'
-      : (language == AppLanguage.hindi ? 'अन्य संभावनाएं (Other Possibilities)' : 'Other Possibilities');
+      ? 'इतर शक्यता'
+      : (language == AppLanguage.hindi ? 'अन्य संभावनाएं' : 'Other Possibilities');
 
   String get whatToAvoidHeader => language == AppLanguage.marathi
-      ? 'हे अजिबात करू नका (तातडीचा इशारा)'
-      : (language == AppLanguage.hindi ? 'यह बिल्कुल न करें (चेतावनी)' : 'WHAT TO AVOID FIRST (CRITICAL)');
+      ? 'हे अजिबात करू नका'
+      : (language == AppLanguage.hindi ? 'यह बिल्कुल न करें' : 'WHAT TO AVOID FIRST (CRITICAL)');
 
   String get whatToCheckHeader => language == AppLanguage.marathi
-      ? 'शेतात काय तपासावे (लक्षणे)'
-      : (language == AppLanguage.hindi ? 'खेत में क्या जांचें (लक्षण)' : 'WHAT TO CHECK (SYMPTOMS)');
+      ? 'शेतात काय तपासावे'
+      : (language == AppLanguage.hindi ? 'खेत में क्या जांचें' : 'WHAT TO CHECK (SYMPTOMS)');
 
   String get ipmLadderHeader => language == AppLanguage.marathi
-      ? 'उपाययोजना पायऱ्या (IPM Ladder)'
-      : (language == AppLanguage.hindi ? 'नियंत्रण के चरण (IPM Ladder)' : 'INTEGRATED PEST MANAGEMENT (IPM)');
+      ? 'एकात्मिक कीड व्यवस्थापन पायऱ्या'
+      : (language == AppLanguage.hindi ? 'एकीकृत कीट प्रबंधन के चरण' : 'INTEGRATED PEST MANAGEMENT (IPM)');
 
   String get culturalTier => language == AppLanguage.marathi
-      ? '१. मशागतीय उपाय (Cultural)'
-      : (language == AppLanguage.hindi ? '1. सस्यीय उपाय (Cultural)' : '1. Cultural Action');
+      ? '१. मशागतीय उपाय'
+      : (language == AppLanguage.hindi ? '१. सस्यीय उपाय' : '1. Cultural Action');
 
   String get biologicalTier => language == AppLanguage.marathi
-      ? '२. जैविक उपाय (Biological)'
-      : (language == AppLanguage.hindi ? '2. जैविक नियंत्रण (Biological)' : '2. Biological Action');
+      ? '२. जैविक उपाय'
+      : (language == AppLanguage.hindi ? '२. जैविक नियंत्रण' : '2. Biological Action');
 
   String get chemicalTier => language == AppLanguage.marathi
-      ? '३. रासायनिक उपाय (Chemical)'
-      : (language == AppLanguage.hindi ? '3. रासायनिक नियंत्रण (Chemical)' : '3. Chemical Action');
+      ? '३. रासायनिक उपाय'
+      : (language == AppLanguage.hindi ? '३. रासायनिक नियंत्रण' : '3. Chemical Action');
 
   String get showChemicalDetails => language == AppLanguage.marathi
       ? '+ रासायनिक औषधांचे तपशील पहा'
@@ -692,12 +692,12 @@ class AppStrings {
       : (language == AppLanguage.hindi ? '- रासायनिक विवरण छुपाएं' : '- Hide chemical details');
 
   String get citationsHeader => language == AppLanguage.marathi
-      ? 'सल्ल्याचा अधिकृत संदर्भ (Citations)'
+      ? 'सल्ल्याचा अधिकृत संदर्भ'
       : (language == AppLanguage.hindi ? 'सलाह का आधिकारिक स्रोत' : 'Why this advice? (Official Sources)');
 
   String get listenAudio => language == AppLanguage.marathi
-      ? 'सल्ला ऐका (Listen)'
-      : (language == AppLanguage.hindi ? 'सलाह सुनें (Listen)' : 'Listen to Advisory');
+      ? 'सल्ला ऐका'
+      : (language == AppLanguage.hindi ? 'सलाह सुनें' : 'Listen to Advisory');
 
   // Confidence Gate - Doubt Doctor (Clarify Outcome)
   String get doubtDoctorTitle => language == AppLanguage.marathi
@@ -711,21 +711,37 @@ class AppStrings {
           : 'Check your field observation to confirm the diagnosis.');
 
   String get answerYes => language == AppLanguage.marathi
-      ? 'होय (YES)'
-      : (language == AppLanguage.hindi ? 'हाँ (YES)' : 'YES');
+      ? 'होय'
+      : (language == AppLanguage.hindi ? 'हाँ' : 'YES');
 
   String get answerNo => language == AppLanguage.marathi
-      ? 'नाही (NO)'
-      : (language == AppLanguage.hindi ? 'नहीं (NO)' : 'NO');
+      ? 'नाही'
+      : (language == AppLanguage.hindi ? 'नहीं' : 'NO');
 
   String get answerUnknown => language == AppLanguage.marathi
-      ? 'सांगता येत नाही (CAN\'T TELL)'
-      : (language == AppLanguage.hindi ? 'पता नहीं (CAN\'T TELL)' : "CAN'T TELL");
+      ? 'सांगता येत नाही'
+      : (language == AppLanguage.hindi ? 'पता नहीं' : "CAN'T TELL");
+
+  String get candidateOneTag => language == AppLanguage.marathi
+      ? 'शक्यता १'
+      : (language == AppLanguage.hindi ? 'संभावना १' : 'Option 1');
+
+  String get candidateTwoTag => language == AppLanguage.marathi
+      ? 'शक्यता २'
+      : (language == AppLanguage.hindi ? 'संभावना २' : 'Option 2');
+
+  String get fieldCheckPrompt => language == AppLanguage.marathi
+      ? 'प्रत्यक्ष निरीक्षण प्रश्न:'
+      : (language == AppLanguage.hindi ? 'प्रत्यक्ष निरीक्षण प्रश्न:' : 'Field Check:');
+
+  String get listenQuestion => language == AppLanguage.marathi
+      ? 'प्रश्न ऐका'
+      : (language == AppLanguage.hindi ? 'प्रश्न सुनें' : 'Listen to Question');
 
   // Confidence Gate - Escalate Outcome
   String get escalateTitle => language == AppLanguage.marathi
-      ? 'तज्ञांकडे वर्ग केले (Escalated)'
-      : (language == AppLanguage.hindi ? 'विशेषज्ञ को भेजा गया (Escalated)' : 'Referred to Agricultural Expert');
+      ? 'तज्ञांकडे वर्ग केले'
+      : (language == AppLanguage.hindi ? 'विशेषज्ञ को भेजा गया' : 'Referred to Agricultural Expert');
 
   String get escalateSubtitle => language == AppLanguage.marathi
       ? 'या समस्येची लक्षणे अस्पष्ट असल्याने आम्ही ही केस स्थानिक कृषी शास्त्रज्ञांकडे पाठवली आहे.'
@@ -734,8 +750,8 @@ class AppStrings {
           : 'Symptoms could not be identified with certainty. An expert is reviewing your case.');
 
   String get caseIdLabel => language == AppLanguage.marathi
-      ? 'केस क्रमांक (Case ID)'
-      : (language == AppLanguage.hindi ? 'केस संख्या (Case ID)' : 'Case ID');
+      ? 'केस क्रमांक'
+      : (language == AppLanguage.hindi ? 'केस संख्या' : 'Case ID');
 
   String get assignedToLabel => language == AppLanguage.marathi
       ? 'नियुक्त केंद्र / तज्ञ'
@@ -748,6 +764,14 @@ class AppStrings {
   String get etaMinutesLabel => language == AppLanguage.marathi
       ? 'अपेक्षित वेळ'
       : (language == AppLanguage.hindi ? 'अनुमानित समय' : 'Estimated Time');
+
+  String get queueStatusSoon => language == AppLanguage.marathi
+      ? '(लवकरच संपर्क होईल)'
+      : (language == AppLanguage.hindi ? '(जल्द संपर्क होगा)' : '(Contacting shortly)');
+
+  String minutesText(int minutes) => language == AppLanguage.marathi
+      ? '$minutes मिनिटे'
+      : (language == AppLanguage.hindi ? '$minutes मिनट' : '$minutes minutes');
 
   String get backToHome => language == AppLanguage.marathi
       ? 'मुख्य पृष्ठावर जा'
@@ -839,16 +863,16 @@ class AppStrings {
           : 'How is the crop doing after treatment?');
 
   String get statusImproved => language == AppLanguage.marathi
-      ? 'सुधारणा झाली (Improved)'
-      : (language == AppLanguage.hindi ? 'सुधार हुआ (Improved)' : 'Improved');
+      ? 'सुधारणा झाली'
+      : (language == AppLanguage.hindi ? 'सुधार हुआ' : 'Improved');
 
   String get statusNoChange => language == AppLanguage.marathi
-      ? 'बदल नाही (No Change)'
-      : (language == AppLanguage.hindi ? 'कोई बदलाव नहीं (No Change)' : 'No Change');
+      ? 'बदल नाही'
+      : (language == AppLanguage.hindi ? 'कोई बदलाव नहीं' : 'No Change');
 
   String get statusGotWorse => language == AppLanguage.marathi
-      ? 'अधिक बिघडले (Got Worse)'
-      : (language == AppLanguage.hindi ? 'और बिगड़ गया (Got Worse)' : 'Got Worse');
+      ? 'अधिक बिघडले'
+      : (language == AppLanguage.hindi ? 'और बिगड़ गया' : 'Got Worse');
 
   String get followupSuccessMessage => language == AppLanguage.marathi
       ? 'फॉलो-अप प्रतिसाद जतन केला. शेताची सद्यस्थिती अद्यतनित झाली आहे.'
@@ -868,8 +892,8 @@ class AppStrings {
 
   // Step 5: Timeline / History
   String get timelineTitle => language == AppLanguage.marathi
-      ? 'पीक इतिहास (Timeline)'
-      : (language == AppLanguage.hindi ? 'फसल इतिहास (Timeline)' : 'Crop Timeline & History');
+      ? 'पीक इतिहास व नोंदी'
+      : (language == AppLanguage.hindi ? 'फसल इतिहास व रिकॉर्ड' : 'Crop Timeline & History');
 
   String get noHistoryTitle => language == AppLanguage.marathi
       ? 'अजून कोणताही इतिहास नाही'
@@ -901,18 +925,58 @@ class AppStrings {
       ? 'फॉलो-अप तपासणी'
       : (language == AppLanguage.hindi ? 'फॉलो-अप जाँच' : 'Follow-up Check');
 
+  String get viewDetails => language == AppLanguage.marathi
+      ? 'तपशील पहा'
+      : (language == AppLanguage.hindi ? 'विवरण देखें' : 'View Details');
+
+  String get timelineAdvisoryTitle => language == AppLanguage.marathi
+      ? 'एकात्मिक कीड व्यवस्थापन सल्ला जारी केला'
+      : (language == AppLanguage.hindi
+          ? 'एकीकृत कीट प्रबंधन सलाह जारी'
+          : 'IPM Advisory Issued');
+
+  String get timelineAdvisoryDesc => language == AppLanguage.marathi
+      ? 'मशागतीय हवा खेळती राहण्याची शिफारस. बुरशीजन्य रोग आढळल्यामुळे रासायनिक कीटकनाशक टाळले.'
+      : (language == AppLanguage.hindi
+          ? 'वायु संचार के लिए कृषि पद्धतियों की सिफारिश। कवक रोग मिलने पर रासायनिक कीटनाशक वर्जित।'
+          : 'Cultural aeration recommended. Chemical insecticide vetoed — fungal pathogen detected.');
+
+  String get timelineDiagnosisTitle => language == AppLanguage.marathi
+      ? 'पीक रोग निदान पूर्ण झाले'
+      : (language == AppLanguage.hindi
+          ? 'फसल रोग निदान पूर्ण हुआ'
+          : 'Crop Diagnosis Completed');
+
+  String get timelineDiagnosisDesc => language == AppLanguage.marathi
+      ? 'भातावरील करपा रोगाची ९४% अचूकतेसह निश्चित ओळख.'
+      : (language == AppLanguage.hindi
+          ? 'धान के झुलसा रोग की 94% सटीकता के साथ पुष्टि।'
+          : 'High confidence detection of Paddy Blast at 94% certainty.');
+
+  String get timelineAlertTitle => language == AppLanguage.marathi
+      ? 'प्रादेशिक हवामान सल्ला'
+      : (language == AppLanguage.hindi
+          ? 'क्षेत्रीय मौसम सलाह'
+          : 'Regional Weather Advisory');
+
+  String get timelineAlertDesc => language == AppLanguage.marathi
+      ? 'नाशिक परिसरासाठी सलग जास्त आर्द्रतेचा रात्रीचा इशारा नोंदवला.'
+      : (language == AppLanguage.hindi
+          ? 'नासिक क्लस्टर के लिए लगातार उच्च आर्द्रता रात की चेतावनी दर्ज की गई।'
+          : 'Consecutive high-humidity night alert registered for Nashik cluster.');
+
   // Step 5: Problem Detail
   String get problemDetailTitle => language == AppLanguage.marathi
       ? 'समस्या सविस्तर माहिती'
       : (language == AppLanguage.hindi ? 'समस्या का विवरण' : 'Problem Details');
 
   String get statusOpen => language == AppLanguage.marathi
-      ? 'सक्रिय (Open)'
-      : (language == AppLanguage.hindi ? 'सक्रिय (Open)' : 'Open');
+      ? 'सक्रिय'
+      : (language == AppLanguage.hindi ? 'सक्रिय' : 'Open');
 
   String get statusResolved => language == AppLanguage.marathi
-      ? 'निवारण झाले (Resolved)'
-      : (language == AppLanguage.hindi ? 'समाधान हुआ (Resolved)' : 'Resolved');
+      ? 'निवारण झाले'
+      : (language == AppLanguage.hindi ? 'समाधान हुआ' : 'Resolved');
 
   String get openedOnLabel => language == AppLanguage.marathi
       ? 'नोंदणी दिनांक'
@@ -932,8 +996,12 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'कृषि सहायता एवं संपर्क केंद्र' : 'KVK & Agricultural Helpline');
 
   String get kvkHeader => language == AppLanguage.marathi
-      ? 'स्थानिक कृषी विज्ञान केंद्र (KVK)'
-      : (language == AppLanguage.hindi ? 'स्थानीय कृषि विज्ञान केंद्र (KVK)' : 'Krishi Vigyan Kendra (KVK)');
+      ? 'स्थानिक कृषी विज्ञान केंद्र'
+      : (language == AppLanguage.hindi ? 'स्थानीय कृषि विज्ञान केंद्र' : 'Krishi Vigyan Kendra (KVK)');
+
+  String get diagnosticLabsHeader => language == AppLanguage.marathi
+      ? 'जिल्हा कृषी प्रयोगशाळा'
+      : (language == AppLanguage.hindi ? 'जिला कृषि प्रयोगशालाएं' : 'District Diagnostic Labs');
 
   String get helplineHeader => language == AppLanguage.marathi
       ? 'शासकीय किसान कॉल सेंटर'
@@ -1069,16 +1137,26 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'सलाह सुन रहे हैं' : 'Playing Advice');
 
   String get listenSpokenSummary => language == AppLanguage.marathi
-      ? 'सल्ला ऐका (Listen)'
-      : (language == AppLanguage.hindi ? 'सलाह सुनें (Listen)' : 'Listen to Advice');
+      ? 'सल्ला ऐका'
+      : (language == AppLanguage.hindi ? 'सलाह सुनें' : 'Listen to Advice');
 
   String get pauseSpokenSummary => language == AppLanguage.marathi
-      ? 'थांबवा (Pause)'
-      : (language == AppLanguage.hindi ? 'रोकें (Pause)' : 'Pause Audio');
+      ? 'थांबवा'
+      : (language == AppLanguage.hindi ? 'रोकें' : 'Pause Audio');
 
   String get replaySpokenSummary => language == AppLanguage.marathi
-      ? 'पुन्हा ऐका (Replay)'
-      : (language == AppLanguage.hindi ? 'दोबारा सुनें (Replay)' : 'Replay Audio');
+      ? 'पुन्हा ऐका'
+      : (language == AppLanguage.hindi ? 'दोबारा सुनें' : 'Replay Audio');
+
+  String get audioPlayingSubtitle => language == AppLanguage.marathi
+      ? 'ऑडिओ सल्ला ऐकवला जात आहे...'
+      : (language == AppLanguage.hindi ? 'ऑडियो सलाह चल रही है...' : 'Audio advisory playing...');
+
+  String get audioTapToListenSubtitle => language == AppLanguage.marathi
+      ? 'तुमच्या भाषेत हा सल्ला ऐकण्यासाठी टॅप करा'
+      : (language == AppLanguage.hindi
+          ? 'अपनी भाषा में यह सलाह सुनने के लिए टैप करें'
+          : 'Tap to listen to this advisory in your language');
 
   // Phase 2 Core Voice Experience Strings
   String get voiceBhoomiAnswer => language == AppLanguage.marathi
@@ -1812,27 +1890,27 @@ class AppStrings {
           : 'Grounded Advisory & IPM Guide');
 
   String get advisoryWhatToAvoidHeader => language == AppLanguage.marathi
-      ? 'हे अजिबात करू नका (What to Avoid):'
+      ? 'हे अजिबात करू नका:'
       : (language == AppLanguage.hindi
-          ? 'यह बिल्कुल न करें (What to Avoid):'
+          ? 'यह बिल्कुल न करें:'
           : 'What to Avoid First (Crucial):');
 
   String get advisoryWhatToCheckHeader => language == AppLanguage.marathi
-      ? 'शेतात काय तपासावे (Field Check):'
+      ? 'शेतात काय तपासावे:'
       : (language == AppLanguage.hindi
-          ? 'खेत में क्या जांचें (Field Check):'
+          ? 'खेत में क्या जांचें:'
           : 'What to Check in Field:');
 
   String get advisoryIpmLadderHeader => language == AppLanguage.marathi
-      ? 'एकात्मिक कीड व्यवस्थापन पायऱ्या (IPM Action Ladder):'
+      ? 'एकात्मिक कीड व्यवस्थापन पायऱ्या:'
       : (language == AppLanguage.hindi
-          ? 'एकीकृत कीट प्रबंधन चरण (IPM Ladder):'
+          ? 'एकीकृत कीट प्रबंधन चरण:'
           : 'IPM Action Ladder (Step-by-Step):');
 
   String get advisoryStep1Title => language == AppLanguage.marathi
-      ? 'मशागतीय / यांत्रिक उपाय (Cultural Action)'
+      ? 'मशागतीय / यांत्रिक उपाय'
       : (language == AppLanguage.hindi
-          ? 'कृषि / यांत्रिक उपाय (Cultural Action)'
+          ? 'कृषि / यांत्रिक उपाय'
           : 'Cultural Management');
 
   String get advisoryStep1Subtitle => language == AppLanguage.marathi
@@ -1842,9 +1920,9 @@ class AppStrings {
           : 'First-line non-chemical practices');
 
   String get advisoryStep2Title => language == AppLanguage.marathi
-      ? 'जैविक नियंत्रण (Biological Action)'
+      ? 'जैविक नियंत्रण'
       : (language == AppLanguage.hindi
-          ? 'जैविक नियंत्रण (Biological Action)'
+          ? 'जैविक नियंत्रण'
           : 'Biological Management');
 
   String get advisoryStep2Subtitle => language == AppLanguage.marathi
@@ -1854,9 +1932,9 @@ class AppStrings {
           : 'Bio-agents & natural predators');
 
   String get advisoryStep3Title => language == AppLanguage.marathi
-      ? 'रासायनिक फवारणी (Chemical Action)'
+      ? 'रासायनिक फवारणी'
       : (language == AppLanguage.hindi
-          ? 'रासायनिक छिड़काव (Chemical Action)'
+          ? 'रासायनिक छिड़काव'
           : 'Chemical Management');
 
   String get advisoryStep3Subtitle => language == AppLanguage.marathi
@@ -1870,13 +1948,13 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'अंतिम विकल्प' : 'Last Resort');
 
   String get advisoryDosageLabel => language == AppLanguage.marathi
-      ? 'प्रमाण (Dosage):'
-      : (language == AppLanguage.hindi ? 'मात्रा (Dosage):' : 'Dosage:');
+      ? 'प्रमाण:'
+      : (language == AppLanguage.hindi ? 'मात्रा:' : 'Dosage:');
 
   String get advisoryPhiLabel => language == AppLanguage.marathi
-      ? 'कापणीपूर्व सुरक्षित अंतर (PHI):'
+      ? 'कापणीपूर्व सुरक्षित अंतर:'
       : (language == AppLanguage.hindi
-          ? 'कटाई पूर्व सुरक्षित अंतराल (PHI):'
+          ? 'कटाई पूर्व सुरक्षित अंतराल:'
           : 'Pre-Harvest Interval (PHI):');
 
   String advisoryPhiDaysText(int days) => language == AppLanguage.marathi
@@ -1896,9 +1974,9 @@ class AppStrings {
           : '$hours hours after spraying');
 
   String get advisoryExpertTriggerHeader => language == AppLanguage.marathi
-      ? 'तज्ञ मदतीची वेळ (Expert Escalation):'
+      ? 'तज्ञ मदतीची वेळ:'
       : (language == AppLanguage.hindi
-          ? 'विशेषज्ञ सहायता का समय (Escalation):'
+          ? 'विशेषज्ञ सहायता का समय:'
           : 'Expert Escalation Trigger:');
 
   String get advisorySourcePrefix => language == AppLanguage.marathi
@@ -1919,16 +1997,16 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'फॉलो-अप जांच' : 'Follow-up Check-in');
 
   String get followupOptionImproved => language == AppLanguage.marathi
-      ? 'सुधारणा\n(Improved)'
-      : (language == AppLanguage.hindi ? 'सुधार\n(Improved)' : 'Improved');
+      ? 'सुधारणा'
+      : (language == AppLanguage.hindi ? 'सुधार' : 'Improved');
 
   String get followupOptionNoChange => language == AppLanguage.marathi
-      ? 'बदल नाही\n(No change)'
-      : (language == AppLanguage.hindi ? 'कोई बदलाव नहीं\n(No change)' : 'No change');
+      ? 'बदल नाही'
+      : (language == AppLanguage.hindi ? 'कोई बदलाव नहीं' : 'No change');
 
   String get followupOptionGotWorse => language == AppLanguage.marathi
-      ? 'बिघडले\n(Got worse)'
-      : (language == AppLanguage.hindi ? 'खराब हुआ\n(Got worse)' : 'Got worse');
+      ? 'बिघडले'
+      : (language == AppLanguage.hindi ? 'और बिगड़ गया' : 'Got worse');
 }
 
 

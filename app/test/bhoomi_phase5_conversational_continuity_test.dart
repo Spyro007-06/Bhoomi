@@ -229,10 +229,10 @@ void main() {
       await tester.tap(find.text('थांबवा'));
       await tester.pump();
       await tester.pumpAndSettle();
-      expect(find.text('सल्ला ऐका (Listen)'), findsOneWidget);
+      expect(find.text('सल्ला ऐका'), findsOneWidget);
 
       // Step 3: Start playback
-      await tester.tap(find.text('सल्ला ऐका (Listen)'));
+      await tester.tap(find.text('सल्ला ऐका'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('सल्ला ऐकत आहात'), findsOneWidget);
@@ -279,7 +279,7 @@ void main() {
       expect(fakeVoiceRepo.transcribeCallCount, equals(1));
 
       // Step 2: Synthesize & play audio
-      await tester.tap(find.text('सल्ला ऐका (Listen)'));
+      await tester.tap(find.text('सल्ला ऐका'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 

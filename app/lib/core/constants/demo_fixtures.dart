@@ -72,21 +72,21 @@ abstract final class DemoFixtures {
     TimelineEventModel(
       id: 'tl_demo_01',
       type: 'advisory',
-      title: 'IPM Advisory Issued (एकात्मिक कीड व्यवस्थापन सल्ला)',
+      title: 'IPM Advisory Issued',
       description: 'Cultural aeration recommended. Chemical insecticide vetoed — fungal pathogen detected.',
       timestamp: '2026-08-30T10:30:00Z',
     ),
     TimelineEventModel(
       id: 'tl_demo_02',
       type: 'diagnosis',
-      title: 'Crop Diagnosis Completed (पीक रोग निदान)',
-      description: 'High confidence detection of Paddy Blast (करपा) at 94% certainty.',
+      title: 'Crop Diagnosis Completed',
+      description: 'High confidence detection of Paddy Blast at 94% certainty.',
       timestamp: '2026-08-30T10:15:00Z',
     ),
     TimelineEventModel(
       id: 'tl_demo_03',
       type: 'alert',
-      title: 'Regional Weather Advisory (हवामान सल्ला)',
+      title: 'Regional Weather Advisory',
       description: 'Consecutive high-humidity night alert registered for Nashik cluster.',
       timestamp: '2026-08-28T06:00:00Z',
     ),
@@ -95,7 +95,7 @@ abstract final class DemoFixtures {
   static final List<ReferralModel> demoReferrals = [
     const ReferralModel(
       kind: 'kvk',
-      name: 'KVK Nashik (कृषी विज्ञान केंद्र, नाशिक)',
+      name: 'KVK Nashik (Krishi Vigyan Kendra)',
       phone: '0253-2231265',
       address: 'KVK Yashwantrao Chavan Open University Campus, Dindori Road, Nashik - 422222',
       distanceKm: 2.1,
@@ -103,7 +103,7 @@ abstract final class DemoFixtures {
     ),
     const ReferralModel(
       kind: 'helpline',
-      name: 'Kisan Call Centre (किसान कॉल सेंटर - भारत सरकार)',
+      name: 'Kisan Call Centre - Govt of India',
       phone: '1800-180-1551',
       address: 'National Helpline (Toll-Free 24x7 in Marathi, Hindi, English)',
       distanceKm: 0.0,
@@ -111,7 +111,7 @@ abstract final class DemoFixtures {
     ),
     const ReferralModel(
       kind: 'lab',
-      name: 'District Plant Health Clinic (जिल्हा वनस्पती आरोग्य क्लिनिक)',
+      name: 'District Plant Health Clinic',
       phone: '0253-2571234',
       address: 'Department of Agriculture Complex, CBS Circle, Nashik',
       distanceKm: 5.4,

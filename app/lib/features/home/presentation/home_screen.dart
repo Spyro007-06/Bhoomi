@@ -516,12 +516,18 @@ class HomeScreen extends ConsumerWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          ev.title,
-                                          style: AppTypography.bodyMedium.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
+                                         Text(
+                                           ev.id == 'tl_demo_01'
+                                               ? strings.timelineAdvisoryTitle
+                                               : (ev.id == 'tl_demo_02'
+                                                   ? strings.timelineDiagnosisTitle
+                                                   : (ev.id == 'tl_demo_03'
+                                                       ? strings.timelineAlertTitle
+                                                       : ev.title)),
+                                           style: AppTypography.bodyMedium.copyWith(
+                                             fontWeight: FontWeight.w700,
+                                           ),
+                                         ),
                                         Text(
                                           ev.timestamp.length >= 10 ? ev.timestamp.substring(0, 10) : ev.timestamp,
                                           style: AppTypography.caption.copyWith(

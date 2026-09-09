@@ -77,11 +77,11 @@ void main() {
 
       // 1. Verify Problem title and status
       expect(find.text('भातावरील करपा'), findsOneWidget);
-      expect(find.text('सक्रिय (Open)'), findsOneWidget);
+      expect(find.text('सक्रिय'), findsOneWidget);
       expect(find.textContaining('नोंदणी दिनांक: 2026-08-28'), findsOneWidget);
 
       // 2. Verify Escalation details
-      expect(find.text('केस क्रमांक (Case ID): CASE-EXP-888'), findsOneWidget);
+      expect(find.text('केस क्रमांक: CASE-EXP-888'), findsOneWidget);
       expect(find.text('नियुक्त केंद्र / तज्ञ: KVK Agronomist Cell'), findsOneWidget);
 
       // 3. Verify Observations list

@@ -123,9 +123,9 @@ void main() {
       expect(find.text('पानाच्या मागील बाजूस करडी बुरशी दिसते का?'), findsOneWidget);
 
       // 4. Verify 3 Tactile Buttons
-      expect(find.text('होय (YES)'), findsOneWidget);
-      expect(find.text('नाही (NO)'), findsOneWidget);
-      expect(find.text("सांगता येत नाही (CAN'T TELL)"), findsOneWidget);
+      expect(find.text('होय'), findsOneWidget);
+      expect(find.text('नाही'), findsOneWidget);
+      expect(find.text('सांगता येत नाही'), findsOneWidget);
     });
 
     testWidgets('Tapping YES with resolved response routes to AdvisoryResultScreen',
@@ -149,7 +149,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap YES
-      await tester.tap(find.text('होय (YES)'));
+      await tester.tap(find.text('होय'));
       await tester.pumpAndSettle();
 
       // Verify answer was submitted to API with correct contract parameters
@@ -181,7 +181,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap CAN'T TELL
-      await tester.tap(find.text("सांगता येत नाही (CAN'T TELL)"));
+      await tester.tap(find.text('सांगता येत नाही'));
       await tester.pumpAndSettle();
 
       // Verify answer was submitted as 'unknown'

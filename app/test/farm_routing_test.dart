@@ -90,11 +90,11 @@ void main() {
 
       // Verify contract fields
       expect(find.text('शेताची माहिती नोंदवा'), findsOneWidget);
-      expect(find.text('भात / धान (Paddy)'), findsOneWidget);
-      expect(find.text('वाण / प्रकार (Variety)'), findsOneWidget);
-      expect(find.text('पिकाची अवस्था (Growth Stage)'), findsOneWidget);
-      expect(find.text('जिल्हा / तालुका (Region)'), findsOneWidget);
-      expect(find.text('शेताचे स्थान (GPS Location)'), findsOneWidget);
+      expect(find.text('भात'), findsOneWidget);
+      expect(find.text('वाण / प्रकार'), findsOneWidget);
+      expect(find.text('पिकाची अवस्था'), findsOneWidget);
+      expect(find.text('जिल्हा / तालुका'), findsOneWidget);
+      expect(find.text('शेताचे स्थान'), findsOneWidget);
 
       // Tap Save Farm Profile
       await tester.tap(find.text('शेत जतन करा'));

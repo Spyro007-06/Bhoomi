@@ -204,7 +204,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Verify High Confidence label
-      expect(find.text('उच्च अचूकता (High Confidence)'), findsOneWidget);
+      expect(find.text('उच्च अचूकता'), findsOneWidget);
 
       // 2. Verify Prominent Spoken Audio Button
       expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
@@ -241,12 +241,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify 3 choices: Improved, No change, Got worse
-      expect(find.text('सुधारणा\n(Improved)'), findsOneWidget);
-      expect(find.text('बदल नाही\n(No change)'), findsOneWidget);
-      expect(find.text('बिघडले\n(Got worse)'), findsOneWidget);
+      expect(find.text('सुधारणा'), findsOneWidget);
+      expect(find.text('बदल नाही'), findsOneWidget);
+      expect(find.text('बिघडले'), findsOneWidget);
 
       // Tap 'Improved'
-      await tester.tap(find.text('सुधारणा\n(Improved)'));
+      await tester.tap(find.text('सुधारणा'));
       expect(recordedOutcome, 'improved');
     });
 

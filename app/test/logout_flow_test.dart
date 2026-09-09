@@ -158,7 +158,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Open Language Dialog
-      await tester.tap(find.text('भाषा बदला (Change Language)'));
+      await tester.tap(find.text('भाषा बदला'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -170,8 +170,8 @@ void main() {
 
       // Verify UI updated to Hindi
       expect(find.text('किसान प्रोफ़ाइल'), findsOneWidget);
-      expect(find.text('भाषा बदलें (Change Language)'), findsOneWidget);
-      expect(find.text('लॉग आउट करें (Log Out)'), findsOneWidget);
+      expect(find.text('भाषा बदलें'), findsOneWidget);
+      expect(find.text('लॉग आउट करें'), findsOneWidget);
     });
 
     testWidgets('Logout confirms and clears session with zero HTTP calls',
@@ -206,7 +206,7 @@ void main() {
       expect(find.byType(MoreScreen), findsOneWidget);
 
       // Tap Logout
-      await tester.tap(find.text('बाहेर पडा (Log Out)'));
+      await tester.tap(find.text('बाहेर पडा'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 

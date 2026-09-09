@@ -140,7 +140,7 @@ class EscalationStatusScreen extends ConsumerWidget {
                     _DetailRow(
                       icon: Icons.people_outline_rounded,
                       label: strings.queuePositionLabel,
-                      value: '${esc?.queuePosition ?? 1} (लवकरच संपर्क होईल)',
+                      value: '${esc?.queuePosition ?? 1} ${strings.queueStatusSoon}',
                     ),
                     const Divider(height: 24, color: AppColors.border),
 
@@ -148,7 +148,7 @@ class EscalationStatusScreen extends ConsumerWidget {
                     _DetailRow(
                       icon: Icons.timer_outlined,
                       label: strings.etaMinutesLabel,
-                      value: '${esc?.etaMinutes ?? 30} मिनिटे (Minutes)',
+                      value: strings.minutesText(esc?.etaMinutes ?? 30),
                     ),
                   ],
                 ),
