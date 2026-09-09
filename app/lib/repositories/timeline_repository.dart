@@ -35,7 +35,7 @@ class TimelineRepositoryImpl implements TimelineRepository {
       );
       return TimelineResponse.fromJson(response as Map<String, dynamic>);
     } catch (_) {
-      if (farmId.startsWith('f_demo')) {
+      if (const bool.fromEnvironment('DEMO_MODE') || farmId.startsWith('f_demo') || farmId == 'f_1') {
         return const TimelineResponse(events: DemoFixtures.demoTimeline);
       }
       rethrow;

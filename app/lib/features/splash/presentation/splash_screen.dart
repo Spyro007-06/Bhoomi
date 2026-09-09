@@ -29,16 +29,31 @@ class SplashScreen extends ConsumerWidget {
                   width: 96,
                   height: 96,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight,
+                    color: Colors.white,
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.forest, width: 2.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.eco_rounded,
-                      size: 52,
-                      color: AppColors.forest,
-                    ),
+                  clipBehavior: Clip.antiAlias,
+                  padding: const EdgeInsets.all(8),
+                  child: Image.asset(
+                    'assets/images/bhoomi_logo_mark.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(
+                          Icons.eco_rounded,
+                          size: 52,
+                          color: AppColors.forest,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: AppSpacing.l24),

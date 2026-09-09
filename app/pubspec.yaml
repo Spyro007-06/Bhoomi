@@ -34,12 +34,10 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: "ic_launcher"
-  image_path: "assets/images/bhoomi_logo.png"
+  ios: true
+  image_path: "assets/images/bhoomi_logo_mark.png"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/bhoomi_logo.png"
-
-dependency_overrides:
-  record_platform_interface: 1.2.0
+  adaptive_icon_foreground: "assets/images/bhoomi_logo_mark.png"
 
 flutter:
   uses-material-design: true

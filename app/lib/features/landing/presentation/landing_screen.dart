@@ -180,9 +180,10 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
               ],
             ),
             clipBehavior: Clip.antiAlias,
+            padding: const EdgeInsets.all(4),
             child: Image.asset(
               'assets/images/bhoomi_logo_mark.png',
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 return const Center(
                   child: Icon(

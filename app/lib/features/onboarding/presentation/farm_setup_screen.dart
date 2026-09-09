@@ -27,6 +27,7 @@ class FarmSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
+  late final TextEditingController _cropController;
   final TextEditingController _varietyController = TextEditingController(text: 'Indrayani');
   final TextEditingController _regionController = TextEditingController(text: 'Nashik');
   String _selectedGrowthStage = 'tillering';
@@ -40,12 +41,15 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
   @override
   void initState() {
     super.initState();
+    final strings = ref.read(stringsProvider);
+    _cropController = TextEditingController(text: strings.cropPaddy);
     _locationService = widget.locationService ?? LocationService();
     _detectLocation();
   }
 
   @override
   void dispose() {
+    _cropController.dispose();
     _varietyController.dispose();
     _regionController.dispose();
     super.dispose();
@@ -70,6 +74,12 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
   }
 
   Future<void> _handleSaveFarm() async {
+    final crop = _cropController.text.trim();
+    if (crop.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your crop name');
+      return;
+    }
+
     final region = _regionController.text.trim();
     if (region.isEmpty) {
       setState(() => _errorMessage = 'Please enter your region / district');
@@ -91,7 +101,7 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
     try {
       final farmRepo = ref.read(farmRepositoryProvider);
       final farm = await farmRepo.createFarm(
-        crop: 'paddy',
+        crop: crop.isNotEmpty ? crop : 'paddy',
         variety: _varietyController.text.trim().isNotEmpty
             ? _varietyController.text.trim()
             : 'Indrayani',
@@ -143,7 +153,7 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Crop Card (Locked to Paddy)
+              // Crop Input Card (Editable)
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.l16),
                 child: Column(
@@ -157,29 +167,10 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.s8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.l16,
-                        vertical: AppSpacing.m12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: AppRadius.input,
-                        border: Border.all(color: AppColors.forest.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.grass_rounded, color: AppColors.forest),
-                          const SizedBox(width: AppSpacing.m12),
-                          Text(
-                            strings.cropPaddy,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.forest,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
+                    AppTextField(
+                      controller: _cropController,
+                      hintText: strings.cropHint,
+                      prefixIcon: const Icon(Icons.grass_rounded, color: AppColors.forest),
                     ),
                   ],
                 ),

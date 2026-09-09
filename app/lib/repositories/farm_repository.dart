@@ -48,7 +48,7 @@ class FarmRepositoryImpl implements FarmRepository {
       final response = await _apiClient.get(ApiEndpoints.farmDetail(farmId));
       return FarmModel.fromJson(response as Map<String, dynamic>);
     } catch (_) {
-      if (farmId.startsWith('f_demo')) {
+      if (const bool.fromEnvironment('DEMO_MODE') || farmId.startsWith('f_demo') || farmId == 'f_1') {
         return DemoFixtures.demoFarm;
       }
       rethrow;
@@ -73,7 +73,7 @@ class FarmRepositoryImpl implements FarmRepository {
       final response = await _apiClient.get(ApiEndpoints.farmSummary(farmId));
       return FarmSummaryModel.fromJson(response as Map<String, dynamic>);
     } catch (_) {
-      if (farmId.startsWith('f_demo')) {
+      if (const bool.fromEnvironment('DEMO_MODE') || farmId.startsWith('f_demo') || farmId == 'f_1') {
         return DemoFixtures.demoFarmSummary;
       }
       rethrow;

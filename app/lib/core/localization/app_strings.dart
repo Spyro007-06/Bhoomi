@@ -334,6 +334,12 @@ class AppStrings {
       ? 'भात / धान (Paddy)'
       : (language == AppLanguage.hindi ? 'धान (Paddy)' : 'Paddy / Rice');
 
+  String get cropHint => language == AppLanguage.marathi
+      ? 'उदा. भात / कापूस / सोयाबीन'
+      : (language == AppLanguage.hindi
+          ? 'उदा. धान / कपास / सोयाबीन'
+          : 'e.g. Paddy / Rice, Cotton, Soybean');
+
   String get varietyLabel => language == AppLanguage.marathi
       ? 'वाण / प्रकार (Variety)'
       : (language == AppLanguage.hindi ? 'किस्म (Variety)' : 'Variety');

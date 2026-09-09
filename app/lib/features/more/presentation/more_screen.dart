@@ -87,24 +87,28 @@ class MoreScreen extends ConsumerWidget {
             vertical: AppSpacing.m12,
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(
-                strings.cancel,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.fieldSlate,
-                  fontWeight: FontWeight.w600,
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton.ghost(
+                    label: strings.cancel,
+                    size: AppButtonSize.small,
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  ),
                 ),
-              ),
-            ),
-            AppButton.danger(
-              label: strings.confirmLogout,
-              size: AppButtonSize.small,
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-                // Local-only logout
-                await ref.read(authStateProvider.notifier).logout();
-              },
+                const SizedBox(width: AppSpacing.s8),
+                Expanded(
+                  child: AppButton.danger(
+                    label: strings.confirmLogout,
+                    size: AppButtonSize.small,
+                    onPressed: () async {
+                      Navigator.of(ctx).pop();
+                      // Local-only logout
+                      await ref.read(authStateProvider.notifier).logout();
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -250,27 +254,7 @@ class MoreScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.fieldSlate),
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => Scaffold(
-                              backgroundColor: AppColors.ricePaper,
-                              appBar: AppBar(
-                                backgroundColor: Colors.transparent,
-                                elevation: 0,
-                                leading: IconButton(
-                                  icon: const Icon(Icons.arrow_back_rounded, color: AppColors.forest),
-                                  onPressed: () => Navigator.of(context).pop(),
-                                ),
-                                title: Text(
-                                  strings.historyOption,
-                                  style: AppTypography.subheading.copyWith(
-                                    color: AppColors.primaryDark,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              body: const HistoryScreen(),
-                            ),
-                          ),
+                          MaterialPageRoute(builder: (_) => const HistoryScreen()),
                         );
                       },
                     ),
