@@ -134,7 +134,7 @@ export function LoginPage() {
 
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-center items-center px-4 py-3 sm:py-5 select-none overflow-x-hidden overflow-y-auto">
-      {/* Primary Visual Background: BHOOMI Agriculture Image */}
+      {/* Primary Visual Background: BHOOMI Agriculture Image (Crystal Clear & Vibrant) */}
       <div
         className="fixed inset-0 pointer-events-none overflow-hidden"
         aria-hidden="true"
@@ -145,16 +145,6 @@ export function LoginPage() {
           className="w-full h-full object-cover object-center select-none"
         />
       </div>
-
-      {/* Subtle Restrained Readability Overlay */}
-      <div
-        className="fixed inset-0 bg-slate-950/30 pointer-events-none"
-        aria-hidden="true"
-      />
-      <div
-        className="fixed inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/35 pointer-events-none"
-        aria-hidden="true"
-      />
 
       {/* Foreground Login Interface */}
       <div className="relative z-10 my-auto w-full max-w-[460px] space-y-3.5 animate-bhm-fade-in-up">
@@ -177,10 +167,10 @@ export function LoginPage() {
 
           {/* Title & Subtitle */}
           <div className="space-y-0.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
               BHOOMI Portal
             </h1>
-            <p className="text-xs sm:text-sm font-medium text-emerald-100/90 drop-shadow-xs max-w-sm mx-auto">
+            <p className="text-xs sm:text-sm font-semibold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] max-w-sm mx-auto">
               Agronomist Case Management & Officials Surveillance
             </p>
           </div>
