@@ -2,21 +2,17 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sprout,
-  ShieldCheck,
   ArrowRight,
   ChevronRight,
-  Activity,
   MapPin,
-  Clock,
   CheckCircle2,
   Menu,
   X,
-  Sliders,
-  Database,
   Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { HowItWorksWorkflow } from '../components/HowItWorksWorkflow';
 
 export function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,13 +62,7 @@ export function LandingPage() {
               href="#how-it-works"
               className="px-3 py-1.5 rounded-lg hover:text-emerald-800 hover:bg-emerald-50/70 transition-all duration-200"
             >
-              Lifecycle
-            </a>
-            <a
-              href="#capabilities"
-              className="px-3 py-1.5 rounded-lg hover:text-emerald-800 hover:bg-emerald-50/70 transition-all duration-200"
-            >
-              Capabilities
+              How It Works
             </a>
             <a
               href="#principles"
@@ -140,14 +130,7 @@ export function LandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-3 py-2 rounded-lg hover:bg-emerald-50 hover:text-emerald-800 transition-colors"
               >
-                Lifecycle
-              </a>
-              <a
-                href="#capabilities"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg hover:bg-emerald-50 hover:text-emerald-800 transition-colors"
-              >
-                Capabilities
+                How It Works
               </a>
               <a
                 href="#principles"
@@ -452,278 +435,9 @@ export function LandingPage() {
       </section>
 
       {/* ============================================================
-          4. THE PRODUCT STORY / OPERATIONAL LIFECYCLE
+          4. HOW BHOOMI WORKS (UNIFIED PROJECT ROADMAP & WORKFLOW)
           ============================================================ */}
-      <section id="how-it-works" className="py-16 lg:py-24 border-t border-slate-200 scroll-mt-16">
-        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <ScrollReveal>
-            <div className="text-center max-w-2xl mx-auto">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                End-to-End Field Lifecycle
-              </span>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-                From Ground Risk Alert to Regional Surveillance
-              </h2>
-              <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
-                A closed-loop diagnostic and surveillance lifecycle connecting farm to state.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={100}>
-            <div className="mt-12 relative">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
-                {/* Step 1 */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                        Step 01
-                      </span>
-                      <Clock className="h-4 w-4 text-slate-400" />
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900">Forward Risk Alert</h4>
-                    <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                      Micro-climate alerts directing farmers where on the plant to inspect before
-                      symptoms spread.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
-                    Non-nullable tasks
-                  </div>
-                </div>
-
-                {/* Step 2 */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                        Step 02
-                      </span>
-                      <Sliders className="h-4 w-4 text-slate-400" />
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900">Confidence Gate</h4>
-                    <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                      Three-band evaluation prompting for a physical cue when symptoms are ambiguous
-                      rather than guessing.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
-                    Uncertainty as feature
-                  </div>
-                </div>
-
-                {/* Step 3 */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                        Step 03
-                      </span>
-                      <ShieldCheck className="h-4 w-4 text-slate-400" />
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900">Pesticide Veto</h4>
-                    <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                      OCR bottle verification against CIB&RC records to veto unapproved chemicals
-                      before spraying.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
-                    Veto, never endorse
-                  </div>
-                </div>
-
-                {/* Step 4 */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                        Step 04
-                      </span>
-                      <Sprout className="h-4 w-4 text-slate-400" />
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900">KVK Expert Triage</h4>
-                    <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                      Escalated case bundles reviewed and confirmed by certified agronomists in
-                      under 3 minutes.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
-                    Human-in-the-loop
-                  </div>
-                </div>
-
-                {/* Step 5 */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                        Step 05
-                      </span>
-                      <Activity className="h-4 w-4 text-slate-400" />
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900">State Surveillance</h4>
-                    <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                      Verified diagnoses update district hotspot maps and broadcast regional
-                      containment alerts.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-medium text-emerald-800">
-                    Epidemic prevention
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ============================================================
-          5. CORE CAPABILITIES (EDITORIAL GRID)
-          ============================================================ */}
-      <section id="capabilities" className="py-16 lg:py-24 bg-slate-50/60 border-t border-slate-200 scroll-mt-16">
-        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <ScrollReveal>
-            <div className="text-center max-w-2xl mx-auto">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                PRD-Enforced Specifications
-              </span>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-                Engineered Against the Confident Wrong Answer
-              </h2>
-              <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
-                Preventing incorrect AI predictions that cause crop loss and chemical over-spraying.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={100}>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-6">
-              {/* Feature 1: The Confidence Gate & Doubt Doctor (Wide 8-col) */}
-              <div className="md:col-span-8 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-lg hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                    <Sliders className="h-4 w-4 text-emerald-700" />
-                    <span>F2 & F4 · Autonomous Confidence Gate</span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-bold text-slate-900">
-                    Three-Band Gate & The Doubt Doctor
-                  </h3>
-                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                    Predictions pass through strict mathematical thresholds. Ambiguous cases prompt
-                    the Doubt Doctor to verify physical cues rather than guessing.
-                  </p>
-
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                    <div className="rounded-lg bg-emerald-50/80 border border-emerald-200/70 p-3 transition-colors hover:bg-emerald-50">
-                      <span className="font-bold text-emerald-900 block">Above Gate (≥ 0.70)</span>
-                      <span className="text-emerald-800 text-[11px] mt-0.5 block">
-                        Direct IPM advisory composed
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-amber-50/80 border border-amber-200/70 p-3 transition-colors hover:bg-amber-50">
-                      <span className="font-bold text-amber-900 block">Ambiguous (0.45 - 0.70)</span>
-                      <span className="text-amber-800 text-[11px] mt-0.5 block">
-                        Doubt Doctor clarifying cue
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-red-50/80 border border-red-200/70 p-3 transition-colors hover:bg-red-50">
-                      <span className="font-bold text-red-900 block">Below Floor (&lt; 0.45)</span>
-                      <span className="text-red-800 text-[11px] mt-0.5 block">
-                        Direct KVK agronomist triage
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
-                  <span>Enforced before advisory generation</span>
-                  <span className="text-slate-800 font-semibold">Zero hallucinated advice</span>
-                </div>
-              </div>
-
-              {/* Feature 2: Chemical Last & Label Check (Compact 4-col) */}
-              <div className="md:col-span-4 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-lg hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                    <ShieldCheck className="h-4 w-4 text-emerald-700" />
-                    <span>F7 & F8 · Pesticide Safety</span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-bold text-slate-900">
-                    Veto, Never Endorse
-                  </h3>
-                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                    Enforces Cultural → Biological → Chemical hierarchy. OCR bottle scans verify CIB&RC
-                    registration to veto unapproved chemicals.
-                  </p>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-500 font-medium">
-                  <span>The printed label remains the sole dosage authority.</span>
-                </div>
-              </div>
-
-              {/* Feature 3: Persistent Farm Memory (Compact 4-col) */}
-              <div className="md:col-span-4 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-lg hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                    <Database className="h-4 w-4 text-emerald-700" />
-                    <span>F1 · Farm Persistent Memory</span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-bold text-slate-900">
-                    The Farm as a Clinical Case File
-                  </h3>
-                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                    Maintains multi-season soil, variety, and infestation history as an active
-                    Bayesian risk prior.
-                  </p>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-500 font-medium">
-                  <span>Mandatory geolocation for spatial containment</span>
-                </div>
-              </div>
-
-              {/* Feature 4: Outbreak Hotspots & Macro Surveillance (Wide 8-col) */}
-              <div className="md:col-span-8 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-lg hover:border-emerald-600/30 transition-all duration-200 ease-out">
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                    <Activity className="h-4 w-4 text-emerald-700" />
-                    <span>F6 & F15 · Regional Surveillance</span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-bold text-slate-900">
-                    District Outbreak Hotspots & Spread Radius
-                  </h3>
-                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                    Only verified diagnoses broadcast radius alerts to nearby farms. Officials
-                    monitor active clusters with live accuracy tracking.
-                  </p>
-
-                  <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-700">
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
-                      <span>High Severity Hotspots</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                      <span>Active Confirmation Queue</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
-                      <span>Field Accuracy Tracking</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
-                  <span>Prevents village-wide false panic</span>
-                  <span className="text-slate-800 font-semibold">Verified ground truth only</span>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
+      <HowItWorksWorkflow />
 
       {/* ============================================================
           6. ENGINEERING & DESIGN PRINCIPLES
