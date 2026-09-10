@@ -9,8 +9,15 @@ handlers always are -- so it is called directly with a real Farm/Asset row
 from the same session, same style test_alert_response.py already uses for
 alerts_service.record_response().
 
-Everything here was ALSO verified live over real HTTP -- see the task's
-pasted curl output -- this file is the regression net, not the first proof.
+The four original fixture-band tests were ALSO verified live over real HTTP
+first -- see that task's pasted curl output; this file is the regression net
+for those, not the first proof. The VISION_MODEL=real tests added later
+(search "the real classifier path" below) are NOT covered by that claim:
+get_asset_bytes()/classify() are mocked in those three, and as of when they
+were added, neither had been run live -- no real model checkpoint or object
+storage was reachable from the environment that wrote them. Said explicitly
+here rather than left for a reader to assume from the sentence above, which
+predates them and was never true of them.
 """
 
 from __future__ import annotations
