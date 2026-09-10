@@ -27,30 +27,30 @@
       "target": "cotton_whitefly",
       "crop": "cotton",
       "title": "Cotton Sap Suckers — Whitefly & Thrips",
-      "source": "Agricultural crop-protection references",
+      "source": "ICAR-CICR, Nagpur — Advisory on Pest and Disease Management in Cotton",
       "reviewed_on": "2026-08-31",
       "source_file": "cotton/cotton_sap_suckers_v1.md",
-      "source_dated": null
+      "source_dated": "2024"
     },
     {
       "doc_id": "cotton_sap_suckers_v1",
       "target": "cotton_thrips",
       "crop": "cotton",
       "title": "Cotton Sap Suckers — Whitefly & Thrips",
-      "source": "Agricultural crop-protection references",
+      "source": "ICAR-CICR, Nagpur — Advisory on Pest and Disease Management in Cotton",
       "reviewed_on": "2026-08-31",
       "source_file": "cotton/cotton_sap_suckers_v1.md",
-      "source_dated": null
+      "source_dated": "2024"
     },
     {
       "doc_id": "cotton_leaf_curl_v1",
       "target": "cotton_leaf_curl_virus",
       "crop": "cotton",
       "title": "Cotton Leaf Curl Virus (CLCuV)",
-      "source": "Cotton disease field guides",
+      "source": "ICAR-CICR Technical Bulletin 1/2020 — Integrated Disease Management in Cotton, Regional Station Coimbatore, section on CLCuD management",
       "reviewed_on": "2026-08-31",
       "source_file": "cotton/cotton_leaf_curl_v1.md",
-      "source_dated": null
+      "source_dated": "2020"
     },
     {
       "doc_id": "cotton_bacterial_blight_v1",
@@ -67,10 +67,10 @@
       "target": "cotton_fusarium_wilt",
       "crop": "cotton",
       "title": "Cotton Fusarium Wilt (Fusarium oxysporum f. sp. vasinfectum)",
-      "source": "Cotton disease field guides",
+      "source": "ICAR-CICR Technical Bulletin 1/2020 — Integrated Disease Management in Cotton, Regional Station Coimbatore, section on wilt management",
       "reviewed_on": "2026-08-31",
       "source_file": "cotton/cotton_fusarium_wilt_v1.md",
-      "source_dated": null
+      "source_dated": "2020"
     },
     {
       "doc_id": "soybean_stem_borers_v1",
@@ -107,20 +107,20 @@
       "target": "soybean_anthracnose",
       "crop": "soybean",
       "title": "Soybean Leaf Spot Diseases — Anthracnose/Pod Blight & Alternaria Leaf Spot",
-      "source": "Soybean disease references",
+      "source": "Gupta GK, Chauhan GS — Symptoms, Identification and Management of Soybean Diseases, ICAR-IISR Technical Bulletin No. 10, Indore",
       "reviewed_on": "2026-08-31",
       "source_file": "soybean/soybean_leaf_spot_diseases_v1.md",
-      "source_dated": null
+      "source_dated": "2005"
     },
     {
       "doc_id": "soybean_leaf_spot_diseases_v1",
       "target": "soybean_alternaria_leaf_spot",
       "crop": "soybean",
       "title": "Soybean Leaf Spot Diseases — Anthracnose/Pod Blight & Alternaria Leaf Spot",
-      "source": "Soybean disease references",
+      "source": "Gupta GK, Chauhan GS — Symptoms, Identification and Management of Soybean Diseases, ICAR-IISR Technical Bulletin No. 10, Indore",
       "reviewed_on": "2026-08-31",
       "source_file": "soybean/soybean_leaf_spot_diseases_v1.md",
-      "source_dated": null
+      "source_dated": "2005"
     },
     {
       "doc_id": "soybean_yellow_mosaic_v1",
@@ -188,30 +188,30 @@
       "target": "jowar_grain_mold",
       "crop": "jowar",
       "title": "Jowar Panicle & Grain Diseases — Grain Mold & Smut",
-      "source": "Sorghum disease references",
+      "source": "Das IK, Aruna C, Tonapi VA — Sorghum Grain Mold, ICAR-Indian Institute of Millets Research, Hyderabad, ISBN 81-89335-93-6",
       "reviewed_on": "2026-08-31",
       "source_file": "jowar/jowar_panicle_grain_diseases_v1.md",
-      "source_dated": null
+      "source_dated": "2020"
     },
     {
       "doc_id": "jowar_panicle_grain_diseases_v1",
       "target": "jowar_smut",
       "crop": "jowar",
       "title": "Jowar Panicle & Grain Diseases — Grain Mold & Smut",
-      "source": "Sorghum disease references",
+      "source": "AICRP-Sorghum Pathology Annual Progress Report, ICAR-IIMR (grain smut incidence section)",
       "reviewed_on": "2026-08-31",
       "source_file": "jowar/jowar_panicle_grain_diseases_v1.md",
-      "source_dated": null
+      "source_dated": "2022"
     },
     {
       "doc_id": "jowar_downy_mildew_v1",
       "target": "jowar_downy_mildew",
       "crop": "jowar",
       "title": "Jowar Downy Mildew",
-      "source": "Sorghum disease references",
+      "source": "Pande S, Bock CH, Bandyopadhyay R, Narayana YD, Reddy BVS, Lenne JM, Jeger MJ — Downy Mildew of Sorghum, ICRISAT Information Bulletin No. 51, ISBN 92-9066-379-0",
       "reviewed_on": "2026-08-31",
       "source_file": "jowar/jowar_downy_mildew_v1.md",
-      "source_dated": null
+      "source_dated": "1997"
     },
     {
       "doc_id": "paddy_blast_symptoms_v1",

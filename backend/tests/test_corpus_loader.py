@@ -23,6 +23,7 @@ from load_corpus import (  # noqa: E402
     _likely_target,
     _looks_like_a_real_citation,
     _parse_date,
+    _source_dated_is_valid,
     _validate_row,
 )
 from sqlalchemy import delete, select  # noqa: E402
@@ -167,6 +168,28 @@ def test_source_dated_must_parse() -> None:
     assert _parse_date("15-03-2024") == date(2024, 3, 15)
     assert _parse_date("") is None
     assert _parse_date("not a date") is None
+
+
+def test_source_dated_accepts_a_bare_four_digit_year() -> None:
+    """A citation naming only a publication year (an ICAR technical bulletin
+    numbered '1/2020', say) is a real, common form -- not a defect. This is
+    deliberately looser than _parse_date() alone, which is what reviewed_on
+    still validates against (see the next test): reviewed_on IS stored as a
+    real Date column and must not be coerced from a year-only guess."""
+    assert _source_dated_is_valid("2020")
+    assert _source_dated_is_valid("1997")
+    assert _source_dated_is_valid("2024-03-15")
+    assert not _source_dated_is_valid("not a year")
+    assert not _source_dated_is_valid("99")
+    assert not _source_dated_is_valid("")
+
+
+def test_reviewed_on_still_requires_a_full_date_not_a_bare_year() -> None:
+    """The bare-year allowance is source_dated-only. reviewed_on is stored
+    verbatim in CorpusDoc.reviewed_on; a bare year silently becoming
+    Jan-1-of-that-year would be exactly the coercion this loader family
+    refuses to do everywhere else."""
+    assert _parse_date("2020") is None
 
 
 # ===========================================================================

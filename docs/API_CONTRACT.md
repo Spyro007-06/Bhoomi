@@ -53,7 +53,7 @@ status from it. `VALIDATION_FAILED` is always 422; it is never 400.
 may — so it is not `FORBIDDEN`, which would claim the caller's identity was the
 problem.
 
-Stable codes: `UNAUTHENTICATED` · `FORBIDDEN` · `NOT_FOUND` · `VALIDATION_FAILED` · `BELOW_CONFIDENCE_GATE` · `AMBIGUOUS_REQUIRES_CLARIFICATION` · `OUT_OF_SCOPE_TARGET` · `NO_RELEVANT_SOURCE` · `OCR_UNREADABLE` · `PRODUCT_NOT_IN_RECORDS` · `AGRONOMIST_UNAVAILABLE` · `FIXTURES_DISABLED`
+Stable codes: `UNAUTHENTICATED` · `FORBIDDEN` · `NOT_FOUND` · `VALIDATION_FAILED` · `BELOW_CONFIDENCE_GATE` · `AMBIGUOUS_REQUIRES_CLARIFICATION` · `OUT_OF_SCOPE_TARGET` · `NO_RELEVANT_SOURCE` · `OCR_UNREADABLE` · `PRODUCT_NOT_IN_RECORDS` · `AGRONOMIST_UNAVAILABLE` · `VOICE_PROVIDER_UNAVAILABLE` · `FIXTURES_DISABLED` · `NOT_IMPLEMENTED` · `METHOD_NOT_ALLOWED` · `INTERNAL_ERROR`
 
 ---
 
@@ -112,6 +112,15 @@ POST /auth/otp/verify      { request_id, otp }          → { access_token, refr
 POST /auth/login           { email, password }          → same shape, role agronomist|official
 ```
 
+**`POST /auth/demo` is dev tooling, not client surface.** It mints tokens for
+a fixed, pre-seeded demo farmer, no request body. Off by default
+(`DEMO_MODE=false`) and, when on, still refused if `app_env` is `production`
+— a demo/judging deployment opts in explicitly. When off, the route is not
+mounted at all, so it never appears in `docs/openapi.json` and no generated
+client sees it. Not part of the stable contract and deliberately excluded
+from §16's endpoint index: no client should call this, and no client should
+be generated against it. See `app/core/routers/auth.py`'s `demo_login`.
+
 ---
 
 ## 3. Media
@@ -168,6 +177,19 @@ Below the ASR confidence floor, `parsed_intent` is omitted and the client re-pro
 { "id": "f_1", "crop": "paddy", "growth_stage": "tillering", "region": "Nashik" }
 ```
 `location` is **required**. Spread alerts and the hotspot map are inoperable without it.
+
+`POST /farms` and `PATCH /farms/{id}` both additionally accept `input_source`
+(`"typed" | "voice"`, default `"typed"`) and `confirmed` (`bool`, default
+`false`). When `input_source` is `"voice"`, `confirmed` must be `true` or
+the whole write is refused (`VALIDATION_FAILED`, 422) — PRD F9's read-back
+guarantee, made structural: a voice-derived crop or growth stage cannot be
+saved until the farmer has heard it read back and confirmed it. Whole-request
+granularity, not per-field — if anything in the payload came from voice, the
+client marks the whole request `voice`; a farmer editing a spoken value
+before saving is a typed correction, sent as `"typed"` (or omitted). Neither
+field is stored — the guarantee lives at the write boundary, and an
+unconfirmed voice value can never reach the database, so there is nothing to
+record after the fact.
 
 ```
 GET   /farms/{id}            → full profile

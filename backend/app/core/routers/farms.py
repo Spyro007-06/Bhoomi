@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.contracts.farm import SRID, GeoPoint
 from app.core.models import Alert, Farm, FollowUp, Problem
 from app.core.schemas.farms import (
+    VOICE_CONFIRMATION_FIELDS,
     FarmCreate,
     FarmOut,
     FarmSummaryOut,
@@ -31,9 +32,26 @@ from app.core.schemas.farms import (
 )
 from app.db import get_session
 from app.deps import Principal, current_principal
-from app.errors import Forbidden, NotFound
+from app.errors import Forbidden, NotFound, error_response
 
 router = APIRouter(prefix="/farms", tags=["farms"])
+
+_UNAUTHENTICATED = error_response(401, "No, or an invalid, bearer token.")
+_MALFORMED = error_response(422, "The request body did not parse.")
+_MALFORMED_OR_UNCONFIRMED_VOICE = error_response(
+    422,
+    "The request body did not parse, OR input_source is \"voice\" and "
+    "confirmed is not true -- a voice-derived value must be read back and "
+    "confirmed before it can be saved (see VOICE_CONFIRMATION_FIELDS).",
+)
+# Every route below with a {farm_id} path param goes through _load_owned,
+# which raises both for the same two reasons every time.
+_FARM_NOT_FOUND_OR_FORBIDDEN = {
+    **error_response(404, "That farm does not exist."),
+    **error_response(
+        403, "The caller is a farmer and that farm belongs to a different account."
+    ),
+}
 
 
 def _point_wkt(location: GeoPoint) -> str:
@@ -77,7 +95,12 @@ async def _load_owned(
     return farm
 
 
-@router.post("", response_model=FarmSummaryOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=FarmSummaryOut,
+    status_code=status.HTTP_201_CREATED,
+    responses={**_UNAUTHENTICATED, **_MALFORMED_OR_UNCONFIRMED_VOICE},
+)
 async def create_farm(
     payload: FarmCreate,
     principal: Principal = Depends(current_principal),
@@ -102,7 +125,11 @@ async def create_farm(
     )
 
 
-@router.get("/{farm_id}", response_model=FarmOut)
+@router.get(
+    "/{farm_id}",
+    response_model=FarmOut,
+    responses={**_UNAUTHENTICATED, **_FARM_NOT_FOUND_OR_FORBIDDEN, **_MALFORMED},
+)
 async def get_farm(
     farm_id: uuid.UUID,
     principal: Principal = Depends(current_principal),
@@ -111,23 +138,42 @@ async def get_farm(
     return _as_farm_out(await _load_owned(farm_id, principal, session))
 
 
-@router.patch("/{farm_id}", response_model=FarmOut)
+@router.patch(
+    "/{farm_id}",
+    response_model=FarmOut,
+    responses={
+        **_UNAUTHENTICATED,
+        **_FARM_NOT_FOUND_OR_FORBIDDEN,
+        **_MALFORMED_OR_UNCONFIRMED_VOICE,
+    },
+)
 async def update_farm(
     farm_id: uuid.UUID,
     payload: FarmUpdate,
     principal: Principal = Depends(current_principal),
     session: AsyncSession = Depends(get_session),
 ) -> FarmOut:
-    """Update onboarding fields. Location is not one of them — see FarmUpdate."""
+    """Update onboarding fields. Location is not one of them — see FarmUpdate.
+
+    `input_source` / `confirmed` are validated by the schema (voice input must
+    be confirmed or the request never reaches this body) and travel no
+    further — excluded here so they are never passed to `setattr` against a
+    model with no such columns. See VOICE_CONFIRMATION_FIELDS.
+    """
     farm = await _load_owned(farm_id, principal, session)
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    updates = payload.model_dump(exclude_unset=True, exclude=VOICE_CONFIRMATION_FIELDS)
+    for field, value in updates.items():
         setattr(farm, field, value)
     await session.commit()
     await session.refresh(farm)
     return _as_farm_out(farm)
 
 
-@router.get("/{farm_id}/summary", response_model=HomeSummaryOut)
+@router.get(
+    "/{farm_id}/summary",
+    response_model=HomeSummaryOut,
+    responses={**_UNAUTHENTICATED, **_FARM_NOT_FOUND_OR_FORBIDDEN, **_MALFORMED},
+)
 async def farm_summary(
     farm_id: uuid.UUID,
     principal: Principal = Depends(current_principal),

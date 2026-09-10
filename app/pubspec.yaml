@@ -1,0 +1,45 @@
+name: bhoomi
+description: Bhoomi v2 - Early detection and management of crop diseases for smallholder farmers.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: '>=0.19.0 <1.0.0'
+  dio: ^5.4.3+1
+  flutter_riverpod: ^2.5.1
+  flutter_secure_storage: ^9.2.2
+  camera: ^0.11.0+2
+  image_picker: ^1.1.2
+  geolocator: ^12.0.0
+  permission_handler: ^11.3.1
+  record: ^5.1.2
+  audioplayers: ^6.0.0
+  flutter_image_compress: ^2.3.0
+  connectivity_plus: ^6.0.5
+  path_provider: ^2.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/images/bhoomi_logo_mark.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/bhoomi_logo_mark.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

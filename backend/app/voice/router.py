@@ -8,8 +8,9 @@ Serves:
 
 Handlers call straight through to app.voice.asr.transcribe() and
 app.voice.tts.synthesize() — S0's provider seam, stub-backed by default via
-settings.asr_provider. No DB, no presigned-bytes fetch (the stub reads
-nothing), no live Sarvam call.
+settings.asr_provider. Both now take the request's DB session (S4), forwarded
+unread to the stub and used by the live provider to resolve/store asset bytes
+via core.services.assets — this router still issues no query itself.
 """
 
 from __future__ import annotations
@@ -19,8 +20,10 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.contracts.enums import Lang
+from app.db import get_session
 from app.deps import Principal, current_principal
 from app.voice.asr import transcribe
 from app.voice.tts import synthesize
@@ -41,7 +44,17 @@ class ParsedIntentOut(BaseModel):
 
 class TranscribeOut(BaseModel):
     text: str
-    confidence: float = Field(ge=0.0, le=1.0)
+    confidence: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Omitted (via response_model_exclude_none) when the provider "
+            "reports none — live Sarvam Saaras never does. Never a "
+            "fabricated sentinel. docs/API_CONTRACT.md §4 shows this as "
+            "always-numeric; live mode is a deliberate, flagged deviation."
+        ),
+    )
     lang: Lang
     parsed_intent: ParsedIntentOut | None = None
     needs_confirmation: bool
@@ -67,14 +80,16 @@ class SynthesizeOut(BaseModel):
 async def transcribe_voice(
     payload: TranscribeIn,
     principal: Principal = Depends(current_principal),
+    session: AsyncSession = Depends(get_session),
 ) -> TranscribeOut:
     """Transcribe an uploaded audio asset. docs/API_CONTRACT.md §4.
 
     Below `config.ASR_FLOOR`, `parsed_intent` is omitted from the response
     entirely (not `null`) — `response_model_exclude_none` renders that;
-    app.voice.asr.transcribe() decides it.
+    app.voice.asr.transcribe() decides it. `confidence` is omitted the same
+    way when the provider reports none (live Sarvam Saaras never does).
     """
-    result = transcribe(str(payload.asset_id), payload.lang, payload.context)
+    result = await transcribe(session, str(payload.asset_id), payload.lang, payload.context)
     parsed_intent = (
         ParsedIntentOut(field=result.parsed_intent.field, value=result.parsed_intent.value)
         if result.parsed_intent is not None
@@ -94,9 +109,10 @@ async def transcribe_voice(
 async def synthesize_voice(
     payload: SynthesizeIn,
     principal: Principal = Depends(current_principal),
+    session: AsyncSession = Depends(get_session),
 ) -> SynthesizeOut:
     """Render text to audio and return a presigned URL. docs/API_CONTRACT.md §4."""
-    result = synthesize(payload.text, payload.lang)
+    result = await synthesize(session, payload.text, payload.lang)
     return SynthesizeOut(
         audio_url=result.audio_url,
         expires_in=result.expires_in,

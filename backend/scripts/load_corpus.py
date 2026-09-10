@@ -327,6 +327,26 @@ def _parse_date(raw: str) -> date | None:
     return None
 
 
+_YEAR_ONLY_RE = re.compile(r"^(19|20)\d{2}$")
+
+
+def _source_dated_is_valid(raw: str) -> bool:
+    """source_dated accepts a full date OR a bare four-digit year.
+
+    Looser than _parse_date() (used for reviewed_on, which IS stored in
+    CorpusDoc.reviewed_on as a real Date column and must not be coerced from
+    a year-only guess -- that would be exactly the kind of silent
+    substitution this loader family refuses to do). source_dated is
+    validated only, never stored (see the module docstring): a bare year is
+    a real, common form the author's positive attestation takes when a
+    source names only its publication year (an ICAR technical bulletin
+    numbered "1/2020", say), not a defect to refuse.
+    """
+    if _parse_date(raw) is not None:
+        return True
+    return bool(_YEAR_ONLY_RE.match(raw.strip()))
+
+
 def _validate_row(
     row: dict, index: int
 ) -> tuple[list[ChunkRow], Refusal | None, NameMismatch | None]:
@@ -361,7 +381,7 @@ def _validate_row(
     if row.get("source"):
         _validate_source(row["source"], reasons)
 
-    if row.get("source_dated") and not _parse_date(row["source_dated"]):
+    if row.get("source_dated") and not _source_dated_is_valid(row["source_dated"]):
         reasons.append(f"source_dated {row['source_dated']!r} is not a recognised date")
 
     if reasons:

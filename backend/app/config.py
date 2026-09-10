@@ -9,6 +9,7 @@ re-declare a threshold, a radius or a floor anywhere else in the tree.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from typing import Literal
 
@@ -44,6 +45,76 @@ OCR_FLOOR = 0.60
 
 ASR_FLOOR = 0.60
 """Below this ASR confidence parsed_intent is omitted and the client re-prompts."""
+
+OUT_OF_SCOPE_MAX_SOFTMAX = float(os.environ.get("VISION_OOS_FLOOR", "0.35"))
+"""Below this max-softmax the classifier declares `out_of_scope=True` on C1
+(docs/DESIGN.md §4). Read once at import time from `VISION_OOS_FLOOR` — this is
+deployment tuning for a perception floor, not a gate decision threshold, so it
+is exempt from the "module constant, not a settings field" rule that GATE/
+FLOOR/MARGIN carry. It still lives only here, per the rule directly above.
+
+KNOWN GAP (raised at the Aug 29 vision-integration checkpoint, partially
+mitigated by VISION_MIN_VEGETATION_FRACTION below, not fully closed): this
+floor was derived from a coverage table of in-distribution paddy photos only.
+On out-of-scope test images (non-plant photos) the real classifier returned
+max-softmax as high as 0.87 / 0.72 / 0.54 / 0.9995 — none below this floor —
+because a 4-class softmax with no rejection class concentrates mass somewhere
+regardless of input. Raising this floor to catch those would also reject ~93%
+of genuine paddy photos (per the same coverage table), so there is no single
+softmax-only threshold fix. The vegetation-fraction pre-filter below catches
+the specific failure mode observed (no green content at all) cheaply, without
+retraining, but is a heuristic, not a learned rejection class — see
+VISION_MIN_VEGETATION_FRACTION's own docstring for what it does and does not
+cover. A trained negative/"normal" class (retrain) or shifting more of the
+burden to Doubt Doctor's differential question remain open for Suchit/
+Thaariha to weigh against this mitigation."""
+
+VISION_MIN_VEGETATION_FRACTION = float(os.environ.get("VISION_MIN_VEGETATION_FRACTION", "0.15"))
+"""Below this fraction of green/yellow-green pixels, the classifier declares
+`out_of_scope=True` regardless of softmax confidence — a cheap, untrained
+complement to OUT_OF_SCOPE_MAX_SOFTMAX above.
+
+Why: the softmax floor alone missed every out-of-scope test image thrown at it
+during integration (see the KNOWN GAP note above), including one non-plant
+photo scored at 99.95% confidence. Measured on that same test set, real paddy
+leaf photos ran ~98% vegetation-hued pixels; the failing non-plant photos ran
+0.0%-6.8%. 0.15 sits with wide margin on both sides of that one data point —
+it has not been validated against a broad image set, only the specific
+failures observed on 2026-08-29.
+
+What this does NOT catch: any out-of-scope subject that happens to be green
+(a cucumber, a lawn, a different crop's leaf) — this is a vegetation detector,
+not a paddy-leaf detector or a trained rejection class. It complements
+OUT_OF_SCOPE_MAX_SOFTMAX; it does not replace the need for a real fix (see the
+KNOWN GAP note)."""
+
+OUT_OF_SCOPE_RAW_LOGIT_FLOOR = float(os.environ.get("VISION_OOS_RAW_LOGIT_FLOOR", "2.0"))
+"""Below this raw (pre-temperature) max-logit, the classifier declares
+`out_of_scope=True` — a third, independent complement to OUT_OF_SCOPE_MAX_SOFTMAX
+and VISION_MIN_VEGETATION_FRACTION above. Same exemption as those two: perception
+tuning, not a gate decision, so it is env-overridable rather than hardcoded.
+
+Why pre-temperature, not post: `temperature` is fitted purely to calibrate the
+*known* 4-class probabilities (docs/DESIGN.md §4) — it is optimized so that a
+0.58 on an in-distribution photo means "right 58% of the time", and it cannot
+change any argmax. It says nothing about whether the input belongs to that
+distribution at all, and dividing by it before scoring can inflate an
+out-of-distribution input's apparent confidence exactly the way
+OUT_OF_SCOPE_MAX_SOFTMAX's KNOWN GAP describes (0.9995 on a fabric photo).
+Scoring the raw logit sidesteps a rescaling that was never fit for this job.
+
+KNOWN GAP, same honesty as the two constants above: this floor was set from the
+same small ad-hoc probe used for VISION_MIN_VEGETATION_FRACTION (solid-color
+squares standing in for non-plant input) plus a handful of unrelated real
+photos found on the dev machine, not a genuine paddy-photo validation set —
+none was available locally. In that probe, the solid-color squares scored
+1.7-2.13 raw max-logit; ordinary real photos (portraits, objects) scored
+2.6-11.85, i.e. *higher* than the synthetic non-plant proxies and on the same
+order as a confident in-distribution prediction. So this floor, like the
+softmax one, reliably catches only the specific failure shape it was set
+against (flat, low-signal input) and should not be read as "raw-logit OOD
+detection solved" — it is one more heuristic vote in the OR below, not a
+replacement for a trained rejection class."""
 
 # ---------------------------------------------------------------------------
 # Voice provider model pins — Sarvam. docs/DESIGN.md §1, §8.
@@ -182,13 +253,30 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    app_env: str = "local"
+    app_env: Literal["local", "production"] = "local"
+    """Two security gates branch on this: core/security.py's fixed-OTP
+    allowlist (`== "local"`, fails closed on anything unrecognised) and
+    core/routers/auth.py's demo-login denylist (`!= "production"`, used to
+    fail OPEN on anything unrecognised -- APP_ENV=prod, a typo, anything not
+    exactly the literal string "production" passed the old bare-str check).
+    Constrained to the two values this project actually sets anywhere
+    (grepped: .env.example, every app_env comparison in app/) so a third
+    value is a Pydantic ValidationError at Settings() construction --
+    silently picking a branch is not a value this field can hold."""
     log_level: str = "INFO"
     api_prefix: str = "/api/v1"
 
     # --- Database ---
     database_url: str = "postgresql+asyncpg://bhoomi:bhoomi@localhost:5432/bhoomi"
     alembic_database_url: str = "postgresql+psycopg://bhoomi:bhoomi@localhost:5432/bhoomi"
+    test_database_url: str | None = None
+    """backend/tests/conftest.py's db_session fixture reads this, not
+    database_url. Unset means the test suite runs against database_url, same
+    as before this setting existed -- nobody's local setup breaks silently.
+    Set it to a genuinely separate database (a second Supabase database, or a
+    local Postgres) so a live-verification curl and the pytest suite cannot
+    collide on the same seed rows. See README's "Test database" section for
+    why a database rather than a schema, and how to point this at one."""
     db_echo: bool = False
 
     # --- Object storage ---
@@ -206,6 +294,16 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 720
     refresh_token_expire_days: int = 30
     otp_expire_seconds: int = 300
+
+    demo_mode: bool = False
+    """Fail closed. POST /auth/demo (core/routers/auth.py) mints tokens for a
+    fixed, seeded farmer identity with no credential beyond this flag -- it
+    used to default True with the app_env check dead by construction (an AND
+    inside a negation), so the endpoint was reachable in every deployment,
+    unauthenticated, by default. A demo deployment opts in explicitly with
+    DEMO_MODE=true; nothing is open by not asking. The route is also not
+    mounted at all when this is false (app/main.py) -- there is nothing to
+    probe, not just nothing to pass."""
 
     dev_fixed_otp: str | None = None
     """Local-only escape hatch so the demo does not need an SMS provider.

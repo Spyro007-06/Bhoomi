@@ -54,8 +54,14 @@ def test_stub_cannot_reach_the_advise_band() -> None:
 
 
 def test_real_model_is_not_silently_stubbed(monkeypatch: pytest.MonkeyPatch) -> None:
-    """With VISION_MODEL=real and no model, classify() must fail loudly rather
-    than quietly serving stub output."""
+    """With VISION_MODEL=real, classify() must fail loudly on unreadable input
+    rather than quietly serving stub output.
+
+    The real classifier is implemented (backend/app/vision/classifier.py), so
+    this no longer raises NotImplementedError — it now loads the real model and
+    attempts real inference, which must reject non-image bytes rather than
+    return a plausible-looking TopK for garbage input.
+    """
     monkeypatch.setattr(settings, "vision_model", "real")
-    with pytest.raises(NotImplementedError):
-        classify(b"x")
+    with pytest.raises(Exception):  # noqa: B017 - PIL/torch raise varying types
+        classify(b"not an image")

@@ -29,6 +29,8 @@ from app.core.routers import (
 from app.db import dispose_engine
 from app.errors import register_exception_handlers
 from app.scheduler import shutdown_scheduler, start_scheduler
+from app.vision.classifier import warmup as vision_warmup
+from app.voice import router as voice_router
 
 logging.basicConfig(level=settings.log_level)
 log = logging.getLogger("bhoomi")
@@ -77,6 +79,10 @@ async def lifespan(_: FastAPI):
             "VISION_MODEL=stub - every TopK carries is_stub=true and clients MUST "
             "render a stub banner. See docs/DESIGN.md section 12."
         )
+    else:
+        log.info("vision: warming up real classifier (VISION_MODEL=real)")
+        vision_warmup()
+        log.info("vision: real classifier warm")
     start_scheduler()
     yield
     shutdown_scheduler()
@@ -85,11 +91,12 @@ async def lifespan(_: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Bhoomi v2",
-        version="2.0.0",
+        title="Bhoomi v3",
+        version="3.0.0",
         description=(
             "SIH26131 — early detection and management of crop diseases and pest "
-            "infestations. Wire format is frozen in docs/API_CONTRACT.md."
+            "infestations. Four crops, 26 crop-namespaced targets. Wire format is "
+            "frozen in docs/API_CONTRACT.md."
         ),
         lifespan=lifespan,
     )
@@ -99,6 +106,13 @@ def create_app() -> FastAPI:
     api = APIRouter(prefix=settings.api_prefix)
     api.include_router(health_router)
     api.include_router(auth.router)
+    if settings.demo_mode:
+        # Not gated inside the handler alone: when demo mode is off, the route
+        # does not exist on this app object at all, so there is nothing to
+        # probe and nothing in the generated client. See auth.demo_login's
+        # docstring for the belt-and-suspenders app_env check that still
+        # applies when this condition is true.
+        api.include_router(auth.demo_router)
     api.include_router(assets.router)
     api.include_router(farms.router)
     api.include_router(problems.router)
@@ -107,6 +121,7 @@ def create_app() -> FastAPI:
     api.include_router(cases.router)
     api.include_router(officials.router)
     api.include_router(diagnose.router)
+    api.include_router(voice_router.router)
     # Phase 2+: problems, timeline. Phase 3+: alerts, followups. Each router
     # module is included here as its owner implements it.
     app.include_router(api)

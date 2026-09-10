@@ -31,9 +31,19 @@ from app.core.schemas.auth import (
     UserOut,
 )
 from app.db import get_session
-from app.errors import BhoomiError, ErrorCode, Unauthenticated
+from app.errors import BhoomiError, ErrorCode, NotFound, Unauthenticated, error_response
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Separate from `router` so app/main.py can choose not to mount it at all when
+# settings.demo_mode is false -- see demo_login's docstring below for why a
+# disabled route should not exist rather than exist and refuse.
+demo_router = APIRouter(prefix="/auth", tags=["auth"])
+
+# None of these three routes carry auth (they are how a caller GETS a
+# token), so 401/403 below mean "your code/credentials were wrong", never
+# "you are not signed in" -- current_principal is not on their signature.
+_MALFORMED = error_response(422, "The request body did not parse.")
 
 
 def _tokens_for(user: User) -> TokenOut:
@@ -46,7 +56,12 @@ def _tokens_for(user: User) -> TokenOut:
     )
 
 
-@router.post("/otp/request", response_model=OtpRequestOut, status_code=status.HTTP_200_OK)
+@router.post(
+    "/otp/request",
+    response_model=OtpRequestOut,
+    status_code=status.HTTP_200_OK,
+    responses={**_MALFORMED},
+)
 async def request_otp(
     payload: OtpRequestIn, session: AsyncSession = Depends(get_session)
 ) -> OtpRequestOut:
@@ -81,7 +96,18 @@ async def request_otp(
     return OtpRequestOut(request_id=otp.id, expires_in=settings.otp_expire_seconds)
 
 
-@router.post("/otp/verify", response_model=TokenOut)
+@router.post(
+    "/otp/verify",
+    response_model=TokenOut,
+    responses={
+        **error_response(
+            401,
+            "The code does not exist, has expired, has been used, has too many "
+            "failed attempts against it, or does not match.",
+        ),
+        **_MALFORMED,
+    },
+)
 async def verify_otp(
     payload: OtpVerifyIn, session: AsyncSession = Depends(get_session)
 ) -> TokenOut:
@@ -121,7 +147,19 @@ async def verify_otp(
     return _tokens_for(user)
 
 
-@router.post("/login", response_model=TokenOut)
+@router.post(
+    "/login",
+    response_model=TokenOut,
+    responses={
+        **error_response(401, "Email is unknown, has no password set, or the password is wrong."),
+        **error_response(
+            403,
+            "The account exists but is a farmer's -- farmers sign in with an "
+            "OTP, not §2's login.",
+        ),
+        **_MALFORMED,
+    },
+)
 async def login(payload: LoginIn, session: AsyncSession = Depends(get_session)) -> TokenOut:
     """Email and password, for `agronomist` and `official`. §2.
 
@@ -139,6 +177,57 @@ async def login(payload: LoginIn, session: AsyncSession = Depends(get_session)) 
     if user.role not in (Role.AGRONOMIST, Role.OFFICIAL):
         raise BhoomiError(
             ErrorCode.FORBIDDEN, "This account signs in with a phone number instead."
+        )
+
+    return _tokens_for(user)
+
+
+DEMO_FARMER_PHONE = "+919999999999"
+
+
+@demo_router.post(
+    "/demo",
+    response_model=TokenOut,
+    responses={
+        **error_response(
+            403,
+            "Demo mode is disabled in this environment: DEMO_MODE is not set, "
+            "or app_env is production.",
+        ),
+        **error_response(
+            404,
+            "The demo farmer has not been seeded in this environment. Run "
+            "`python -m seed.farms`.",
+        ),
+    },
+)
+async def demo_login(session: AsyncSession = Depends(get_session)) -> TokenOut:
+    """Mint tokens for the fixed, pre-seeded demo farmer. SIH judging only.
+
+    No request body: there used to be a `demo_code` field defaulting to the
+    same literal the handler fell back to when the body was absent, which is
+    not a credential -- removed rather than tightened, since a hardcoded
+    string in a public repo cannot be one. The only gate left is
+    settings.demo_mode (whether this route is mounted at all -- see
+    app/main.py) and settings.app_env, checked again here even though
+    mounting already implies demo_mode is true, so this function's own
+    invariant does not depend on how it was reached.
+
+    Does not create the demo farmer or farm -- an unauthenticated write path
+    was the least defensible part of the original endpoint. Both are seed
+    data (seed/farms.py); absence here is a clear, unauthenticated-safe
+    error telling the caller to run the seed, not a silent row creation.
+    """
+    if not (settings.demo_mode and settings.app_env != "production"):
+        raise BhoomiError(ErrorCode.FORBIDDEN, "Demo mode is disabled in this environment.")
+
+    user = (
+        await session.execute(select(User).where(User.phone == DEMO_FARMER_PHONE))
+    ).scalar_one_or_none()
+    if user is None:
+        raise NotFound(
+            "The demo farmer has not been seeded in this environment. "
+            "Run `python -m seed.farms`."
         )
 
     return _tokens_for(user)
