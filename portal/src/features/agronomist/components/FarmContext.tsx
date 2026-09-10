@@ -6,12 +6,19 @@ interface FarmContextProps {
   farm: FarmSummary;
 }
 
+const FARMER_NAMES_BY_FARM: Record<string, string> = {
+  farm_demo_001: 'Lakshmi Narayanan',
+  farm_demo_002: 'Sopanrao Deshmukh',
+  farm_demo_003: 'Babasaheb Patil',
+  farm_demo_004: 'Hanmantrao Shinde',
+};
+
 export function FarmContext({ farm }: FarmContextProps) {
   // Farmer display name
   const farmerName =
-    'farmer_name' in farm && typeof farm.farmer_name === 'string'
-      ? farm.farmer_name
-      : 'Lakshmi Narayanan';
+    'farmer_name' in farm && typeof (farm as Record<string, unknown>).farmer_name === 'string'
+      ? ((farm as Record<string, unknown>).farmer_name as string)
+      : FARMER_NAMES_BY_FARM[farm.id] || 'Lakshmi Narayanan';
 
   return (
     <Card className="rounded-2xl border border-bhoomi-border bg-bhoomi-surface p-5 shadow-card overflow-hidden">

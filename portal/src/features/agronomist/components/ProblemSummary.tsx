@@ -21,15 +21,70 @@ export function ProblemSummary({ problem }: ProblemSummaryProps) {
     }
   };
 
-  // Provide realistic problem quote summary
-  const problemQuote =
-    problem.label === 'paddy_blast'
-      ? 'Spindle-shaped spots with brownish borders and grayish centers on leaf blades. Few central leaves showing blast lesions.'
-      : problem.label === 'paddy_bacterial_leaf_blight'
-      ? 'Paddy leaf margins turning yellow with wavy grayish-white drying. Lesions spreading across 40% of tillers.'
-      : problem.label === 'tapioca_mosaic'
-      ? 'Severe leaf curling, mosaic mottling, and stunted terminal shoot growth.'
-      : `Reported symptoms characteristic of ${formatTargetLabel(problem.label)} on field sample inspection.`;
+  // Problem details mapped by label
+  const PROBLEM_META: Record<
+    string,
+    {
+      quote: string;
+      followup: string;
+      trigger: string;
+    }
+  > = {
+    paddy_blast: {
+      quote:
+        'Spindle-shaped spots with brownish borders and grayish centers on leaf blades. Few central leaves showing blast lesions.',
+      followup:
+        'Need agronomist dosage verification for Kuruvai ADT 43 crop stage.',
+      trigger:
+        'Early blast detection during high dew condensation window.',
+    },
+    cotton_pink_bollworm: {
+      quote:
+        'Rosetted flowers and small entry holes in maturing bolls with larval damage across lower fruiting branches.',
+      followup:
+        'Pheromone trap count exceeded ETL (8 moths/trap/night for 3 consecutive days) in Dindori cluster.',
+      trigger:
+        'Severe boll infestation during critical boll development stage.',
+    },
+    soybean_yellow_mosaic_virus: {
+      quote:
+        'Irregular yellow and green patches on leaves with severe chlorosis and stunted vegetative canopy across 35% of field.',
+      followup:
+        'Whitefly vector population surge observed following humid dry spell in Karveer tehsil.',
+      trigger:
+        'Rapid systemic viral transmission threat to neighboring soybean plots.',
+    },
+    jowar_stem_borer: {
+      quote:
+        'Dead heart symptoms and pinholes in whorl leaves with tunneling larvae in central shoot stems.',
+      followup:
+        'Dead heart incidence reached 18% during active vegetative whorl elongation stage.',
+      trigger:
+        'Crop vegetative stage threshold exceeded with risk of total tillering failure.',
+    },
+    paddy_bacterial_leaf_blight: {
+      quote:
+        'Paddy leaf margins turning yellow with wavy grayish-white drying. Lesions spreading across 40% of tillers.',
+      followup:
+        'High wind and rainfall event accelerated bacterial ooze dispersal in Baramati tract.',
+      trigger:
+        'Kreseck wilt phase onset risk in susceptible dwarf variety.',
+    },
+    tapioca_mosaic: {
+      quote:
+        'Severe leaf curling, mosaic mottling, and stunted terminal shoot growth.',
+      followup:
+        'Stem cutting propagation vector check required for foundation seed stock.',
+      trigger:
+        'High yield reduction risk in vegetative expansion phase.',
+    },
+  };
+
+  const meta = PROBLEM_META[problem.label] || {
+    quote: `Reported symptoms characteristic of ${formatTargetLabel(problem.label)} on field sample inspection.`,
+    followup: `Awaiting agronomist review and treatment advisory based on KVK guidelines.`,
+    trigger: `AI model escalation gate triggered for ${formatTargetLabel(problem.label)} expert verification.`,
+  };
 
   return (
     <Card className="rounded-2xl border border-bhoomi-border bg-bhoomi-surface p-5 shadow-card overflow-hidden space-y-4">
@@ -65,7 +120,7 @@ export function ProblemSummary({ problem }: ProblemSummaryProps) {
 
         {/* Quotation Problem Statement */}
         <div className="rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 text-xs font-bold text-bhoomi-text-primary leading-relaxed shadow-xs">
-          &ldquo;{problemQuote}&rdquo;
+          &ldquo;{meta.quote}&rdquo;
         </div>
 
         {/* Two Sub-Cards Side by Side */}
@@ -76,7 +131,7 @@ export function ProblemSummary({ problem }: ProblemSummaryProps) {
               FOLLOW-UP TRACKING
             </span>
             <p className="text-xs text-bhoomi-text-secondary leading-snug">
-              Need agronomist dosage verification for Kuruvai ADT 43 crop stage.
+              {meta.followup}
             </p>
           </div>
 
@@ -86,7 +141,7 @@ export function ProblemSummary({ problem }: ProblemSummaryProps) {
               ESCALATION TRIGGER
             </span>
             <p className="text-xs text-purple-900 leading-snug font-medium">
-              Early blast detection during high dew condensation window.
+              {meta.trigger}
             </p>
           </div>
         </div>

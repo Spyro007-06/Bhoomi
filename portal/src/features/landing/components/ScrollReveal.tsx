@@ -59,14 +59,14 @@ export function ScrollReveal({
     <div
       ref={ref}
       style={{
-        transitionDuration: '550ms',
+        transitionDuration: '520ms',
         transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
         transitionDelay: `${delay}ms`,
       }}
-      className={`transition-all ${
+      className={`transition-all duration-500 ease-out will-change-[transform,opacity] ${
         isVisible
           ? 'opacity-100 translate-y-0 scale-100'
-          : 'opacity-0 translate-y-4 scale-[0.99] pointer-events-none'
+          : 'opacity-0 translate-y-5 scale-[0.99] pointer-events-none'
       } ${className}`}
     >
       {children}

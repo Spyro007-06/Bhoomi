@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils/cn';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  labelClassName?: string;
   error?: string;
   helperText?: string;
   icon?: ReactNode;
@@ -11,7 +12,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, type = 'text', label, error, helperText, icon, endAdornment, id, disabled, ...props },
+    { className, labelClassName, type = 'text', label, error, helperText, icon, endAdornment, id, disabled, ...props },
     ref
   ) => {
     const generatedId = useId();
@@ -24,7 +25,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-semibold uppercase tracking-wider text-bhoomi-text-secondary"
+            className={cn('block text-xs font-semibold uppercase tracking-wider text-bhoomi-text-secondary', labelClassName)}
           >
             {label}
           </label>

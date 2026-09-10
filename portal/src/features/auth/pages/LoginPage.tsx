@@ -160,15 +160,6 @@ export function LoginPage() {
       <div className="relative z-10 my-auto w-full max-w-[460px] space-y-3.5 animate-bhm-fade-in-up">
         {/* Brand Identity Area */}
         <div className="text-center space-y-2">
-          {/* Government Operations Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-950/50 backdrop-blur-md px-3.5 py-1 text-xs font-semibold tracking-wider text-emerald-200 shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
-            </span>
-            <span>GOVERNMENT OF MAHARASHTRA</span>
-          </div>
-
           {/* Official Bhoomi Emblem */}
           <Link
             to="/"
@@ -195,34 +186,39 @@ export function LoginPage() {
           </div>
         </div>
 
-        {/* Elevated Glassmorphism Login Card */}
-        <Card className="rounded-2xl border border-white/80 bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.35),0_1px_3px_rgba(0,0,0,0.08)] text-bhoomi-text-primary transition-all">
-          <CardHeader className="space-y-1 pb-3 pt-5 px-6 sm:px-7">
+        {/* Elevated Background-Adaptive Glassmorphism Login Card */}
+        <Card className="relative rounded-3xl border border-emerald-500/25 bg-slate-950/50 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.12)_inset] text-white transition-all overflow-hidden">
+          {/* Subtle Top-down Light Rim & Ambient Emerald Glows */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none" />
+          <div className="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 h-52 w-52 rounded-full bg-emerald-700/20 blur-3xl pointer-events-none" />
+
+          <CardHeader className="relative z-10 space-y-1 pb-3 pt-6 px-6 sm:px-7">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-bold tracking-tight text-slate-900">
+              <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-white drop-shadow-xs">
                 Sign In
               </CardTitle>
-              <div className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200/70">
-                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-950/70 backdrop-blur-md px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-400/30 shadow-xs">
+                <ShieldCheck className="h-4 w-4 text-emerald-400" />
                 <span>Secure Access</span>
               </div>
             </div>
-            <CardDescription className="text-xs sm:text-sm text-slate-500">
+            <CardDescription className="text-xs sm:text-sm text-emerald-100/75">
               Enter your official credentials to access your portal workspace.
             </CardDescription>
           </CardHeader>
 
-          <form onSubmit={handleSubmit} noValidate>
+          <form onSubmit={handleSubmit} noValidate className="relative z-10">
             <CardContent className="space-y-3.5 px-6 sm:px-7 pt-1">
               {generalError && (
                 <div
                   role="alert"
-                  className="rounded-xl bg-red-50/95 p-3 text-xs text-bhoomi-danger border border-red-200 flex items-start gap-2 shadow-xs animate-bhm-fade-in"
+                  className="rounded-xl bg-red-950/80 backdrop-blur-md p-3 text-xs text-red-200 border border-red-500/40 flex items-start gap-2 shadow-sm animate-bhm-fade-in"
                 >
                   {generalError.isNetwork ? (
-                    <WifiOff className="h-4 w-4 shrink-0 text-bhoomi-danger mt-0.5" />
+                    <WifiOff className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
                   ) : (
-                    <AlertCircle className="h-4 w-4 shrink-0 text-bhoomi-danger mt-0.5" />
+                    <AlertCircle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
                   )}
                   <div className="leading-snug font-medium">{generalError.message}</div>
                 </div>
@@ -230,28 +226,28 @@ export function LoginPage() {
 
               {/* Workspace Role Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 block">
+                <label className="text-xs font-semibold text-emerald-200/90 block">
                   Select Workspace Role
                 </label>
                 <div
                   role="radiogroup"
                   aria-label="Select Workspace Role"
-                  className="grid grid-cols-2 p-1.5 rounded-xl bg-slate-100/90 border border-slate-200/90 gap-1.5"
+                  className="grid grid-cols-2 p-1.5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 gap-1.5 shadow-inner"
                 >
                   <button
                     type="button"
                     role="radio"
                     aria-checked={selectedRole === 'official'}
                     onClick={() => setSelectedRole('official')}
-                    className={`flex items-center justify-center gap-2 py-2 px-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
                       selectedRole === 'official'
-                        ? 'bg-white text-[#1B5E20] shadow-xs border border-emerald-600/30 ring-1 ring-emerald-600/20'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 border border-transparent'
+                        ? 'bg-emerald-600/90 text-white shadow-md border border-emerald-400/40 ring-1 ring-emerald-400/30'
+                        : 'text-emerald-100/70 hover:text-white hover:bg-white/10 border border-transparent'
                     }`}
                   >
                     <Building2
                       className={`h-4 w-4 shrink-0 transition-colors ${
-                        selectedRole === 'official' ? 'text-[#1B5E20]' : 'text-slate-500'
+                        selectedRole === 'official' ? 'text-white' : 'text-emerald-300/70'
                       }`}
                     />
                     <span>Official Dashboard</span>
@@ -262,15 +258,15 @@ export function LoginPage() {
                     role="radio"
                     aria-checked={selectedRole === 'agronomist'}
                     onClick={() => setSelectedRole('agronomist')}
-                    className={`flex items-center justify-center gap-2 py-2 px-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
                       selectedRole === 'agronomist'
-                        ? 'bg-white text-[#1B5E20] shadow-xs border border-emerald-600/30 ring-1 ring-emerald-600/20'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 border border-transparent'
+                        ? 'bg-emerald-600/90 text-white shadow-md border border-emerald-400/40 ring-1 ring-emerald-400/30'
+                        : 'text-emerald-100/70 hover:text-white hover:bg-white/10 border border-transparent'
                     }`}
                   >
                     <Sprout
                       className={`h-4 w-4 shrink-0 transition-colors ${
-                        selectedRole === 'agronomist' ? 'text-[#1B5E20]' : 'text-slate-500'
+                        selectedRole === 'agronomist' ? 'text-white' : 'text-emerald-300/70'
                       }`}
                     />
                     <span>Agronomist Portal</span>
@@ -280,6 +276,7 @@ export function LoginPage() {
 
               <Input
                 label="Official Email"
+                labelClassName="text-emerald-200/90"
                 type="email"
                 placeholder={selectedRole === 'official' ? 'officer@maha.gov.in' : 'name@kvk.gov.in'}
                 value={email}
@@ -288,12 +285,13 @@ export function LoginPage() {
                 error={fieldErrors.email}
                 required
                 disabled={isSubmitting}
-                icon={<Mail className="h-4 w-4 text-slate-400" />}
-                className="h-10.5 bg-slate-50/70 focus:bg-white text-slate-900 placeholder:text-slate-400 border-slate-300/80 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all text-sm"
+                icon={<Mail className="h-4 w-4 text-emerald-400/70" />}
+                className="h-10.5 bg-black/35 focus:bg-black/50 text-white placeholder:text-slate-400 border-white/15 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 rounded-xl transition-all text-sm shadow-inner backdrop-blur-md"
               />
 
               <Input
                 label="Password"
+                labelClassName="text-emerald-200/90"
                 type="password"
                 placeholder="••••••••"
                 value={password}
@@ -302,15 +300,15 @@ export function LoginPage() {
                 error={fieldErrors.password}
                 required
                 disabled={isSubmitting}
-                icon={<Lock className="h-4 w-4 text-slate-400" />}
-                className="h-10.5 bg-slate-50/70 focus:bg-white text-slate-900 placeholder:text-slate-400 border-slate-300/80 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all text-sm"
+                icon={<Lock className="h-4 w-4 text-emerald-400/70" />}
+                className="h-10.5 bg-black/35 focus:bg-black/50 text-white placeholder:text-slate-400 border-white/15 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 rounded-xl transition-all text-sm shadow-inner backdrop-blur-md"
               />
             </CardContent>
 
-            <CardFooter className="flex flex-col gap-2.5 pt-1.5 pb-4 px-6 sm:px-7">
+            <CardFooter className="flex flex-col gap-2.5 pt-1.5 pb-5 px-6 sm:px-7">
               <Button
                 type="submit"
-                className="w-full h-10.5 text-sm font-semibold bg-[#1B5E20] hover:bg-[#14532D] active:bg-[#0F3E22] text-white shadow-md shadow-emerald-950/20 hover:shadow-lg active:scale-[0.99] transition-all duration-200 rounded-xl flex items-center justify-center gap-2 group"
+                className="w-full h-11 text-sm font-semibold bg-[#2E7D32] hover:bg-[#1B5E20] active:bg-[#14532D] text-white shadow-lg shadow-emerald-950/60 hover:shadow-emerald-900/40 active:scale-[0.99] transition-all duration-200 rounded-xl flex items-center justify-center gap-2 group border border-emerald-400/20"
                 isLoading={isSubmitting}
               >
                 <span>Sign In to Workspace</span>
@@ -321,11 +319,11 @@ export function LoginPage() {
 
               <div className="relative w-full my-1">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200" />
+                  <div className="w-full border-t border-white/15" />
                 </div>
                 <div className="relative flex justify-center text-[10px] sm:text-xs uppercase">
-                  <span className="bg-white px-2.5 text-slate-400 font-semibold tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                  <span className="bg-slate-950/80 backdrop-blur-md px-3 py-0.5 rounded-full border border-white/15 text-emerald-200/80 font-semibold tracking-wider flex items-center gap-1.5 shadow-xs">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                     Demo Fast Access
                   </span>
                 </div>
@@ -336,20 +334,20 @@ export function LoginPage() {
                   type="button"
                   variant="secondary"
                   size="sm"
-                  className="w-full h-9.5 flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold border border-slate-200 bg-slate-50/80 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-950 text-slate-700 transition-all rounded-xl shadow-xs active:scale-[0.98]"
+                  className="w-full h-10 flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold border border-white/15 bg-white/5 hover:bg-amber-500/20 hover:border-amber-400/50 hover:text-amber-200 text-slate-200 transition-all rounded-xl shadow-xs active:scale-[0.98] backdrop-blur-md"
                   onClick={() => handleDemoLogin('official')}
                 >
-                  <Zap className="h-4 w-4 text-amber-600 fill-amber-500/20 shrink-0" />
+                  <Zap className="h-4 w-4 text-amber-400 fill-amber-400/20 shrink-0" />
                   <span>Official Dashboard</span>
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="w-full h-9.5 flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold border border-slate-200 bg-slate-50/80 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-950 text-slate-700 transition-all rounded-xl shadow-xs active:scale-[0.98]"
+                  className="w-full h-10 flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold border border-white/15 bg-white/5 hover:bg-emerald-500/20 hover:border-emerald-400/50 hover:text-emerald-200 text-slate-200 transition-all rounded-xl shadow-xs active:scale-[0.98] backdrop-blur-md"
                   onClick={() => handleDemoLogin('agronomist')}
                 >
-                  <Sprout className="h-4 w-4 text-[#1B5E20] shrink-0" />
+                  <Sprout className="h-4 w-4 text-emerald-400 shrink-0" />
                   <span>Agronomist Queue</span>
                 </Button>
               </div>
@@ -359,7 +357,7 @@ export function LoginPage() {
 
         {/* Official Footer Banner */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-950/40 backdrop-blur-md px-3.5 py-1 text-xs font-medium text-emerald-100/80 border border-white/10 shadow-xs">
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-950/50 backdrop-blur-md px-3.5 py-1 text-xs font-medium text-emerald-100/80 border border-white/10 shadow-xs">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
             <span>Government of Maharashtra · SIH26131</span>
           </div>

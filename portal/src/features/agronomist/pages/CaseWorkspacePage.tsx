@@ -72,22 +72,21 @@ export function CaseWorkspacePage() {
   // Loading Skeleton State
   if (isLoading) {
     return (
-      <div className="flex-1 p-6 space-y-6 max-w-[1600px] mx-auto w-full">
-        <div className="flex items-center justify-between border-b border-bhoomi-border pb-4">
-          <Skeleton className="h-8 w-64 rounded-xl" />
-          <Skeleton className="h-6 w-32 rounded-full" />
+      <div className="flex-1 flex flex-col lg:flex-row bg-bhoomi-canvas min-w-0">
+        <div className="w-full lg:w-[320px] lg:shrink-0 border-r border-bhoomi-border bg-bhoomi-surface p-4 space-y-3">
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
         </div>
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          <div className="w-full lg:w-[320px] lg:shrink-0 space-y-3">
-            <Skeleton className="h-32 w-full rounded-2xl" />
-            <Skeleton className="h-32 w-full rounded-2xl" />
-            <Skeleton className="h-32 w-full rounded-2xl" />
+        <div className="flex-1 p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-bhoomi-border pb-4">
+            <Skeleton className="h-8 w-64 rounded-xl" />
+            <Skeleton className="h-6 w-32 rounded-full" />
           </div>
-          <div className="flex-1 space-y-5 w-full">
-            <Skeleton className="h-36 rounded-2xl" />
-            <Skeleton className="h-44 rounded-2xl" />
-            <Skeleton className="h-72 rounded-2xl" />
-          </div>
+          <Skeleton className="h-36 rounded-2xl" />
+          <Skeleton className="h-44 rounded-2xl" />
+          <Skeleton className="h-72 rounded-2xl" />
         </div>
       </div>
     );
@@ -130,92 +129,96 @@ export function CaseWorkspacePage() {
     );
   }
 
-  const isResolved = caseBundle.status === 'resolved' || resolutionResult !== null;
+  const isResolved =
+    caseBundle.status === 'resolved' ||
+    (resolutionResult !== null && resolutionResult.case_id === caseBundle.case_id);
 
   return (
-    <div className="flex-1 p-6 pb-24 bg-bhoomi-canvas min-w-0">
-      {/* 3-Column Cockpit Workspace Layout */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start max-w-[1600px] mx-auto">
-        {/* Column 2: Escalated Case Queue List (Middle Column) */}
-        <EscalatedQueuePanel activeCaseId={caseId || caseBundle.case_id} />
+    <div className="flex-1 flex flex-col lg:flex-row bg-bhoomi-canvas min-w-0 lg:h-[calc(100vh-70px)] lg:overflow-hidden">
+      {/* Column 2: Escalated Case Queue List (Middle Column) */}
+      <EscalatedQueuePanel activeCaseId={caseId || caseBundle.case_id} />
 
-        {/* Column 3: Case Workspace / Detail Pane (Right Column) */}
-        <div className="flex-1 space-y-5 min-w-0 w-full">
-          {/* Header */}
-          <CaseHeader
-            caseId={caseBundle.case_id}
-            status={caseBundle.status}
-            openedAt={caseBundle.problem.opened_at}
-            isResolved={isResolved}
-          />
+      {/* Column 3: Case Workspace / Detail Pane (Right Column) */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Scrollable Detail Content Area */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-5">
+          <div className="max-w-[1400px] mx-auto space-y-5">
+            {/* Header */}
+            <CaseHeader
+              caseId={caseBundle.case_id}
+              status={caseBundle.status}
+              openedAt={caseBundle.problem.opened_at}
+              isResolved={isResolved}
+            />
 
-          {/* Farm Context */}
-          <FarmContext farm={caseBundle.farm} />
+            {/* Farm Context */}
+            <FarmContext farm={caseBundle.farm} />
 
-          {/* Farm Health & Treatment Response Banner (State / Network retry) */}
-          {caseBundle.gate?.outcome === 'clarify' && (
-            <div className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-xs text-xs">
-              <div className="flex items-center gap-2 text-amber-800 font-semibold">
-                <AlertCircle className="h-4 w-4 text-amber-600" />
-                <span>Farm Health &amp; Treatment Response</span>
+            {/* Farm Health & Treatment Response Banner (State / Network retry) */}
+            {caseBundle.gate?.outcome === 'clarify' && (
+              <div className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-xs text-xs">
+                <div className="flex items-center gap-2 text-amber-800 font-semibold">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <span>Farm Health &amp; Treatment Response</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => refetch()}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 py-1 text-xs font-bold text-amber-800 hover:bg-amber-50 transition-colors shadow-2xs"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  <span>Retry</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 py-1 text-xs font-bold text-amber-800 hover:bg-amber-50 transition-colors shadow-2xs"
-              >
-                <RefreshCw className="h-3 w-3" />
-                <span>Retry</span>
-              </button>
-            </div>
-          )}
+            )}
 
-          {/* Problem Summary (FARMER STATED PROBLEM) */}
-          <ProblemSummary problem={caseBundle.problem} />
+            {/* Problem Summary (FARMER STATED PROBLEM) */}
+            <ProblemSummary problem={caseBundle.problem} />
 
-          {/* Uploaded Field Media (Evidence Gallery) */}
-          <EvidenceGallery images={caseBundle.images} />
+            {/* Uploaded Field Media (Evidence Gallery) */}
+            <EvidenceGallery images={caseBundle.images} />
 
-          {/* Two-Column Detail Section for Hypotheses and Observations */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-            {/* Left Sub-column: Observations & Field History */}
-            <div className="xl:col-span-7 space-y-5">
-              {/* Doubt Doctor Field Observations */}
-              <FieldObservations observations={caseBundle.field_observations} />
+            {/* Two-Column Detail Section for Hypotheses and Observations */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+              {/* Left Sub-column: Observations & Field History */}
+              <div className="xl:col-span-7 space-y-5">
+                {/* Doubt Doctor Field Observations */}
+                <FieldObservations observations={caseBundle.field_observations} />
 
-              {/* Treatments Tried */}
-              <TreatmentsTried treatments={caseBundle.treatments_tried} />
+                {/* Treatments Tried */}
+                <TreatmentsTried treatments={caseBundle.treatments_tried} />
 
-              {/* Pesticide Label Checks */}
-              <LabelChecks labelChecks={caseBundle.label_checks} />
+                {/* Pesticide Label Checks */}
+                <LabelChecks labelChecks={caseBundle.label_checks} />
 
-              {/* Follow-up Trend */}
-              <FollowupTrend
-                trend={caseBundle.followup_trend}
-                spokenSummary={caseBundle.spoken_summary}
-              />
-            </div>
+                {/* Follow-up Trend */}
+                <FollowupTrend
+                  trend={caseBundle.followup_trend}
+                  spokenSummary={caseBundle.spoken_summary}
+                />
+              </div>
 
-            {/* Right Sub-column: AI Hypotheses & Gate Context */}
-            <div className="xl:col-span-5 space-y-5">
-              {/* Model Hypotheses */}
-              <HypothesesPanel hypotheses={caseBundle.model_hypotheses} />
+              {/* Right Sub-column: AI Hypotheses & Gate Context */}
+              <div className="xl:col-span-5 space-y-5">
+                {/* Model Hypotheses */}
+                <HypothesesPanel hypotheses={caseBundle.model_hypotheses} />
 
-              {/* Decision Gate */}
-              <GateSummary gate={caseBundle.gate} />
+                {/* Decision Gate */}
+                <GateSummary gate={caseBundle.gate} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Sticky Action Bar */}
-      <CaseActionBar
-        onConfirmClick={() => setIsConfirmOpen(true)}
-        onCorrectClick={() => setIsCorrectOpen(true)}
-        onRequestInfoClick={() => setIsRequestInfoOpen(true)}
-        isPending={isPending}
-        isResolved={isResolved}
-      />
+        {/* Stable Docked Action Bar at the Bottom — NEVER moves, ZERO space below */}
+        <CaseActionBar
+          onConfirmClick={() => setIsConfirmOpen(true)}
+          onCorrectClick={() => setIsCorrectOpen(true)}
+          onRequestInfoClick={() => setIsRequestInfoOpen(true)}
+          isPending={isPending}
+          isResolved={isResolved}
+        />
+      </div>
 
       {/* Action Dialogs */}
       <ConfirmCaseDialog
