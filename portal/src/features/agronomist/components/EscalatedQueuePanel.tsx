@@ -102,20 +102,20 @@ export function EscalatedQueuePanel({ activeCaseId, cases }: EscalatedQueuePanel
     return (
       <aside
         aria-label="Escalated Case Queue"
-        className="w-full lg:w-[68px] lg:shrink-0 lg:sticky lg:top-[70px] lg:h-[calc(100vh-70px)] border-b lg:border-b-0 lg:border-r border-bhoomi-border bg-bhoomi-surface p-2.5 flex flex-col items-center overflow-hidden select-none z-10 transition-all duration-200 ease-in-out"
+        className="w-full lg:w-[68px] lg:shrink-0 lg:sticky lg:top-[70px] lg:h-[calc(100vh-70px)] border-b lg:border-b-0 lg:border-r border-slate-200 bg-[#F8FAFC] p-2.5 flex flex-col items-center overflow-hidden select-none z-10 transition-all duration-200 ease-in-out"
       >
         {/* Shrunk Header with Expand Action */}
-        <div className="pb-3 mb-2 border-b border-bhoomi-border shrink-0 flex flex-col items-center gap-1.5 w-full">
+        <div className="pb-3 mb-2 border-b border-slate-200 shrink-0 flex flex-col items-center gap-1.5 w-full">
           <button
             type="button"
             onClick={() => setIsCollapsed(false)}
             title="Expand queue panel"
             aria-label="Expand queue panel"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-bhoomi-border bg-bhoomi-canvas hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 text-slate-600 transition-all shadow-2xs cursor-pointer group"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border-2 border-slate-300 bg-white hover:bg-emerald-50 hover:border-emerald-500 hover:text-emerald-700 text-slate-700 transition-all shadow-xs cursor-pointer group"
           >
             <ChevronsRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
-          <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase">
+          <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">
             Queue
           </span>
         </div>
@@ -136,16 +136,16 @@ export function EscalatedQueuePanel({ activeCaseId, cases }: EscalatedQueuePanel
                 to={`/agronomist/cases/${c.case_id}`}
                 title={`${c.case_id} · ${formatTargetLabel(c.label)} (${c.region})`}
                 className={cn(
-                  'group relative flex flex-col items-center justify-center h-12 w-12 rounded-xl border transition-all duration-150',
+                  'group relative flex flex-col items-center justify-center h-12 w-12 rounded-xl border-2 transition-all duration-150 shadow-xs',
                   isActive
-                    ? 'border-2 border-emerald-600 bg-[#F4F9F4] text-emerald-800 shadow-xs'
-                    : 'border-bhoomi-border bg-bhoomi-surface hover:border-bhoomi-primary/40 hover:bg-[#F8FAFC] text-slate-600'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
+                    : 'border-slate-300 bg-white hover:border-emerald-600 hover:bg-emerald-50/40 text-slate-700'
                 )}
               >
                 <Sprout
                   className={cn(
                     'h-4 w-4 transition-colors',
-                    isActive ? 'text-emerald-700' : 'text-slate-400 group-hover:text-emerald-600'
+                    isActive ? 'text-emerald-700' : 'text-slate-500 group-hover:text-emerald-700'
                   )}
                 />
                 <span className="font-mono text-[10px] font-bold mt-0.5 leading-none">
@@ -154,7 +154,7 @@ export function EscalatedQueuePanel({ activeCaseId, cases }: EscalatedQueuePanel
                 {/* Status indicator dot */}
                 <span
                   className={cn(
-                    'absolute top-1 right-1 h-1.5 w-1.5 rounded-full',
+                    'absolute top-1 right-1 h-1.5 w-1.5 rounded-full ring-1 ring-white',
                     c.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'
                   )}
                 />
