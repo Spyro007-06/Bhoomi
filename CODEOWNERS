@@ -48,27 +48,29 @@
 # Last match wins in CODEOWNERS, so the file runs general to specific.
 
 # --- Default ---------------------------------------------------------------
-# UNVERIFIED, flagged, not changed here: the same contributors-API check that
-# resolved the TODOs above also shows @Spyro007-06 (used everywhere below as
+# RESOLVED (2026-09-10): the same contributors-API check that resolved the
+# TODOs above also showed @Spyro007-06 (used everywhere below as
 # "Shreekumar") resolving to the 13 commits made under b.l.tharun1465@gmail.com
-# ("Spyro007-06" / "THARUN B L" as author names) -- i.e. it looks like
+# ("Spyro007-06" / "THARUN B L" as author names) -- i.e. it was actually
 # THARUN's GitHub account, not Shreekumar's. Shreekumar's own commits
 # (bsrikumar855@gmail.com, 67 of them) resolve to @bsrikumar855-dot instead.
-# Left exactly as it was rather than reinterpreted: every occurrence of
-# @Spyro007-06 below is the file's PRE-EXISTING, already-"resolved" owner, not
-# a @TODO-* this pass touched, and a change with this much blast radius (it
-# is the default `*` owner and the standing owner of backend/, docs/,
-# CODEOWNERS itself, and more) needs the person who wrote it to confirm which
-# account was meant before every rule using it is repointed.
-*                               @Spyro007-06
+# Flagged rather than swapped at the time, pending confirmation from the
+# person who wrote it, given the blast radius (the default `*` owner and the
+# standing owner of backend/, docs/, CODEOWNERS itself, and more). Confirmed
+# and swapped now: every occurrence of @Spyro007-06 below that meant
+# Shreekumar is now @bsrikumar855-dot. The one exception is @TODO-tharun's own
+# line and its surrounding comment further down -- @Spyro007-06 is also a
+# real candidate for THAT person, and conflating the two is the exact
+# failure this file's header warns about, so that mention is untouched.
+*                               @bsrikumar855-dot
 
 # --- Top-level directories -------------------------------------------------
-/docs/                          @Spyro007-06
-/.github/                       @Spyro007-06
-/CLAUDE.md                      @Spyro007-06
-/README.md                      @Spyro007-06
-/CODEOWNERS                     @Spyro007-06
-/worksplitV1                    @Spyro007-06
+/docs/                          @bsrikumar855-dot
+/.github/                       @bsrikumar855-dot
+/CLAUDE.md                      @bsrikumar855-dot
+/README.md                      @bsrikumar855-dot
+/CODEOWNERS                     @bsrikumar855-dot
+/worksplitV1                    @bsrikumar855-dot
 
 # @TODO-tharun: NOT resolved. The only two candidate handles the log yields
 # both trace back to the same person and neither is a clean pick --
@@ -83,44 +85,44 @@
 # guessed.
 /app/                           @TODO-tharun @santheesh73
 /portal/                        @santheesh73
-/backend/                       @Spyro007-06
+/backend/                       @bsrikumar855-dot
 
 # --- backend/app/ subpackages ----------------------------------------------
 
 # FROZEN at hour 2. A change here needs a team decision, not a pull request.
 # Routed to everyone so nobody can land one quietly.
-/backend/app/contracts/         @Spyro007-06 @thaariha29 @suchitchopade3110-arch @Shruthi-Senthilkumar @TODO-tharun @santheesh73
+/backend/app/contracts/         @bsrikumar855-dot @thaariha29 @suchitchopade3110-arch @Shruthi-Senthilkumar @TODO-tharun @santheesh73
 
-/backend/app/core/              @Spyro007-06
+/backend/app/core/              @bsrikumar855-dot
 /backend/app/vision/            @suchitchopade3110-arch
 # @thaariha29 -- see the FOLLOW-UP (2026-09-10) note at the top of this file.
 /backend/app/intelligence/      @thaariha29
 /backend/app/voice/             @Shruthi-Senthilkumar
 
 # App foundation
-/backend/app/main.py            @Spyro007-06
-/backend/app/config.py          @Spyro007-06
-/backend/app/db.py              @Spyro007-06
-/backend/app/deps.py            @Spyro007-06
-/backend/app/errors.py          @Spyro007-06
+/backend/app/main.py            @bsrikumar855-dot
+/backend/app/config.py          @bsrikumar855-dot
+/backend/app/db.py              @bsrikumar855-dot
+/backend/app/deps.py            @bsrikumar855-dot
+/backend/app/errors.py          @bsrikumar855-dot
 
 # --- Routers whose owner is not the owner of core/ -------------------------
 # Everything else under core/routers/ falls to the /backend/app/core/ rule.
-/backend/app/core/routers/diagnose.py    @thaariha29 @suchitchopade3110-arch @Spyro007-06
+/backend/app/core/routers/diagnose.py    @thaariha29 @suchitchopade3110-arch @bsrikumar855-dot
 /backend/app/core/routers/clarify.py     @thaariha29
 /backend/app/core/routers/advisory.py    @thaariha29
 /backend/app/core/routers/cases.py       @thaariha29
-/backend/app/core/routers/labelcheck.py  @suchitchopade3110-arch @Spyro007-06 @thaariha29
+/backend/app/core/routers/labelcheck.py  @suchitchopade3110-arch @bsrikumar855-dot @thaariha29
 /backend/app/core/routers/referrals.py   @TODO-tharun
-/backend/app/core/routers/officials.py   @santheesh73 @Spyro007-06
+/backend/app/core/routers/officials.py   @santheesh73 @bsrikumar855-dot
 
 # --- Backend supporting trees ----------------------------------------------
-/backend/tests/                 @Spyro007-06
-/backend/alembic/               @Spyro007-06
-/backend/scripts/               @Spyro007-06
-/backend/seed/                  @Spyro007-06
+/backend/tests/                 @bsrikumar855-dot
+/backend/alembic/               @bsrikumar855-dot
+/backend/scripts/               @bsrikumar855-dot
+/backend/seed/                  @bsrikumar855-dot
 
 # Unowned in the work split (DESIGN §14, PRD §10). Routed to me so the review
 # lands somewhere, but these need a real owner assigned, not a reviewer.
-/backend/seed/registered_use.csv    @Spyro007-06
-/backend/seed/corpus/               @Spyro007-06
+/backend/seed/registered_use.csv    @bsrikumar855-dot
+/backend/seed/corpus/               @bsrikumar855-dot
