@@ -34,12 +34,13 @@ from sqlalchemy.dialects.postgresql import array as pg_array
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.contracts.enums import GateOutcome, GateReasonCode, ProblemStatus, TargetLabel
+from app.contracts.enums import AssetKind, GateOutcome, GateReasonCode, ProblemStatus, TargetLabel
 from app.contracts.vision import Prediction, TopK
 from app.core.models import Case, Diagnosis, DistinguishingCue, Farm, Problem, User
 from app.core.schemas.diagnose import DiagnoseIn, DiagnoseOut, EscalationOut, GateOut
 from app.core.services import prior as prior_service
 from app.core.services.alerts import TARGET_PROBLEM_TYPES
+from app.core.services.assets import get_asset_bytes
 from app.core.services.escalation import escalate
 from app.db import get_session
 from app.deps import Principal, current_principal
@@ -57,8 +58,9 @@ from app.intelligence.gate import decide
 # _stub_topk, not classify(): the no-header path must return the stub without
 # handing invented bytes to a classifier. Reaching into Suchit's module for the
 # private builder keeps one definition of the stub distribution; assembling a
-# second copy of it here is the thing that drifts.
-from app.vision.classifier import STUB_MODEL_VERSION, _stub_topk
+# second copy of it here is the thing that drifts. classify() is imported
+# alongside it for the one path below that IS meant to hand it real bytes.
+from app.vision.classifier import STUB_MODEL_VERSION, _stub_topk, classify
 
 router = APIRouter(tags=["diagnose"])
 
@@ -280,7 +282,13 @@ async def _escalation_out(session: AsyncSession, case: Case) -> EscalationOut:
     response_model_exclude_none=True,
     responses={
         **error_response(401, "No, or an invalid, bearer token."),
-        **error_response(404, "That farm does not exist."),
+        **error_response(
+            404,
+            "That farm does not exist, or -- VISION_MODEL=real, no "
+            "X-Vision-Fixture header -- payload.image_asset_id does not "
+            "resolve to an Asset row, or resolves to one with no object "
+            "ever uploaded to storage.",
+        ),
         **error_response(
             403, "The caller is a farmer and that farm belongs to a different account."
         ),
@@ -291,8 +299,9 @@ async def _escalation_out(session: AsyncSession, case: Case) -> EscalationOut:
         ),
         **error_response(
             422,
-            "The request body did not parse, or X-Vision-Fixture named an "
-            "unrecognised fixture.",
+            "The request body did not parse, X-Vision-Fixture named an "
+            "unrecognised fixture, or (VISION_MODEL=real, no fixture header) "
+            "image_asset_id resolves to an Asset that is not kind=image.",
         ),
         # THE important one. Both are real, reachable gate outcomes today,
         # not hypothetical future states: `advise` is reached by every
@@ -336,7 +345,33 @@ async def diagnose_farm(
     """
     farm = await _load_owned_farm(farm_id, principal, session)
 
-    topk = _resolve_topk(x_vision_fixture)
+    if settings.vision_model == "real" and x_vision_fixture is None:
+        # The one path _resolve_topk() cannot serve, by design: it is fixture/
+        # stub resolution only (see its own docstring), shared with POST
+        # /vision/classify, and has no reason to know about Asset rows or the
+        # real classifier. This is the only place in the whole API that runs
+        # an uploaded photo through app.vision.classify() -- before this,
+        # payload.image_asset_id was stored on Diagnosis and never read back.
+        #
+        # get_asset_bytes() raises NotFound/ValidationFailed for a bad
+        # image_asset_id (row missing, wrong kind, presigned-but-never-
+        # uploaded) -- both are BhoomiError subclasses, so a real 404/422
+        # reaches the caller through the registered handler, not a 500. Left
+        # to propagate here, not caught: there is nothing more specific to
+        # say than what those exceptions already say.
+        #
+        # classify() itself raises a bare exception on an undecodable image
+        # or a missing checkpoint -- deliberately, per its own docstring ("a
+        # garbage input must fail loudly, not get silently classified"). Also
+        # left to propagate: that surfaces as INTERNAL_ERROR, which is the
+        # correct shape for a genuine, unanticipated failure, not something
+        # this orchestration should mask as a farm- or asset-specific error.
+        image_bytes = await get_asset_bytes(
+            session, payload.image_asset_id, expected_kind=AssetKind.IMAGE
+        )
+        topk = classify(image_bytes)
+    else:
+        topk = _resolve_topk(x_vision_fixture)
 
     biases = {
         prediction.label: await prior_service.bias_for(

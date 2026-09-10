@@ -102,15 +102,28 @@ def _as_uuid(asset_id: uuid.UUID | str) -> uuid.UUID | None:
         return None
 
 
-async def get_asset_bytes(session: AsyncSession, asset_id: uuid.UUID | str) -> bytes:
+async def get_asset_bytes(
+    session: AsyncSession,
+    asset_id: uuid.UUID | str,
+    *,
+    expected_kind: AssetKind = AssetKind.AUDIO,
+) -> bytes:
     """Read an asset's bytes back from object storage, by id.
+
+    `expected_kind` defaults to AUDIO -- this function's first caller
+    (LiveSpeechToText, app/voice/providers.py) always wants audio and calls
+    positionally with two arguments, so its call site did not change when
+    this gained a second caller wanting images (diagnose_farm(),
+    core/routers/diagnose.py, Part 2 of the same task that added this
+    parameter) instead of the fixed AUDIO check the function was written
+    with initially.
 
     Three distinct, distinguishable failures, none of them a raw exception
     reaching the caller:
 
     - the Asset row does not exist                          -> NotFound
-    - the row exists but is not `kind=audio`                 -> ValidationFailed
-    - the row exists, `kind=audio`, but no object is at
+    - the row exists but is not `kind=expected_kind`         -> ValidationFailed
+    - the row exists, right kind, but no object is at
       `object_key` -- the presigned PUT was minted and never
       completed, or failed partway                           -> NotFound
 
@@ -125,10 +138,10 @@ async def get_asset_bytes(session: AsyncSession, asset_id: uuid.UUID | str) -> b
     if asset is None:
         raise NotFound(f"Asset {asset_id} does not exist.")
 
-    if asset.kind != AssetKind.AUDIO:
+    if asset.kind != expected_kind:
         raise ValidationFailed(
             f"Asset {asset_id} is kind={asset.kind.value!r}, not "
-            f"{AssetKind.AUDIO.value!r} -- it cannot be transcribed."
+            f"{expected_kind.value!r} -- it cannot be used here."
         )
 
     client = _s3(settings.s3_endpoint_url)

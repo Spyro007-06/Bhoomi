@@ -73,6 +73,55 @@ async def test_get_asset_bytes_presigned_but_never_uploaded_errors_cleanly(db_se
     assert "never" in str(exc_info.value).lower() or "no object" in str(exc_info.value).lower()
 
 
+async def test_get_asset_bytes_accepts_an_image_when_expected_kind_is_image(
+    db_session,
+) -> None:
+    """core/routers/diagnose.py reads a real uploaded photo through this same
+    helper with expected_kind=IMAGE -- not the AUDIO default voice/ relies on
+    (its call site passes no expected_kind at all, and must keep working
+    unchanged; see test_get_asset_bytes_refuses_an_image_asset above)."""
+    payload = b"\xff\xd8\xff-not-a-real-jpeg-but-real-bytes"
+    object_key = f"image/{uuid.uuid4()}.jpg"
+
+    import boto3
+    from botocore.config import Config
+
+    client = boto3.client(
+        "s3",
+        endpoint_url=settings.s3_endpoint_url,
+        aws_access_key_id=settings.s3_access_key,
+        aws_secret_access_key=settings.s3_secret_key,
+        region_name=settings.s3_region,
+        config=Config(signature_version="s3v4"),
+    )
+    client.put_object(
+        Bucket=settings.s3_bucket, Key=object_key, Body=payload, ContentType="image/jpeg"
+    )
+
+    asset = await _insert_asset(
+        session=db_session, kind=AssetKind.IMAGE, content_type="image/jpeg", object_key=object_key
+    )
+
+    result = await get_asset_bytes(db_session, asset.id, expected_kind=AssetKind.IMAGE)
+
+    assert result == payload
+
+
+async def test_get_asset_bytes_with_expected_kind_image_refuses_an_audio_asset(
+    db_session,
+) -> None:
+    """The check works in both directions -- an audio row handed to a caller
+    that wanted an image is refused the same way an image row is refused for
+    the AUDIO default."""
+    asset = await _insert_asset(session=db_session)  # defaults to kind=AUDIO
+
+    with pytest.raises(ValidationFailed) as exc_info:
+        await get_asset_bytes(db_session, asset.id, expected_kind=AssetKind.IMAGE)
+
+    assert "audio" in str(exc_info.value)
+    assert "image" in str(exc_info.value)
+
+
 # --- read side: the real round trip -----------------------------------------
 
 

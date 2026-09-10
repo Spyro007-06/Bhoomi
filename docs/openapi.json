@@ -3470,7 +3470,7 @@
                 }
               }
             },
-            "description": "That farm does not exist."
+            "description": "That farm does not exist, or -- VISION_MODEL=real, no X-Vision-Fixture header -- payload.image_asset_id does not resolve to an Asset row, or resolves to one with no object ever uploaded to storage."
           },
           "409": {
             "content": {
@@ -3490,7 +3490,7 @@
                 }
               }
             },
-            "description": "The request body did not parse, or X-Vision-Fixture named an unrecognised fixture."
+            "description": "The request body did not parse, X-Vision-Fixture named an unrecognised fixture, or (VISION_MODEL=real, no fixture header) image_asset_id resolves to an Asset that is not kind=image."
           },
           "501": {
             "content": {

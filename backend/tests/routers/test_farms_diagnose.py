@@ -131,6 +131,112 @@ async def test_confident_reaches_advise_and_is_refused_not_composed(db_session) 
     assert caught.value.status_code == 501
 
 
+# --- VISION_MODEL=real, no fixture header: the real classifier path ---------
+#
+# get_asset_bytes() and classify() are mocked here rather than exercised for
+# real: a real run needs an actual model checkpoint loaded (torch/PIL, not
+# installed in every environment this suite runs in) and a real object in
+# storage (MinIO/S3, not running in every environment either). These tests
+# cover the ORCHESTRATION -- that diagnose_farm() calls the two in the right
+# order with the right arguments when the branch is taken, and that a bad
+# image_asset_id produces a real BhoomiError rather than a 500 -- not vision
+# model correctness, which is Suchit's classify() to test.
+
+
+async def test_real_vision_model_with_no_fixture_calls_the_real_classifier(
+    db_session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """VISION_MODEL=real, no X-Vision-Fixture header: the one path that must
+    read the uploaded image's real bytes (expected_kind=IMAGE, not the
+    AUDIO default get_asset_bytes() carries for voice/) and run them through
+    classify(), instead of falling through to _resolve_topk()'s stub."""
+    from app.contracts.vision import Prediction, TopK
+    from app.core.routers import diagnose as diagnose_module
+
+    monkeypatch.setattr(diagnose_module.settings, "vision_model", "real")
+
+    farm = await _farm(db_session)
+    asset = await _asset(db_session, farm)
+    seen_calls: dict[str, object] = {}
+
+    async def _fake_get_asset_bytes(session, asset_id, *, expected_kind):
+        seen_calls["asset_id"] = asset_id
+        seen_calls["expected_kind"] = expected_kind
+        return b"fake-real-photo-bytes"
+
+    def _fake_classify(image_bytes):
+        seen_calls["image_bytes"] = image_bytes
+        return TopK(
+            predictions=[
+                Prediction(label="paddy_blast", confidence=0.38),
+                Prediction(label="paddy_brown_spot", confidence=0.33),
+                Prediction(label="paddy_bacterial_leaf_blight", confidence=0.29),
+            ],
+            out_of_scope=False,
+            model_version="fake-real-v1",
+            is_stub=False,
+        )
+
+    monkeypatch.setattr(diagnose_module, "get_asset_bytes", _fake_get_asset_bytes)
+    monkeypatch.setattr(diagnose_module, "classify", _fake_classify)
+
+    payload = DiagnoseIn(image_asset_id=asset.id, lang="mr-IN")
+    principal = Principal(subject=farm.farmer_id, role=Role.FARMER)
+    out = await diagnose_module.diagnose_farm(
+        farm_id=farm.id, payload=payload, x_vision_fixture=None,
+        principal=principal, session=db_session,
+    )
+
+    assert seen_calls["asset_id"] == asset.id
+    assert seen_calls["expected_kind"] == AssetKind.IMAGE
+    assert seen_calls["image_bytes"] == b"fake-real-photo-bytes"
+    assert out.gate.outcome == "escalate"
+    assert out.gate.is_stub is False
+
+
+async def test_real_vision_model_propagates_not_found_for_a_bad_asset(
+    db_session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A bad image_asset_id under VISION_MODEL=real must not become a 500 --
+    get_asset_bytes()'s NotFound is a BhoomiError and propagates untouched,
+    not caught and rewrapped here."""
+    from app.core.routers import diagnose as diagnose_module
+    from app.errors import NotFound
+
+    monkeypatch.setattr(diagnose_module.settings, "vision_model", "real")
+
+    farm = await _farm(db_session)
+    payload = DiagnoseIn(image_asset_id=uuid.uuid4(), lang="mr-IN")  # never created
+    principal = Principal(subject=farm.farmer_id, role=Role.FARMER)
+
+    with pytest.raises(NotFound):
+        await diagnose_module.diagnose_farm(
+            farm_id=farm.id, payload=payload, x_vision_fixture=None,
+            principal=principal, session=db_session,
+        )
+
+
+async def test_real_vision_model_with_a_fixture_header_still_uses_the_fixture(
+    db_session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """VISION_MODEL=real is not sufficient on its own to take the real-
+    classifier branch -- an X-Vision-Fixture header still routes through
+    _resolve_topk(), which refuses it with FIXTURES_DISABLED (unchanged
+    behaviour, asserted here only to pin that the new branch's condition is
+    genuinely `real AND no header`, not `real` alone)."""
+    from app.core.routers import diagnose as diagnose_module
+    from app.errors import BhoomiError
+
+    monkeypatch.setattr(diagnose_module.settings, "vision_model", "real")
+
+    farm = await _farm(db_session)
+
+    with pytest.raises(BhoomiError) as caught:
+        await _diagnose(db_session, farm, "confident")
+
+    assert caught.value.code.value == "FIXTURES_DISABLED"
+
+
 # --- no advisory/clarification object on any non-advise path ----------------
 
 
