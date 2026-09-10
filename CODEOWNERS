@@ -21,10 +21,20 @@
 #   @TODO-santheesh -> @santheesh73             (10 commits under santheesh737@gmail.com,
 #                       display names "santheesh73"/"Santheesh S")
 #
-#   @TODO-tharun and @TODO-thaariha are NOT resolved below. See the two notes
-#   further down, at the point each first occurs, rather than guessed here --
-#   a plausible-but-wrong handle is exactly the failure this file's header
-#   already warns about.
+# FOLLOW-UP (2026-09-10): @TODO-thaariha resolved below too. She had zero
+# commits at the pass above (2026-09-07) -- the original note was correct
+# when written. Her first, 0506077 (2026-09-08, gthaariha@gmail.com,
+# "thaariha29"), landed the next day; same commit-author-link check as
+# above applied to it directly, not re-derived from anything already
+# written here.
+#
+#   @TODO-thaariha  -> @thaariha29               (1 commit, 0506077, verified
+#                       link -- thin, same as @THARUNBL's one commit below,
+#                       but it is what the log yields)
+#
+#   @TODO-tharun is still NOT resolved. See the note further down, at the
+#   point it first occurs, rather than guessed here -- a plausible-but-wrong
+#   handle is exactly the failure this file's header already warns about.
 #
 # Ownership follows worksplitV1 (the "Owns:" lines) and docs/DESIGN.md §3, which
 # agree. Note that worksplitV1's section *titles* and its Owns: lines disagree
@@ -79,17 +89,12 @@
 
 # FROZEN at hour 2. A change here needs a team decision, not a pull request.
 # Routed to everyone so nobody can land one quietly.
-/backend/app/contracts/         @Spyro007-06 @TODO-thaariha @suchitchopade3110-arch @Shruthi-Senthilkumar @TODO-tharun @santheesh73
+/backend/app/contracts/         @Spyro007-06 @thaariha29 @suchitchopade3110-arch @Shruthi-Senthilkumar @TODO-tharun @santheesh73
 
 /backend/app/core/              @Spyro007-06
 /backend/app/vision/            @suchitchopade3110-arch
-# @TODO-thaariha: NOT resolved. No commit anywhere in `git log --all` (any
-# spelling of "Thaariha", case-insensitive) is attributed to her, under any
-# name or email -- she has never committed to this repository, so there is no
-# author identity here to match to a GitHub account. A guessed handle would
-# be pure invention, not an inference from evidence. Needs asking her
-# directly for her GitHub username.
-/backend/app/intelligence/      @TODO-thaariha
+# @thaariha29 -- see the FOLLOW-UP (2026-09-10) note at the top of this file.
+/backend/app/intelligence/      @thaariha29
 /backend/app/voice/             @Shruthi-Senthilkumar
 
 # App foundation
@@ -101,11 +106,11 @@
 
 # --- Routers whose owner is not the owner of core/ -------------------------
 # Everything else under core/routers/ falls to the /backend/app/core/ rule.
-/backend/app/core/routers/diagnose.py    @TODO-thaariha @suchitchopade3110-arch @Spyro007-06
-/backend/app/core/routers/clarify.py     @TODO-thaariha
-/backend/app/core/routers/advisory.py    @TODO-thaariha
-/backend/app/core/routers/cases.py       @TODO-thaariha
-/backend/app/core/routers/labelcheck.py  @suchitchopade3110-arch @Spyro007-06 @TODO-thaariha
+/backend/app/core/routers/diagnose.py    @thaariha29 @suchitchopade3110-arch @Spyro007-06
+/backend/app/core/routers/clarify.py     @thaariha29
+/backend/app/core/routers/advisory.py    @thaariha29
+/backend/app/core/routers/cases.py       @thaariha29
+/backend/app/core/routers/labelcheck.py  @suchitchopade3110-arch @Spyro007-06 @thaariha29
 /backend/app/core/routers/referrals.py   @TODO-tharun
 /backend/app/core/routers/officials.py   @santheesh73 @Spyro007-06
 
