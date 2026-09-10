@@ -48,11 +48,77 @@
 @keyframes bhmFadeInUp {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes bhmHeroBadge {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bhmHeroHeading {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bhmHeroSubheading {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bhmHeroCta {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bhmHeroMetrics {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bhmHeroVisual {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -61,7 +127,7 @@
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-6px) rotate(1deg);
+    transform: translateY(-5px) rotate(0.8deg);
   }
 }
 
@@ -77,11 +143,35 @@
 }
 
 .animate-bhm-fade-in {
-  animation: bhmFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: bhmFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-bhm-fade-in-up {
-  animation: bhmFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: bhmFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bhm-hero-badge {
+  animation: bhmHeroBadge 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bhm-hero-heading {
+  animation: bhmHeroHeading 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.animate-bhm-hero-subheading {
+  animation: bhmHeroSubheading 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+}
+
+.animate-bhm-hero-cta {
+  animation: bhmHeroCta 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
+}
+
+.animate-bhm-hero-metrics {
+  animation: bhmHeroMetrics 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.32s both;
+}
+
+.animate-bhm-hero-visual {
+  animation: bhmHeroVisual 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
 }
 
 .animate-bhm-ambient-sway {
@@ -91,4 +181,42 @@
 .animate-bhm-pulse-soft {
   animation: bhmPulseSoft 8s ease-in-out infinite;
 }
+
+/* Discreet scrollbar styling for independent panels */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+/* Hide scrollbar while preserving scroll functionality */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+  width: 0;
+  height: 0;
+}
+
+
+
 
