@@ -136,10 +136,10 @@ export function EscalatedQueuePanel({ activeCaseId, cases }: EscalatedQueuePanel
                 to={`/agronomist/cases/${c.case_id}`}
                 title={`${c.case_id} · ${formatTargetLabel(c.label)} (${c.region})`}
                 className={cn(
-                  'group relative flex flex-col items-center justify-center h-12 w-12 rounded-xl border transition-all duration-150',
+                  'group relative flex flex-col items-center justify-center h-12 w-12 rounded-xl border-2 transition-all duration-150 shadow-xs',
                   isActive
-                    ? 'border-2 border-emerald-600 bg-[#F4F9F4] text-emerald-800 shadow-xs'
-                    : 'border-bhoomi-border bg-bhoomi-surface hover:border-bhoomi-primary/40 hover:bg-[#F8FAFC] text-slate-600'
+                    ? 'border-emerald-600 bg-[#F4F9F4] text-emerald-800'
+                    : 'border-slate-200 bg-white hover:border-emerald-500/60 hover:bg-emerald-50/30 text-slate-700'
                 )}
               >
                 <Sprout
