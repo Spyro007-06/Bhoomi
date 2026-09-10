@@ -121,7 +121,7 @@ export function EscalatedQueuePanel({ activeCaseId, cases }: EscalatedQueuePanel
         </div>
 
         {/* Shrunk Card List: Compact clickable case icons */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center gap-2.5 w-full min-h-0 pb-4">
+        <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col items-center gap-2.5 w-full min-h-0 pb-4">
           {displayCases.map((c, idx) => {
             const isActive =
               activeCaseId === c.case_id ||
@@ -199,8 +199,8 @@ export function EscalatedQueuePanel({ activeCaseId, cases }: EscalatedQueuePanel
         </p>
       </div>
 
-      {/* Independently Scrollable Card List Below Header */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2.5 min-h-0 pb-4">
+      {/* Independently Scrollable Card List Below Header (hidden scrollbar line) */}
+      <div className="flex-1 overflow-y-auto no-scrollbar space-y-2.5 min-h-0 pb-4">
         {displayCases.map((c, idx) => {
           const isActive =
             activeCaseId === c.case_id ||
