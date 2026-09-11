@@ -133,7 +133,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-center items-center px-4 py-3 sm:py-5 select-none overflow-x-hidden overflow-y-auto">
+    <div className="relative min-h-screen w-full flex flex-col justify-center items-center lg:items-start px-4 sm:px-8 lg:pl-28 lg:pr-12 xl:pl-40 xl:pr-16 2xl:pl-52 py-6 sm:py-10 select-none overflow-x-hidden overflow-y-auto">
       {/* Primary Visual Background: BHOOMI Agriculture Image (Crystal Clear & Vibrant) */}
       <div
         className="fixed inset-0 pointer-events-none overflow-hidden"
@@ -144,40 +144,45 @@ export function LoginPage() {
           alt="BHOOMI Agriculture Farmland"
           className="w-full h-full object-cover object-center select-none"
         />
+        {/* Soft contrast gradient on desktop to ensure crisp legibility while preserving the tractor & field vista */}
+        <div className="hidden lg:block absolute inset-y-0 left-0 w-[55%] bg-gradient-to-r from-slate-950/75 via-slate-950/35 to-transparent pointer-events-none" />
+        {/* Subtle overall dark vignette on mobile */}
+        <div className="lg:hidden absolute inset-0 bg-slate-950/30 pointer-events-none" />
       </div>
 
-      {/* Foreground Login Interface */}
+      {/* Foreground Login Interface: Left-Offset on Desktop, Centered on Mobile */}
       <div className="relative z-10 my-auto w-full max-w-[460px] space-y-3.5 animate-bhm-fade-in-up">
         {/* Brand Identity Area */}
-        <div className="text-center space-y-2">
-          {/* Official Bhoomi Emblem */}
-          <Link
-            to="/"
-            className="mx-auto block w-fit rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-            title="Return to Landing Page"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 p-1.5 shadow-xl shadow-emerald-950/50 ring-2 ring-emerald-400/30 transition-transform duration-300 hover:scale-105">
-              <img
-                src="/icons/bhoomi-logo.png"
-                alt="BHOOMI Logo"
-                className="h-9 w-9 object-contain"
-              />
-            </div>
-          </Link>
+        <div className="text-center lg:text-left space-y-2">
+          {/* Official Bhoomi Emblem & Brand Title */}
+          <div className="flex flex-col lg:flex-row items-center lg:items-center gap-3">
+            <Link
+              to="/"
+              className="block w-fit rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 shrink-0"
+              title="Return to Landing Page"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 p-1.5 shadow-xl shadow-emerald-950/50 ring-2 ring-emerald-400/30 transition-transform duration-300 hover:scale-105">
+                <img
+                  src="/icons/bhoomi-logo.png"
+                  alt="BHOOMI Logo"
+                  className="h-9 w-9 object-contain"
+                />
+              </div>
+            </Link>
 
-          {/* Title & Subtitle */}
-          <div className="space-y-0.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
-              BHOOMI Portal
-            </h1>
-            <p className="text-xs sm:text-sm font-semibold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] max-w-sm mx-auto">
-              Agronomist Case Management & Officials Surveillance
-            </p>
+            <div className="space-y-0.5 text-center lg:text-left">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+                BHOOMI Portal
+              </h1>
+              <p className="text-xs sm:text-sm font-semibold text-emerald-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+                Agronomist Case Management & Officials Surveillance
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Elevated Background-Adaptive Glassmorphism Login Card */}
-        <Card className="relative rounded-3xl border border-emerald-500/25 bg-slate-950/50 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.12)_inset] text-white transition-all overflow-hidden">
+        <Card className="relative rounded-3xl border border-emerald-500/25 bg-slate-950/55 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.12)_inset] text-white transition-all overflow-hidden">
           {/* Subtle Top-down Light Rim & Ambient Emerald Glows */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent pointer-events-none" />
           <div className="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />

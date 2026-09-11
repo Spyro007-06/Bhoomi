@@ -235,8 +235,8 @@ export function LandingPage() {
                 <div className="relative rounded-2xl border border-slate-200/90 bg-white p-2.5 shadow-xl shadow-slate-900/5 transition-all duration-300 hover:shadow-2xl hover:border-emerald-600/30">
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-slate-100">
                     <img
-                      src="/images/bhoomi-agri-bg.jpg"
-                      alt="Agricultural field landscape in Maharashtra"
+                      src="/images/bhoomi-hero-preview.jpg"
+                      alt="Smart agriculture diagnostics in field"
                       className="h-full w-full object-cover object-center transition-transform duration-700 hover:scale-105"
                       loading="eager"
                     />
