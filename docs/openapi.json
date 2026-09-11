@@ -86,6 +86,38 @@
         "title": "AccuracyWindow",
         "type": "object"
       },
+      "AdvisoryNotRetrievedOut": {
+        "properties": {
+          "escalation_offered": {
+            "default": true,
+            "title": "Escalation Offered",
+            "type": "boolean"
+          },
+          "reason": {
+            "default": "no_relevant_source",
+            "title": "Reason",
+            "type": "string"
+          },
+          "retrieved": {
+            "default": false,
+            "title": "Retrieved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "title": "AdvisoryNotRetrievedOut",
+        "type": "object"
+      },
       "AdvisoryOut": {
         "description": "docs/API_CONTRACT.md \u00a78. `what_to_avoid` precedes `ladder` in the object\nand must be rendered first and loudest by clients.",
         "properties": {
@@ -146,6 +178,66 @@
           "created_at"
         ],
         "title": "AdvisoryOut",
+        "type": "object"
+      },
+      "AdvisoryQueryIn": {
+        "properties": {
+          "farm_id": {
+            "format": "uuid",
+            "title": "Farm Id",
+            "type": "string"
+          },
+          "lang": {
+            "title": "Lang",
+            "type": "string"
+          },
+          "query_text": {
+            "title": "Query Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "farm_id",
+          "query_text",
+          "lang"
+        ],
+        "title": "AdvisoryQueryIn",
+        "type": "object"
+      },
+      "AdvisoryRetrievedOut": {
+        "properties": {
+          "advisory": {
+            "$ref": "#/components/schemas/AdvisoryOut"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/CitationOut"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "retrieved": {
+            "default": true,
+            "title": "Retrieved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "required": [
+          "advisory",
+          "citations"
+        ],
+        "title": "AdvisoryRetrievedOut",
         "type": "object"
       },
       "AlertListOut": {
@@ -3192,6 +3284,91 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/advisory/query": {
+      "post": {
+        "description": "docs/API_CONTRACT.md \u00a78's standalone question. Not tied to a Problem\n-- see app/core/schemas/advisory.py's module docstring for why the\nreturned advisory is never persisted to the `advisory` table.\n\n`target` isn't part of the request contract (only `farm_id`,\n`query_text`, `lang`) -- retrieval is scoped to the farm's crop and, for\ntarget, the farm's most recently opened Problem's label if it has one,\nfalling back to no target filter otherwise. docs/API_CONTRACT.md \u00a78\ndoesn't specify how a standalone question resolves a target; this is the\norchestration's own reasonable choice, not a guess dressed as the spec.",
+        "operationId": "advisory_query_api_v1_advisory_query_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdvisoryQueryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AdvisoryRetrievedOut"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AdvisoryNotRetrievedOut"
+                    }
+                  ],
+                  "title": "Response Advisory Query Api V1 Advisory Query Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is not a farmer, or the farm belongs to someone else."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That farm does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Advisory Query",
+        "tags": [
+          "advisory"
+        ]
+      }
+    },
     "/api/v1/agronomist/case-queue": {
       "get": {
         "description": "Cases for this agronomist, oldest first. docs/API_CONTRACT.md \u00a713.\n\nOldest first, not highest severity first: a queue ordered by urgency starves\nits tail, and the farmer whose case has waited longest is the one most\nlikely to have stopped trusting that anyone is coming.",
