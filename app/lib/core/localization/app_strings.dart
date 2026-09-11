@@ -334,11 +334,23 @@ class AppStrings {
       ? 'भात'
       : (language == AppLanguage.hindi ? 'धान' : 'Paddy / Rice');
 
+  String get cropCotton => language == AppLanguage.marathi
+      ? 'कापूस'
+      : (language == AppLanguage.hindi ? 'कपास' : 'Cotton');
+
+  String get cropSoybean => language == AppLanguage.marathi
+      ? 'सोयाबीन'
+      : (language == AppLanguage.hindi ? 'सोयाबीन' : 'Soybean');
+
+  String get cropJowar => language == AppLanguage.marathi
+      ? 'ज्वारी'
+      : (language == AppLanguage.hindi ? 'ज्वार' : 'Jowar / Sorghum');
+
   String get cropHint => language == AppLanguage.marathi
-      ? 'उदा. भात / कापूस / सोयाबीन'
+      ? 'उदा. भात / कापूस / सोयाबीन / ज्वारी'
       : (language == AppLanguage.hindi
-          ? 'उदा. धान / कपास / सोयाबीन'
-          : 'e.g. Paddy / Rice, Cotton, Soybean');
+          ? 'उदा. धान / कपास / सोयाबीन / ज्वार'
+          : 'e.g. Paddy, Cotton, Soybean, Jowar');
 
   String get varietyLabel => language == AppLanguage.marathi
       ? 'वाण / प्रकार'
@@ -360,11 +372,19 @@ class AppStrings {
       ? 'रोपवाटिका'
       : (language == AppLanguage.hindi ? 'नर्सरी' : 'Nursery');
 
+  String get growthStageVegetative => language == AppLanguage.marathi
+      ? 'शाकीय वाढ'
+      : (language == AppLanguage.hindi ? 'वानस्पतिक वृद्धि' : 'Vegetative');
+
   String get growthStageTillering => language == AppLanguage.marathi
       ? 'फुटवे फुटण्याची अवस्था'
       : (language == AppLanguage.hindi
           ? 'कल्ले निकलने की अवस्था'
           : 'Tillering');
+
+  String get growthStageBooting => language == AppLanguage.marathi
+      ? 'पोटरी अवस्था'
+      : (language == AppLanguage.hindi ? 'गाभ की अवस्था' : 'Booting');
 
   String get growthStagePanicle => language == AppLanguage.marathi
       ? 'पोटरी / लोंबी निघणे'
@@ -377,10 +397,40 @@ class AppStrings {
       : (language == AppLanguage.hindi ? 'फूल आना' : 'Flowering');
 
   String get growthStageGrainFilling => language == AppLanguage.marathi
-      ? 'दाणे भरणे / पक्वता'
-      : (language == AppLanguage.hindi
-          ? 'दाना भरना / पकना'
-          : 'Grain Filling / Maturity');
+      ? 'दाणे भरणे'
+      : (language == AppLanguage.hindi ? 'दाना भरना' : 'Grain Filling');
+
+  String get growthStageMaturity => language == AppLanguage.marathi
+      ? 'पक्वता'
+      : (language == AppLanguage.hindi ? 'परिपक्वता' : 'Maturity');
+
+  String get growthStageGermination => language == AppLanguage.marathi
+      ? 'उगवण'
+      : (language == AppLanguage.hindi ? 'अंकुरण' : 'Germination');
+
+  String get growthStageSquaring => language == AppLanguage.marathi
+      ? 'पात्या लागणे'
+      : (language == AppLanguage.hindi ? 'चौकोर बनना' : 'Squaring');
+
+  String get growthStageBollFormation => language == AppLanguage.marathi
+      ? 'बोंड लागणे'
+      : (language == AppLanguage.hindi ? 'गूलर बनना' : 'Boll Formation');
+
+  String get growthStageBollOpening => language == AppLanguage.marathi
+      ? 'बोंडे फुटणे'
+      : (language == AppLanguage.hindi ? 'गूलर खुलना' : 'Boll Opening');
+
+  String get growthStageEmergence => language == AppLanguage.marathi
+      ? 'उगवण'
+      : (language == AppLanguage.hindi ? 'अंकुरण' : 'Emergence');
+
+  String get growthStagePodFormation => language == AppLanguage.marathi
+      ? 'शेंगा भरणे'
+      : (language == AppLanguage.hindi ? 'फली बनना' : 'Pod Formation');
+
+  String get growthStageSeedFilling => language == AppLanguage.marathi
+      ? 'दाणे भरणे'
+      : (language == AppLanguage.hindi ? 'दाना भरना' : 'Seed Filling');
 
   String get regionLabel => language == AppLanguage.marathi
       ? 'जिल्हा / तालुका'

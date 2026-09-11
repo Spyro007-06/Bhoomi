@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/crop_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -27,7 +28,7 @@ class FarmSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
-  late final TextEditingController _cropController;
+  CropType _selectedCrop = CropType.paddy;
   final TextEditingController _varietyController = TextEditingController(text: 'Indrayani');
   final TextEditingController _regionController = TextEditingController(text: 'Nashik');
   String _selectedGrowthStage = 'tillering';
@@ -41,15 +42,12 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
   @override
   void initState() {
     super.initState();
-    final strings = ref.read(stringsProvider);
-    _cropController = TextEditingController(text: strings.cropPaddy);
     _locationService = widget.locationService ?? LocationService();
     _detectLocation();
   }
 
   @override
   void dispose() {
-    _cropController.dispose();
     _varietyController.dispose();
     _regionController.dispose();
     super.dispose();
@@ -73,13 +71,36 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
     });
   }
 
-  Future<void> _handleSaveFarm() async {
-    final crop = _cropController.text.trim();
-    if (crop.isEmpty) {
-      setState(() => _errorMessage = 'Please enter your crop name');
-      return;
-    }
+  void _onCropChanged(CropType newCrop) {
+    final strings = ref.read(stringsProvider);
+    final stages = newCrop.getGrowthStages(strings);
+    setState(() {
+      _selectedCrop = newCrop;
+      _selectedGrowthStage = stages.isNotEmpty ? stages.first.key : 'vegetative';
+      // Suggest common variety if default is still active
+      if (_varietyController.text == 'Indrayani' ||
+          _varietyController.text == 'BT Cotton' ||
+          _varietyController.text == 'JS-335' ||
+          _varietyController.text == 'CSH-16') {
+        switch (newCrop) {
+          case CropType.paddy:
+            _varietyController.text = 'Indrayani';
+            break;
+          case CropType.cotton:
+            _varietyController.text = 'BT Cotton';
+            break;
+          case CropType.soybean:
+            _varietyController.text = 'JS-335';
+            break;
+          case CropType.jowar:
+            _varietyController.text = 'CSH-16';
+            break;
+        }
+      }
+    });
+  }
 
+  Future<void> _handleSaveFarm() async {
     final region = _regionController.text.trim();
     if (region.isEmpty) {
       setState(() => _errorMessage = 'Please enter your region / district');
@@ -101,7 +122,7 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
     try {
       final farmRepo = ref.read(farmRepositoryProvider);
       final farm = await farmRepo.createFarm(
-        crop: crop.isNotEmpty ? crop : 'paddy',
+        crop: _selectedCrop.key,
         variety: _varietyController.text.trim().isNotEmpty
             ? _varietyController.text.trim()
             : 'Indrayani',
@@ -130,6 +151,7 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
   Widget build(BuildContext context) {
     final strings = ref.watch(stringsProvider);
     final hasLocation = _locationResult?.isSuccess ?? false;
+    final growthStages = _selectedCrop.getGrowthStages(strings);
 
     return Scaffold(
       backgroundColor: AppColors.ricePaper,
@@ -153,7 +175,7 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Crop Input Card (Editable)
+              // Crop Selection Dropdown Card (Strictly CLAUDE.md crops)
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.l16),
                 child: Column(
@@ -167,10 +189,43 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.s8),
-                    AppTextField(
-                      controller: _cropController,
-                      hintText: strings.cropHint,
-                      prefixIcon: const Icon(Icons.grass_rounded, color: AppColors.forest),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l16),
+                      decoration: BoxDecoration(
+                        color: AppColors.warmSurface,
+                        borderRadius: AppRadius.input,
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<CropType>(
+                          value: _selectedCrop,
+                          isExpanded: true,
+                          icon: const Icon(Icons.arrow_drop_down, color: AppColors.forest),
+                          items: CropType.values.map((crop) {
+                            return DropdownMenuItem<CropType>(
+                              value: crop,
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.grass_rounded, color: AppColors.forest, size: 20),
+                                  const SizedBox(width: AppSpacing.s10),
+                                  Text(
+                                    crop.getLocalizedName(strings),
+                                    style: AppTypography.body.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              _onCropChanged(val);
+                            }
+                          },
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -201,7 +256,7 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
               ),
               const SizedBox(height: AppSpacing.m16),
 
-              // Growth Stage Dropdown Card
+              // Growth Stage Dropdown Card (Dynamic to Selected Crop)
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.l16),
                 child: Column(
@@ -224,31 +279,17 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
-                          value: _selectedGrowthStage,
+                          value: growthStages.any((s) => s.key == _selectedGrowthStage)
+                              ? _selectedGrowthStage
+                              : (growthStages.isNotEmpty ? growthStages.first.key : null),
                           isExpanded: true,
                           icon: const Icon(Icons.arrow_drop_down, color: AppColors.forest),
-                          items: [
-                            DropdownMenuItem(
-                              value: 'nursery',
-                              child: Text(strings.growthStageNursery, style: AppTypography.body),
-                            ),
-                            DropdownMenuItem(
-                              value: 'tillering',
-                              child: Text(strings.growthStageTillering, style: AppTypography.body),
-                            ),
-                            DropdownMenuItem(
-                              value: 'panicle_initiation',
-                              child: Text(strings.growthStagePanicle, style: AppTypography.body),
-                            ),
-                            DropdownMenuItem(
-                              value: 'flowering',
-                              child: Text(strings.growthStageFlowering, style: AppTypography.body),
-                            ),
-                            DropdownMenuItem(
-                              value: 'grain_filling',
-                              child: Text(strings.growthStageGrainFilling, style: AppTypography.body),
-                            ),
-                          ],
+                          items: growthStages.map((stage) {
+                            return DropdownMenuItem<String>(
+                              value: stage.key,
+                              child: Text(stage.name, style: AppTypography.body),
+                            );
+                          }).toList(),
                           onChanged: (val) {
                             if (val != null) {
                               setState(() => _selectedGrowthStage = val);

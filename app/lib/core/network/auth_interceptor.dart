@@ -13,6 +13,7 @@ class AuthInterceptor extends Interceptor {
   static const List<String> _publicEndpoints = [
     ApiEndpoints.authOtpRequest,
     ApiEndpoints.authOtpVerify,
+    ApiEndpoints.authDemo,
     ApiEndpoints.health,
   ];
 

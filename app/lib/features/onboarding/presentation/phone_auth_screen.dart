@@ -4,6 +4,7 @@ import '../../../core/config/demo_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/error/app_exception.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../providers/auth_providers.dart';
 import '../../../widgets/app_button.dart';
@@ -232,7 +233,9 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = e.toString();
+        _errorMessage = e is AppException
+            ? e.message
+            : 'Unable to connect to the server. Please check your connection and try again.';
       });
     }
   }

@@ -87,6 +87,9 @@ IMPLEMENTED = {
     # blocked on. Not a phase brief's scaffolded placeholder -- a new module,
     # same reasoning as services/corpus.py above.
     "services/assets.py",
+    # F13 referral and helpline.
+    "routers/referrals.py",
+    "schemas/referrals.py",
 }
 
 

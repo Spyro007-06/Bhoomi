@@ -119,11 +119,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<OtpVerifyResponse> loginAsDemo({String demoCode = 'SIH2026'}) async {
+  Future<OtpVerifyResponse> loginAsDemo() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final authRepo = _ref.read(authRepositoryProvider);
-      final res = await authRepo.loginAsDemo(demoCode: demoCode);
+      final res = await authRepo.loginAsDemo();
 
       // Auto-set the demo farm context for the demo session
       await _ref.read(activeFarmIdProvider.notifier).setActiveFarmId('f_demo_01');
@@ -136,6 +136,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return res;
     } catch (e) {
       state = state.copyWith(
+        status: AuthStatus.unauthenticated,
         isLoading: false,
         errorMessage: e.toString(),
       );

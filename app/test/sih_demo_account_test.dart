@@ -62,10 +62,7 @@ class FakeDemoAuthRepo extends AuthRepository {
   }
 
   @override
-  Future<OtpVerifyResponse> loginAsDemo({String demoCode = 'SIH2026'}) async {
-    if (demoCode != 'SIH2026') {
-      throw Exception('Invalid demo code');
-    }
+  Future<OtpVerifyResponse> loginAsDemo() async {
     const demoUser = UserModel(id: 'u_demo_01', name: 'Ramesh Patil', phone: '+919999999999', role: 'farmer');
     isAuthed = true;
     currentUser = demoUser;

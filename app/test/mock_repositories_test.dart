@@ -14,6 +14,7 @@ import 'package:bhoomi/repositories/referral_repository.dart';
 import 'package:bhoomi/repositories/health_repository.dart';
 import 'package:bhoomi/models/farm_models.dart';
 import 'package:bhoomi/core/storage/secure_storage.dart';
+import 'package:bhoomi/core/error/app_exception.dart';
 
 class MockInMemoryStorage extends SecureStorage {
   final Map<String, String> _map = {};
@@ -23,6 +24,24 @@ class MockInMemoryStorage extends SecureStorage {
   Future<String?> read({required String key}) async => _map[key];
   @override
   Future<void> delete({required String key}) async => _map.remove(key);
+}
+
+class MockErrorApiClient extends ApiClient {
+  MockErrorApiClient()
+      : super(
+          config: const ApiConfig(),
+          tokenStorage: TokenStorage(storage: MockInMemoryStorage()),
+        );
+
+  @override
+  Future<dynamic> post(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    throw const NetworkException();
+  }
 }
 
 class MockHttpApiClient extends ApiClient {
@@ -97,6 +116,47 @@ void main() {
       // Verify tokens were saved to TokenStorage
       expect(await tokenStorage.getAccessToken(), 'jwt_access_abc');
       expect(await authRepo.isAuthenticated(), isTrue);
+    });
+
+    test('AuthRepository loginAsDemo sends POST /auth/demo without body and saves real session', () async {
+      final authRepo = AuthRepositoryImpl(
+        apiClient: mockClient,
+        tokenStorage: tokenStorage,
+      );
+
+      mockClient.responses['/auth/demo'] = {
+        'access_token': 'jwt_real_demo_access',
+        'refresh_token': 'jwt_real_demo_refresh',
+        'user': {
+          'id': 'u_demo_real',
+          'phone': '+919999999999',
+          'name': 'Ramesh Patil',
+          'role': 'farmer',
+        },
+      };
+
+      final demoRes = await authRepo.loginAsDemo();
+      expect(mockClient.lastPostPath, '/auth/demo');
+      expect(mockClient.lastPostData, isNull);
+      expect(demoRes.accessToken, 'jwt_real_demo_access');
+      expect(demoRes.user.name, 'Ramesh Patil');
+
+      expect(await tokenStorage.getAccessToken(), 'jwt_real_demo_access');
+      expect(await authRepo.isAuthenticated(), isTrue);
+    });
+
+    test('AuthRepository loginAsDemo does NOT fabricate fake user when backend fails', () async {
+      final errorClient = MockErrorApiClient();
+      final freshStorage = TokenStorage(storage: MockInMemoryStorage());
+      final authRepo = AuthRepositoryImpl(
+        apiClient: errorClient,
+        tokenStorage: freshStorage,
+      );
+
+      // Verify that backend network failure throws NetworkException and does NOT authenticate
+      expect(() => authRepo.loginAsDemo(), throwsA(isA<NetworkException>()));
+      expect(await freshStorage.getAccessToken(), isNull);
+      expect(await authRepo.isAuthenticated(), isFalse);
     });
 
     test('FarmRepository handles farm creation and summary queries', () async {

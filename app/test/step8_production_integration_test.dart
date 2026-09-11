@@ -117,7 +117,7 @@ class MockStep8AuthRepo extends AuthRepository {
   }
 
   @override
-  Future<OtpVerifyResponse> loginAsDemo({String demoCode = 'SIH2026'}) async {
+  Future<OtpVerifyResponse> loginAsDemo() async {
     _isAuthed = true;
     _user = const UserModel(
       id: 'u_farmer_step8_demo',

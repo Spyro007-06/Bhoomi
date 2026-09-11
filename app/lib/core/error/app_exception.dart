@@ -18,7 +18,7 @@ sealed class AppException implements Exception {
 /// Network is completely unavailable or device is offline
 class NetworkException extends AppException {
   const NetworkException({
-    super.message = 'No internet connection. Please check your mobile data or Wi-Fi.',
+    super.message = 'Unable to connect to the server. Please check your connection and try again.',
     super.code = 'NETWORK_UNAVAILABLE',
     super.details,
   });
