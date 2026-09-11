@@ -109,15 +109,12 @@ content     each markdown section must have non-empty body text once its
             heading line is removed; an empty section is skipped (not a
             document-level refusal) and reported.
 
-Embeddings: no vector-generation path exists in this codebase as of this
-loader (searched: no embedding client, no BGE-m3 call, nothing that returns
-a `list[float]` -- app.voice.embedding_text.to_embedding_text() produces
-normalised TEXT for a query, not a vector, and is the wrong function for
-ingestion-time document embedding regardless). Every row loads with
-`embedding = NULL`. NULL is an honest "not indexed yet"; generating a vector
-with a different, unvetted model to fill the column would be indistinguishable
-from a correctly-indexed row and is exactly the kind of silent substitution
-this loader family refuses to do anywhere else.
+Embeddings: every row still loads with `embedding = NULL` here, deliberately
+-- this loader's job is validating and chunking manifest-described text, not
+calling a model. `scripts/embed_corpus.py` (app.intelligence.rag.embed(),
+BGE-m3) is the separate, idempotent backfill step, run after this one. NULL
+is an honest "not indexed yet" in between the two, never a fabricated vector
+standing in for a real one.
 -----------------------------------------------------------------------------
 """
 
@@ -559,7 +556,10 @@ async def load(dry_run: bool = False) -> int:
     print(f"  rows refused   {len(refusals)}")
     non_auth = sum(1 for c in all_chunks if not c.authoritative)
     print(f"  non-authoritative chunks (Chemical Management)  {non_auth}")
-    print("  embedding column: NULL on every row -- no embedding path exists yet")
+    print(
+        "  embedding column: NULL on every row loaded here -- run "
+        "`LLM_ENABLED=true python -m scripts.embed_corpus` after this to backfill"
+    )
 
     if refusals:
         print("\n  refused rows - correct the manifest, never here:")
