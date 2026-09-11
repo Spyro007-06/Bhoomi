@@ -60,8 +60,6 @@ def _sample_topk() -> TopK:
 
 NOT_YET_IMPLEMENTED = [
     ("app.intelligence.rag", "compose", ("q", "paddy", "paddy_blast", [])),
-    ("app.intelligence.verdict", "verdict", (None, "paddy", "paddy_blast", None, None)),
-    ("app.intelligence.bundle", "compile_bundle", (None, None, None, [], [], [], [])),
 ]
 
 
@@ -83,3 +81,44 @@ def test_gate_signature_exists_and_returns_a_decision() -> None:
 
     decision = decide(_sample_topk(), 0.8)
     assert decision.outcome == "advise"
+
+
+def test_verdict_signature_exists_and_returns_a_verdict() -> None:
+    """Merged from Thaariha's reviewed delivery (thaariha_reviewed_dropin.zip
+    -- see the merge commit); verdict() no longer refuses. See
+    tests/test_verdict.py for the one behaviour added on merge (a caller-bug
+    sanity check), not re-tested here."""
+    from app.intelligence.verdict import verdict
+
+    result = verdict(
+        extracted=None, crop="paddy", target="paddy_blast",
+        days_to_harvest=None, matched_rows=[],
+    )
+    assert result.code == "NOT_IN_RECORDS"
+
+
+def test_compile_bundle_signature_exists_and_returns_a_bundle() -> None:
+    """Merged from Thaariha's reviewed delivery. compile_bundle() no longer
+    refuses."""
+    import uuid
+    from datetime import UTC, datetime
+
+    from app.contracts.enums import Crop, ProblemStatus, ProblemType
+    from app.core.models import Farm, Problem
+    from app.intelligence.bundle import compile_bundle
+
+    farm = Farm(
+        id=uuid.uuid4(), farmer_id=uuid.uuid4(), crop=Crop.PADDY, variety="Indrayani",
+        growth_stage="tillering", region="Nashik", location="SRID=4326;POINT(0 0)",
+    )
+    problem = Problem(
+        id=uuid.uuid4(), farm_id=farm.id, problem_type=ProblemType.DISEASE,
+        status=ProblemStatus.OPEN, opened_at=datetime.now(UTC),
+    )
+
+    result = compile_bundle(
+        case_id=uuid.uuid4(), status="open", farm=farm, problem=problem,
+        diagnosis=None, observations=[], images=[], label_checks=[], followups=[],
+    )
+    assert result.case_id is not None
+    assert result.treatments_tried == []

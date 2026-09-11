@@ -4,7 +4,7 @@ OWNER: split, deliberately. See docs/API_CONTRACT.md §13, ownership note.
 
     POST /cases/{id}/confirm         Shreekumar  (this file)
     GET  /agronomist/case-queue      Shreekumar  (this file)
-    GET  /cases/{id}                 Thaariha    (NOT here - still 501)
+    GET  /cases/{id}                 Thaariha    (this file)
     POST /cases/{id}/request-info     Thaariha    (NOT here - still 501)
 
 docs/API_CONTRACT.md §16 lists the whole of §12/§13 as Thaariha's. §13's confirm
@@ -25,12 +25,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.contracts.enums import CaseStatus, Role
-from app.core.models import Case, Farm, Problem
+from app.core.models import Asset, Case, Diagnosis, Farm, FollowUp, LabelCheck, Observation, Problem
+from app.core.schemas.bundle import CaseBundleOut
 from app.core.schemas.cases import CaseQueueItem, CaseQueueOut, ConfirmIn, ConfirmOut
 from app.core.services.confirmation import confirm_case
 from app.db import get_session
 from app.deps import Principal, require_role
 from app.errors import BhoomiError, ErrorCode, NotFound, error_response
+from app.intelligence.bundle import compile_bundle
 
 router = APIRouter(tags=["agronomist"])
 
@@ -92,6 +94,91 @@ async def case_queue(
             # opened and is stale the moment anything ahead of it resolves.
             for position, (case, problem, farm) in enumerate(rows, start=1)
         ]
+    )
+
+
+@router.get(
+    "/cases/{case_id}",
+    response_model=CaseBundleOut,
+    responses={
+        **_UNAUTHENTICATED,
+        **_NOT_AN_AGRONOMIST,
+        **error_response(404, "That case does not exist."),
+    },
+)
+async def get_case_bundle(
+    case_id: uuid.UUID,
+    principal: Principal = AGRONOMIST_ONLY,
+    session: AsyncSession = Depends(get_session),
+) -> CaseBundleOut:
+    """The bundle the agronomist opens. docs/API_CONTRACT.md §12.
+
+    Compiled on read from live rows, not served out of Case.bundle -- that
+    column exists for a future cached-write path (docs/DESIGN.md §5) but
+    reading it directly risks serving a bundle that predates events recorded
+    since it was last written. compile_bundle() (app/intelligence/bundle.py)
+    does the shaping; this function only fetches.
+    """
+    case = await session.get(Case, case_id)
+    if case is None:
+        raise NotFound("That case does not exist.")
+
+    problem = await session.get(Problem, case.problem_id)
+    if problem is None:
+        raise NotFound("That case's problem no longer exists.")
+    farm = await session.get(Farm, problem.farm_id)
+    if farm is None:
+        raise NotFound("That case's farm no longer exists.")
+
+    diagnosis = (
+        await session.execute(
+            select(Diagnosis)
+            .where(Diagnosis.problem_id == problem.id)
+            .order_by(Diagnosis.created_at.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+
+    observations = (
+        await session.execute(
+            select(Observation).where(Observation.problem_id == problem.id)
+        )
+    ).scalars().all()
+
+    label_checks = (
+        await session.execute(
+            select(LabelCheck).where(LabelCheck.problem_id == problem.id)
+        )
+    ).scalars().all()
+
+    followups = (
+        await session.execute(
+            select(FollowUp).where(FollowUp.problem_id == problem.id)
+        )
+    ).scalars().all()
+
+    # Images: every asset referenced by a diagnosis or a follow-up on this
+    # problem. Not Asset.farm_id -- that column is farm-wide (every photo
+    # ever uploaded for the farm), which would pull in images from unrelated
+    # problems on a multi-problem farm.
+    image_ids = {d.image_asset_id for d in [diagnosis] if d and d.image_asset_id}
+    image_ids |= {f.image_asset_id for f in followups if f.image_asset_id}
+    images = []
+    if image_ids:
+        images = (
+            await session.execute(select(Asset).where(Asset.id.in_(image_ids)))
+        ).scalars().all()
+
+    return compile_bundle(
+        case_id=case.id,
+        status=case.status,
+        farm=farm,
+        problem=problem,
+        diagnosis=diagnosis,
+        observations=list(observations),
+        images=list(images),
+        label_checks=list(label_checks),
+        followups=list(followups),
     )
 
 

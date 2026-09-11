@@ -48,12 +48,16 @@ IMPLEMENTED = {
     "services/escalation.py",
     # Phase 4 (F6 spread, F14 confirmation + prior, F15 data half).
     #
-    # routers/cases.py is PARTLY implemented: POST /cases/{id}/confirm and
-    # GET /agronomist/case-queue are Shreekumar's and are built. GET /cases/{id}
-    # — the bundle — and POST /cases/{id}/request-info remain Thaariha's F12 and
-    # are NOT implemented; they are absent from the router rather than stubbed,
-    # so they 404 rather than returning a plausible empty bundle.
+    # routers/cases.py: POST /cases/{id}/confirm and GET /agronomist/case-queue
+    # are Shreekumar's; GET /cases/{id} — the bundle — landed from Thaariha's
+    # reviewed delivery (thaariha_reviewed_dropin.zip, merged whole). POST
+    # /cases/{id}/request-info remains hers and NOT implemented; it is absent
+    # from the router rather than stubbed, so it 404s rather than returning a
+    # plausible empty response.
     "routers/cases.py",
+    # schemas/bundle.py: GET /cases/{id}'s response models — Thaariha's F12,
+    # same merge as routers/cases.py's bundle route above.
+    "schemas/bundle.py",
     "routers/officials.py",
     "schemas/cases.py",
     "schemas/officials.py",

@@ -359,6 +359,330 @@
         "title": "AssetOut",
         "type": "object"
       },
+      "BundleFarm": {
+        "properties": {
+          "crop": {
+            "title": "Crop",
+            "type": "string"
+          },
+          "growth_stage": {
+            "title": "Growth Stage",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "region": {
+            "title": "Region",
+            "type": "string"
+          },
+          "variety": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variety"
+          }
+        },
+        "required": [
+          "id",
+          "crop",
+          "variety",
+          "growth_stage",
+          "region"
+        ],
+        "title": "BundleFarm",
+        "type": "object"
+      },
+      "BundleGate": {
+        "properties": {
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason_code": {
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "threshold_applied": {
+            "title": "Threshold Applied",
+            "type": "number"
+          }
+        },
+        "required": [
+          "outcome",
+          "reason_code",
+          "threshold_applied"
+        ],
+        "title": "BundleGate",
+        "type": "object"
+      },
+      "BundleImage": {
+        "properties": {
+          "asset_id": {
+            "format": "uuid",
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "required": [
+          "asset_id",
+          "url",
+          "at"
+        ],
+        "title": "BundleImage",
+        "type": "object"
+      },
+      "BundleLabelCheck": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "ingredient": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingredient"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verdict"
+          }
+        },
+        "required": [
+          "ingredient",
+          "verdict",
+          "at"
+        ],
+        "title": "BundleLabelCheck",
+        "type": "object"
+      },
+      "BundleObservation": {
+        "properties": {
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "question": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question",
+          "answer",
+          "at"
+        ],
+        "title": "BundleObservation",
+        "type": "object"
+      },
+      "BundleProblem": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "opened_at": {
+            "format": "date-time",
+            "title": "Opened At",
+            "type": "string"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProblemStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ProblemType"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "label",
+          "severity",
+          "status",
+          "opened_at"
+        ],
+        "title": "BundleProblem",
+        "type": "object"
+      },
+      "CaseBundleOut": {
+        "description": "docs/API_CONTRACT.md \u00a712. Every field populated from live data \u2014 no\nplaceholder strings, no empty array standing in for absent history.",
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "farm": {
+            "$ref": "#/components/schemas/BundleFarm"
+          },
+          "field_observations": {
+            "items": {
+              "$ref": "#/components/schemas/BundleObservation"
+            },
+            "title": "Field Observations",
+            "type": "array"
+          },
+          "followup_trend": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Followup Trend"
+          },
+          "gate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BundleGate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/BundleImage"
+            },
+            "title": "Images",
+            "type": "array"
+          },
+          "label_checks": {
+            "items": {
+              "$ref": "#/components/schemas/BundleLabelCheck"
+            },
+            "title": "Label Checks",
+            "type": "array"
+          },
+          "model_hypotheses": {
+            "items": {
+              "$ref": "#/components/schemas/Prediction"
+            },
+            "title": "Model Hypotheses",
+            "type": "array"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/BundleProblem"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          },
+          "treatments_tried": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Treatments Tried",
+            "type": "array"
+          }
+        },
+        "required": [
+          "case_id",
+          "status",
+          "farm",
+          "problem",
+          "model_hypotheses",
+          "gate",
+          "field_observations",
+          "images",
+          "treatments_tried",
+          "label_checks",
+          "followup_trend"
+        ],
+        "title": "CaseBundleOut",
+        "type": "object"
+      },
       "CaseQueueItem": {
         "properties": {
           "case_id": {
@@ -3057,6 +3381,85 @@
         "summary": "Verify Otp",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}": {
+      "get": {
+        "description": "The bundle the agronomist opens. docs/API_CONTRACT.md \u00a712.\n\nCompiled on read from live rows, not served out of Case.bundle -- that\ncolumn exists for a future cached-write path (docs/DESIGN.md \u00a75) but\nreading it directly risks serving a bundle that predates events recorded\nsince it was last written. compile_bundle() (app/intelligence/bundle.py)\ndoes the shaping; this function only fetches.",
+        "operationId": "get_case_bundle_api_v1_cases__case_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseBundleOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller's role is not agronomist."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That case does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Case Bundle",
+        "tags": [
+          "agronomist"
         ]
       }
     },
