@@ -30,6 +30,7 @@ core/; intelligence/ receives typed results, never a session.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -52,12 +53,16 @@ class CorpusChunk:
     source: str
     content: str
     authoritative: bool
+    reviewed_on: date | None
+    """Added alongside search() (F7 wiring): docs/API_CONTRACT.md §8's
+    CitationOut carries `reviewed_on` and had nowhere to read it from -- this
+    dataclass is what compose()'s citations are built from."""
 
 
 def _as_chunk(row: CorpusDoc) -> CorpusChunk:
     return CorpusChunk(
         id=str(row.id), doc_id=row.doc_id, title=row.title, source=row.source,
-        content=row.content, authoritative=row.authoritative,
+        content=row.content, authoritative=row.authoritative, reviewed_on=row.reviewed_on,
     )
 
 
@@ -95,3 +100,48 @@ async def authoritative_chunks(
         )
     ).scalars().all()
     return [_as_chunk(r) for r in rows]
+
+
+async def search(
+    session: AsyncSession, crop: str, target: str, query_embedding: list[float], limit: int = 5
+) -> list[tuple[CorpusChunk, float]]:
+    """pgvector similarity search, filtered by crop + target. docs/DESIGN.md §8.
+
+    Args:
+        query_embedding: the query's BGE-m3 vector (app.intelligence.rag.embed()
+            -- intelligence/ computes the vector, this module is what actually
+            touches the database with it, same split as everywhere else in this
+            file).
+        limit: candidates returned, most similar first.
+
+    Returns:
+        `(chunk, similarity)` pairs, similarity descending, similarity in
+        [-1, 1] (cosine similarity = 1 - cosine_distance). Empty if the
+        crop/target combination has no chunks, or every chunk for it still
+        has `embedding IS NULL` (not yet backfilled by
+        scripts/embed_corpus.py) -- both are honest "nothing to retrieve"
+        results, not errors.
+
+        Rows with a NULL embedding are excluded from the ORDER BY entirely
+        (pgvector's `<=>` operator on NULL is NULL, which sorts
+        unpredictably against real distances rather than sorting last) --
+        the WHERE clause below filters them out explicitly rather than
+        relying on ordering to push them to the end.
+
+    The retrieval relevance check itself (`max(similarity) < RAG_THRESHOLD`
+    -> escalate) is the gate's job (app.intelligence.gate.decide()), not
+    this function's -- this is the read, not the decision.
+    """
+    distance = CorpusDoc.embedding.cosine_distance(query_embedding)
+    statement = (
+        select(CorpusDoc, distance.label("distance"))
+        .where(
+            CorpusDoc.crop == crop,
+            CorpusDoc.target == target,
+            CorpusDoc.embedding.is_not(None),
+        )
+        .order_by(distance)
+        .limit(limit)
+    )
+    rows = (await session.execute(statement)).all()
+    return [(_as_chunk(row), 1.0 - float(dist)) for row, dist in rows]
