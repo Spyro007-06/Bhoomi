@@ -94,6 +94,11 @@ IMPLEMENTED = {
     # F13 referral and helpline.
     "routers/referrals.py",
     "schemas/referrals.py",
+    # F8 label check -- POST /problems/{id}/label-check. verdict()'s
+    # problem_type threading (app/intelligence/verdict.py) landed first;
+    # this is the router that calls it.
+    "routers/labelcheck.py",
+    "schemas/labelcheck.py",
 }
 
 

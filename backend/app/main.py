@@ -23,6 +23,7 @@ from app.core.routers import (
     diagnose,
     farms,
     followups,
+    labelcheck,
     officials,
     problems,
     referrals,
@@ -122,6 +123,7 @@ def create_app() -> FastAPI:
     api.include_router(cases.router)
     api.include_router(officials.router)
     api.include_router(diagnose.router)
+    api.include_router(labelcheck.router)
     api.include_router(voice_router.router)
     api.include_router(referrals.router)
     # Phase 2+: problems, timeline. Phase 3+: alerts, followups. Each router
