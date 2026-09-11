@@ -7,14 +7,12 @@ Serves:
         context, classify, apply the prior, run F7's retrieve() to get a
         real retrieval_score, call app.intelligence.gate.decide() (owner
         Thaariha, unmodified here), and branch. `escalate`, `advise` (F7's
-        composer, app.core.services.advisory, now wired), and `clarify` with
-        no matching cue (the only clarify path reachable while
-        DistinguishingCue is empty) all produce a real, complete response.
-        `clarify` with a cue actually found is still a real reachable state
-        this build does not compose a response for -- 501 NOT_IMPLEMENTED,
-        not a bug: F4's Doubt Doctor *question rendering* is a different
-        feature from F4's *answer resolution*, which
-        POST /problems/{id}/clarify (routers/clarify.py) now serves. See
+        composer, app.core.services.advisory), and both `clarify` shapes --
+        no matching cue found, and a cue found (F4's Doubt Doctor *question
+        rendering*, built against LabelReference -- see
+        _clarification_out() below) -- all produce a real, complete
+        response. F4's *answer resolution* is the other half,
+        POST /problems/{id}/clarify (routers/clarify.py). See
         _resolve_topk() and diagnose_farm() below.
 
     POST /vision/classify -- Phase 1 exception, vision fixture / test mode
@@ -39,18 +37,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.contracts.enums import AssetKind, GateOutcome, GateReasonCode, ProblemStatus, TargetLabel
 from app.contracts.vision import Prediction, TopK
-from app.core.models import Case, Diagnosis, DistinguishingCue, Farm, Problem, User
-from app.core.schemas.diagnose import DiagnoseIn, DiagnoseOut, DiagnosisOut, EscalationOut, GateOut
+from app.core.models import (
+    Asset,
+    Case,
+    Diagnosis,
+    DistinguishingCue,
+    Farm,
+    LabelReference,
+    Problem,
+    User,
+)
+from app.core.schemas.diagnose import (
+    ClarificationOut,
+    CueCandidateOut,
+    DiagnoseIn,
+    DiagnoseOut,
+    DiagnosisOut,
+    EscalationOut,
+    GateOut,
+)
 from app.core.services import advisory as advisory_service
 from app.core.services import prior as prior_service
 from app.core.services.alerts import TARGET_PROBLEM_TYPES
-from app.core.services.assets import get_asset_bytes
+from app.core.services.assets import get_asset_bytes, presigned_get_url
 from app.core.services.escalation import escalate
 from app.db import get_session
 from app.deps import Principal, current_principal
 from app.errors import (
-    BhoomiError,
-    ErrorCode,
     FixturesDisabled,
     Forbidden,
     NotFound,
@@ -266,6 +279,43 @@ def _agronomist_slug(user: User) -> str:
     return f"agronomist:{slug}"
 
 
+async def _clarification_candidate(session: AsyncSession, label: str) -> CueCandidateOut:
+    """One candidate in a Doubt Doctor question -- signature/image_url sourced
+    from LabelReference, never guessed from the cue's own text. Honestly
+    None/None when no LabelReference row exists yet for this label (not yet
+    authored) or, for image_url, when presigned_get_url() cannot sign the
+    stored object_key -- same "one bad row must not take down the rest of the
+    response" convention as app/intelligence/bundle.py's _image_url()."""
+    target_label = TargetLabel(label)
+    ref = await session.get(LabelReference, target_label)
+    if ref is None:
+        return CueCandidateOut(label=target_label, signature=None, image_url=None)
+
+    image_url = None
+    if ref.image_asset_id is not None:
+        asset = await session.get(Asset, ref.image_asset_id)
+        if asset is not None:
+            try:
+                image_url = presigned_get_url(asset.object_key)
+            except ValueError:
+                image_url = None
+
+    return CueCandidateOut(label=target_label, signature=ref.signature, image_url=image_url)
+
+
+async def _clarification_out(session: AsyncSession, cue: DistinguishingCue) -> ClarificationOut:
+    """docs/API_CONTRACT.md §6's `clarification` block for a matched cue.
+    `question_localized` stays None -- see ClarificationOut's own docstring."""
+    candidates = [
+        await _clarification_candidate(session, label) for label in cue.discriminates
+    ]
+    return ClarificationOut(
+        cue_id=cue.id,
+        question=cue.question_text,
+        candidates=candidates,
+    )
+
+
 async def _escalation_out(session: AsyncSession, case: Case) -> EscalationOut:
     assigned_to = None
     if case.assigned_to is not None:
@@ -307,17 +357,6 @@ async def _escalation_out(session: AsyncSession, case: Case) -> EscalationOut:
             "unrecognised fixture, or (VISION_MODEL=real, no fixture header) "
             "image_asset_id resolves to an Asset that is not kind=image.",
         ),
-        # `clarify` with a matching DistinguishingCue found is the one
-        # remaining reachable gate outcome this orchestration does not
-        # compose a response for: F4's Doubt Doctor *question rendering* is
-        # a different feature from *answer resolution*
-        # (POST /problems/{id}/clarify, routers/clarify.py, now built).
-        **error_response(
-            501,
-            "The gate reached 'clarify' with a matching DistinguishingCue "
-            "found, but rendering the Doubt Doctor question is not built in "
-            "this orchestration -- details.cue_id names the matched cue.",
-        ),
     },
 )
 async def diagnose_farm(
@@ -329,15 +368,13 @@ async def diagnose_farm(
 ) -> DiagnoseOut:
     """The gated diagnose path. docs/API_CONTRACT.md §6, docs/DESIGN.md §6, §7.
 
-    `escalate`, `advise`, and clarify-with-no-cue-found all produce a full
-    response. clarify-with-a-cue-found is the one reachable gate outcome
-    this build still refuses rather than fabricates a response for -- 501
-    NOT_IMPLEMENTED. See the module docstring.
+    `escalate`, `advise`, and both `clarify` shapes (no cue found; cue
+    found -- F4's question rendering) all produce a full response. See the
+    module docstring.
 
     The Problem and Diagnosis rows are written regardless of which branch is
-    reached, including the 501 branch: a real classification event
-    happened and is recorded before the response is decided, not only when
-    this build knows how to finish answering it.
+    reached: a real classification event happened and is recorded before the
+    response is decided.
     """
     farm = await _load_owned_farm(farm_id, principal, session)
 
@@ -460,12 +497,20 @@ async def diagnose_farm(
                 escalation=await _escalation_out(session, case),
             )
 
+        clarification = await _clarification_out(session, cue)
         await session.commit()
-        raise BhoomiError(
-            ErrorCode.NOT_IMPLEMENTED,
-            "A discriminating cue exists for this pair, but rendering the "
-            "Doubt Doctor question is not built in this orchestration.",
-            details={"cue_id": str(cue.id)},
+        return DiagnoseOut(
+            gate=GateOut(
+                outcome=decision.outcome,
+                confidence=decision.confidence,
+                threshold_applied=decision.threshold_applied,
+                reason_code=decision.reason_code,
+                alternatives=decision.alternatives,
+                is_stub=topk.is_stub,
+            ),
+            problem_id=problem.id,
+            problem_type=problem.problem_type,
+            clarification=clarification,
         )
 
     # decision.outcome == "advise": reaching here means decide() already

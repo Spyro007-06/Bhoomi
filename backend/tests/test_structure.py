@@ -69,9 +69,10 @@ IMPLEMENTED = {
     # test-mode endpoint for the vision stub.
     #
     # POST /farms/{id}/diagnose itself landed later, in the same file --
-    # escalate and clarify-with-no-cue-found are fully built; advise and
-    # clarify-with-a-cue-found return 501 (F7's composer and F4's question
-    # flow are Thaariha's). See routers/diagnose.py's module docstring.
+    # escalate, advise (F7's composer), and both clarify shapes (no cue
+    # found; cue found -- F4's question rendering, built against
+    # LabelReference) are all fully built. See routers/diagnose.py's module
+    # docstring.
     "routers/diagnose.py",
     # schemas/diagnose.py: the response shapes for the above. Same reasoning
     # as routers/diagnose.py -- built alongside it, not a phase-scaffolded

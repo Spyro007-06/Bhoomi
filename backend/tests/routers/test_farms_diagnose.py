@@ -27,8 +27,17 @@ import uuid
 import pytest
 from sqlalchemy import select
 
-from app.contracts.enums import AssetKind, Crop, GateOutcome, Role
-from app.core.models import Asset, Diagnosis, Farm, LabelPrior, Problem, User
+from app.contracts.enums import AssetKind, Crop, GateOutcome, Role, TargetLabel
+from app.core.models import (
+    Asset,
+    Diagnosis,
+    DistinguishingCue,
+    Farm,
+    LabelPrior,
+    LabelReference,
+    Problem,
+    User,
+)
 from app.core.routers.diagnose import diagnose_farm
 from app.core.schemas.diagnose import DiagnoseIn
 from app.deps import Principal
@@ -111,6 +120,50 @@ async def test_torn_is_ambiguous_then_escalated_no_cue_exists(db_session) -> Non
     assert out.gate.outcome == "escalate"
     assert out.gate.reason_code == "AMBIGUOUS"
     assert out.escalation is not None
+
+
+async def test_torn_renders_the_doubt_doctor_question_when_a_cue_matches(db_session) -> None:
+    """F4's question rendering -- the branch that used to 501. A matching
+    DistinguishingCue for (paddy_blast, paddy_brown_spot) makes the gate's
+    `clarify` outcome carry a real `clarification`, not an escalation. One
+    candidate (paddy_blast) has a LabelReference row; the other
+    (paddy_brown_spot) does not -- signature/image_url on that candidate
+    must be honestly None, not fabricated."""
+    farm = await _farm(db_session)
+
+    db_session.add(
+        DistinguishingCue(
+            cue_text="probe cue",
+            question_text="Is it pointed at both ends?",
+            discriminates=["paddy_blast", "paddy_brown_spot"],
+            answer_yes_implies=TargetLabel.PADDY_BLAST,
+        )
+    )
+    db_session.add(
+        LabelReference(label=TargetLabel.PADDY_BLAST, signature="Diamond-shaped, grey centre")
+    )
+    await db_session.flush()
+
+    out = await _diagnose(db_session, farm, "torn")
+
+    assert out.gate.outcome == "clarify"
+    assert out.escalation is None
+    assert out.advisory is None
+    assert out.clarification is not None
+    assert out.clarification.question == "Is it pointed at both ends?"
+    assert out.clarification.question_localized is None
+    assert {c.label for c in out.clarification.candidates} == {
+        TargetLabel.PADDY_BLAST,
+        TargetLabel.PADDY_BROWN_SPOT,
+    }
+    blast = next(c for c in out.clarification.candidates if c.label == TargetLabel.PADDY_BLAST)
+    brown_spot = next(
+        c for c in out.clarification.candidates if c.label == TargetLabel.PADDY_BROWN_SPOT
+    )
+    assert blast.signature == "Diamond-shaped, grey centre"
+    assert blast.image_url is None
+    assert brown_spot.signature is None
+    assert brown_spot.image_url is None
 
 
 async def test_out_of_scope_escalates(db_session) -> None:
