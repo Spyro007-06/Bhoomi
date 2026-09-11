@@ -14,12 +14,14 @@ Specified by: docs/API_CONTRACT.md §5. Farm shape is contract C2, docs/DESIGN.m
 from __future__ import annotations
 
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, status
 from geoalchemy2.shape import to_shape
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.contracts.enums import FollowupResponse
 from app.contracts.farm import SRID, GeoPoint
 from app.core.models import Alert, Farm, FollowUp, Problem
 from app.core.schemas.farms import (
@@ -28,6 +30,7 @@ from app.core.schemas.farms import (
     FarmOut,
     FarmSummaryOut,
     FarmUpdate,
+    HealthOut,
     HomeSummaryOut,
 )
 from app.db import get_session
@@ -169,6 +172,57 @@ async def update_farm(
     return _as_farm_out(farm)
 
 
+async def _health_summary(
+    session: AsyncSession, farm: Farm, open_problems: int, active_alerts: int
+) -> HealthOut:
+    """F11, owner Thaariha. docs/API_CONTRACT.md §5: "a sentence and a trend
+    arrow. There is no numeric score field, deliberately."
+
+    First-cut heuristic, not a model -- there is no learned or authored
+    health-scoring logic anywhere in this codebase to call instead, and F11
+    was zero code before this. `trend` prefers the most recent FollowUp
+    answer for this farm: that field exists precisely to record whether a
+    farmer's symptoms got better, stayed the same, or got worse
+    (`followup_response`, docs/DESIGN.md §5), which is a real signal rather
+    than one inferred from bare counts. Only when no follow-up has ever been
+    answered does trend fall back to "an active alert with an open problem
+    reads as worsening, otherwise stable" -- still grounded in real rows, an
+    honest first pass Thaariha can refine, not a placeholder.
+    """
+    latest_response = await session.scalar(
+        select(FollowUp.response)
+        .join(Problem, Problem.id == FollowUp.problem_id)
+        .where(Problem.farm_id == farm.id, FollowUp.response.is_not(None))
+        .order_by(FollowUp.responded_at.desc())
+        .limit(1)
+    )
+
+    if latest_response == FollowupResponse.GOT_WORSE:
+        trend: Literal["improving", "stable", "worsening"] = "worsening"
+    elif latest_response == FollowupResponse.IMPROVED:
+        trend = "improving"
+    elif latest_response == FollowupResponse.NO_CHANGE:
+        trend = "stable"
+    else:
+        trend = "worsening" if (active_alerts > 0 and open_problems > 0) else "stable"
+
+    if open_problems == 0 and active_alerts == 0:
+        sentence = "No open problems. Farm is being monitored."
+    else:
+        parts = []
+        if open_problems:
+            parts.append(f"{open_problems} open problem{'s' if open_problems != 1 else ''}")
+        if active_alerts:
+            parts.append(f"{active_alerts} active alert{'s' if active_alerts != 1 else ''}")
+        sentence = ", ".join(parts).capitalize() + "."
+        if latest_response == FollowupResponse.GOT_WORSE:
+            sentence += " Latest follow-up reported symptoms getting worse."
+        elif latest_response == FollowupResponse.IMPROVED:
+            sentence += " Latest follow-up reported improvement."
+
+    return HealthOut(sentence=sentence, trend=trend)
+
+
 @router.get(
     "/{farm_id}/summary",
     response_model=HomeSummaryOut,
@@ -181,8 +235,9 @@ async def farm_summary(
 ) -> HomeSummaryOut:
     """The home screen in one call. docs/API_CONTRACT.md §5.
 
-    The three counts are real queries. `health` and `spoken_summary` are null,
-    not invented — see HomeSummaryOut for who owns them.
+    The three counts are real queries. `health` is computed by
+    _health_summary() (F11, owner Thaariha) from real rows. `spoken_summary`
+    stays null — see HomeSummaryOut for who owns it.
     """
     farm = await _load_owned(farm_id, principal, session)
 
@@ -203,11 +258,15 @@ async def farm_summary(
         .where(Alert.farm_id == farm.id, Alert.outcome.is_(None))
     )
 
+    open_problems = open_problems or 0
+    active_alerts = active_alerts or 0
+
     return HomeSummaryOut(
         farm=FarmSummaryOut(
             id=farm.id, crop=farm.crop, growth_stage=farm.growth_stage, region=farm.region
         ),
-        open_problems=open_problems or 0,
+        health=await _health_summary(session, farm, open_problems, active_alerts),
+        open_problems=open_problems,
         pending_followups=pending_followups or 0,
-        active_alerts=active_alerts or 0,
+        active_alerts=active_alerts,
     )

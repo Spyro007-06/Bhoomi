@@ -105,14 +105,23 @@ class FarmOut(BaseModel):
     created_at: datetime
 
 
+class HealthOut(BaseModel):
+    """F11, owner Thaariha. docs/API_CONTRACT.md §5: "a sentence and a trend
+    arrow. There is no numeric score field, deliberately." Computed in
+    app/core/routers/farms.py's farm_summary() from real rows (open Problems,
+    active Alerts, resolved-Problem history) — never a fabricated sentence."""
+
+    sentence: str
+    trend: Literal["improving", "stable", "worsening"]
+
+
 class HomeSummaryOut(BaseModel):
     """`GET /farms/{id}/summary` — the home screen in one call, §5.
 
-    `health` is F11 and belongs to **Thaariha**. It is null here, not a
-    fabricated sentence: docs/API_CONTRACT.md §12's rule against placeholder
-    strings exists because this project has shipped fake copy before, and
-    docs/API_CONTRACT.md §5 is explicit that health is a sentence and a trend,
-    with no numeric score field. Inventing either would be the same mistake.
+    `health` is F11 (owner Thaariha). Populated from real farm history —
+    see HealthOut and farm_summary()'s _health_summary() helper — never a
+    fabricated sentence; docs/API_CONTRACT.md §12's rule against placeholder
+    strings exists because this project has shipped fake copy before.
 
     `spoken_summary` is likewise null until F9 (Shruthi) can produce it in the
     farmer's language. An English placeholder read aloud in Marathi is worse
@@ -120,9 +129,11 @@ class HomeSummaryOut(BaseModel):
     """
 
     farm: FarmSummaryOut
-    health: None = Field(
+    health: HealthOut | None = Field(
         default=None,
-        description="F11, owner Thaariha. Null until implemented — never a placeholder.",
+        description="F11, owner Thaariha. Always populated by farm_summary() "
+        "now — the Optional type stays for wire compatibility with a farm "
+        "that somehow has none of the rows _health_summary() reads.",
     )
     open_problems: int
     pending_followups: int
