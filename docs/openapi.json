@@ -795,6 +795,59 @@
         "title": "ErrorEnvelope",
         "type": "object"
       },
+      "EscalateOut": {
+        "description": "`POST /problems/{id}/escalate`. docs/API_CONTRACT.md \u00a712.\n\nSame shape auto-escalation already produces (DiagnoseOut's nested\n`escalation` object, core/schemas/diagnose.py's EscalationOut) plus\n`status` \u2014 this response is the top-level thing a caller gets back, not\nnested inside a gate decision, so it names the case's own status rather\nthan leaving it implicit.",
+        "properties": {
+          "assigned_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "eta_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eta Minutes"
+          },
+          "queue_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Queue Position"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          }
+        },
+        "required": [
+          "case_id",
+          "assigned_to",
+          "status"
+        ],
+        "title": "EscalateOut",
+        "type": "object"
+      },
       "EscalationOut": {
         "description": "docs/API_CONTRACT.md \u00a76's escalation block.\n\n`assigned_to` is rendered \"agronomist:<slug>\" from the assigned User's\nemail domain (no dedicated column for this exists on User \u2014 see\napp/core/routers/diagnose.py's _agronomist_slug()). `None` when the\nqueue has no agronomist to assign, honestly, not a placeholder.",
         "properties": {
@@ -2027,6 +2080,75 @@
           "total"
         ],
         "title": "QueueOut",
+        "type": "object"
+      },
+      "ReferralListOut": {
+        "description": "docs/API_CONTRACT.md \u00a714 \u2014 GET /farms/{id}/referrals response.",
+        "properties": {
+          "referrals": {
+            "items": {
+              "$ref": "#/components/schemas/ReferralOut"
+            },
+            "title": "Referrals",
+            "type": "array"
+          }
+        },
+        "required": [
+          "referrals"
+        ],
+        "title": "ReferralListOut",
+        "type": "object"
+      },
+      "ReferralOut": {
+        "description": "Referral contact card item (KVK, diagnostic lab, or helpline). \u00a714.",
+        "properties": {
+          "accepts_samples": {
+            "default": false,
+            "title": "Accepts Samples",
+            "type": "boolean"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Km"
+          },
+          "kind": {
+            "description": "kvk | lab | helpline",
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "phone"
+        ],
+        "title": "ReferralOut",
         "type": "object"
       },
       "Role": {
@@ -3737,6 +3859,85 @@
         ]
       }
     },
+    "/api/v1/farms/{farm_id}/referrals": {
+      "get": {
+        "description": "List referral contacts (KVK, plant clinics, helplines) available for a farm. \u00a714.\n\nEnforces farm existence and caller authorization via _load_owned.\nQueries real staff / agronomist directory records from the database.\nReturns an empty collection if no referrals exist for the farm.",
+        "operationId": "get_farm_referrals_api_v1_farms__farm_id__referrals_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "farm_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Farm Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is a farmer and that farm belongs to a different account."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That farm does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Farm Referrals",
+        "tags": [
+          "referrals"
+        ]
+      }
+    },
     "/api/v1/farms/{farm_id}/summary": {
       "get": {
         "description": "The home screen in one call. docs/API_CONTRACT.md \u00a75.\n\nThe three counts are real queries. `health` and `spoken_summary` are null,\nnot invented \u2014 see HomeSummaryOut for who owns them.",
@@ -4379,6 +4580,85 @@
           }
         ],
         "summary": "Get Problem",
+        "tags": [
+          "case file"
+        ]
+      }
+    },
+    "/api/v1/problems/{problem_id}/escalate": {
+      "post": {
+        "description": "Manually escalate this problem to an agronomist. docs/API_CONTRACT.md \u00a712.\n\nA route-surface addition only, no new decision logic: this is the same\nescalate() that already fires automatically from the gate (below-floor,\nout-of-scope, ambiguous-with-no-cue), from a \"got worse\" follow-up\nresponse, and from an inspection-tier alert. Idempotent per problem\n(escalate()'s own guarantee, core/services/escalation.py): calling this\ntwice on the same problem returns the SAME case, not a second one in the\nqueue.",
+        "operationId": "escalate_problem_api_v1_problems__problem_id__escalate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "problem_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Problem Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscalateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is not a farmer -- this case file is read by the farmer who owns it (see the module docstring for where agronomist/official read instead)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That problem does not exist, or belongs to a different account."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A path or query parameter did not parse."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Escalate Problem",
         "tags": [
           "case file"
         ]

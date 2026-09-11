@@ -22,6 +22,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.contracts.enums import (
+    CaseStatus,
     CueAnswer,
     GateOutcome,
     GateReasonCode,
@@ -165,6 +166,26 @@ class ProblemDetailOut(BaseModel):
     images: list[AssetOut] = Field(default_factory=list)
     label_checks: list[LabelCheckOut] = Field(default_factory=list)
     followups: list[FollowUpOut] = Field(default_factory=list)
+
+
+# --- escalate -----------------------------------------------------------
+
+
+class EscalateOut(BaseModel):
+    """`POST /problems/{id}/escalate`. docs/API_CONTRACT.md §12.
+
+    Same shape auto-escalation already produces (DiagnoseOut's nested
+    `escalation` object, core/schemas/diagnose.py's EscalationOut) plus
+    `status` — this response is the top-level thing a caller gets back, not
+    nested inside a gate decision, so it names the case's own status rather
+    than leaving it implicit.
+    """
+
+    case_id: uuid.UUID
+    assigned_to: str | None
+    status: CaseStatus
+    queue_position: int | None = None
+    eta_minutes: int | None = None
 
 
 # --- timeline ---------------------------------------------------------------

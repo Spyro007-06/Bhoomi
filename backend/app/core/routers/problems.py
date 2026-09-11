@@ -1,13 +1,14 @@
-"""F1 case file, F11 farm health.
+"""F1 case file, F11 farm health, F12's manual escalation trigger.
 
 OWNER: Shreekumar
 
 Serves:
-    GET /problems/{id}
-    GET /farms/{id}/problems
-    GET /farms/{id}/timeline
+    GET  /problems/{id}
+    GET  /farms/{id}/problems
+    GET  /farms/{id}/timeline
+    POST /problems/{id}/escalate
 
-Specified by: docs/API_CONTRACT.md §11.
+Specified by: docs/API_CONTRACT.md §11, §12.
 
 -----------------------------------------------------------------------------
 Audience: these are the farmer's own case file. A farmer reads only their own
@@ -30,7 +31,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -45,12 +46,21 @@ from app.core.models import (
     LabelCheck,
     Observation,
     Problem,
+    User,
 )
 from app.core.pagination import clamp_limit, decode_cursor, encode_cursor
+
+# core/routers/diagnose.py's own private helper, reused rather than
+# duplicated -- same reason that file reaches into vision/classifier.py for
+# _stub_topk: one definition of "how a User renders as an assigned_to slug"
+# is the thing that cannot drift between the auto-escalation response and
+# this manual-trigger one.
+from app.core.routers.diagnose import _agronomist_slug
 from app.core.schemas.problems import (
     AdvisoryOut,
     AssetOut,
     DiagnosisOut,
+    EscalateOut,
     FollowUpOut,
     GateOut,
     LabelCheckOut,
@@ -61,6 +71,7 @@ from app.core.schemas.problems import (
     TimelineEntry,
     TimelineOut,
 )
+from app.core.services.escalation import escalate
 from app.db import get_session
 from app.deps import Principal, current_principal
 from app.errors import Forbidden, NotFound, error_response
@@ -379,6 +390,56 @@ async def get_problem(
             )
             for f in followups
         ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /problems/{id}/escalate
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/problems/{problem_id}/escalate",
+    response_model=EscalateOut,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        **_UNAUTHENTICATED,
+        **_NOT_A_FARMER,
+        **_PROBLEM_NOT_FOUND,
+        **_MALFORMED,
+    },
+)
+async def escalate_problem(
+    problem_id: uuid.UUID,
+    principal: Principal = Depends(current_principal),
+    session: AsyncSession = Depends(get_session),
+) -> EscalateOut:
+    """Manually escalate this problem to an agronomist. docs/API_CONTRACT.md §12.
+
+    A route-surface addition only, no new decision logic: this is the same
+    escalate() that already fires automatically from the gate (below-floor,
+    out-of-scope, ambiguous-with-no-cue), from a "got worse" follow-up
+    response, and from an inspection-tier alert. Idempotent per problem
+    (escalate()'s own guarantee, core/services/escalation.py): calling this
+    twice on the same problem returns the SAME case, not a second one in the
+    queue.
+    """
+    problem, _ = await _owned_problem(problem_id, principal, session)
+    case = await escalate(session, problem.id, reason="farmer-requested escalation")
+    await session.commit()
+
+    assigned_to = None
+    if case.assigned_to is not None:
+        agronomist = await session.get(User, case.assigned_to)
+        if agronomist is not None:
+            assigned_to = _agronomist_slug(agronomist)
+
+    return EscalateOut(
+        case_id=case.id,
+        assigned_to=assigned_to,
+        status=case.status,
+        queue_position=case.queue_position,
+        eta_minutes=case.eta_minutes,
     )
 
 
