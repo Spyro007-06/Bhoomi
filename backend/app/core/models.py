@@ -2,7 +2,7 @@
 
 OWNER: Shreekumar.
 
-Nineteen tables:
+Twenty tables:
 
   Thirteen from docs/DESIGN.md §5, transcribed with the exact column names in
   that section: farm, problem, diagnosis, observation, advisory, label_check,
@@ -18,6 +18,10 @@ Nineteen tables:
   One added in migration 0010: corpus_document — the stable per-document
   identity that corpus_doc.doc_id and distinguishing_cue.doc_id both FK to,
   fixing a dangling-pointer bug (see the class docstring below).
+
+  One added in migration 0012: case_note — F12's POST /cases/{id}/request-info,
+  a documented gap-fill for an endpoint §13 names but never specifies (see
+  the class docstring below).
 
 Three columns added in v3: alert.reason,
 registered_use.pesticide_class, confirmation.treatment.
@@ -730,6 +734,39 @@ class Case(Base):
     bundle been compiled yet?" gets yes for all of them and renders a null.
     This is the only nullable JSONB column in the schema; every other one is
     NOT NULL, so the trap has exactly one place to bite."""
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMPTZ, nullable=False, server_default=func.now()
+    )
+
+
+class CaseNote(Base):
+    """F12, owner Thaariha. `POST /cases/{id}/request-info`, docs/API_CONTRACT.md
+    §13 -- the endpoint that section names in its prose but never gives a
+    request/response shape for, and that §16's endpoint index omits
+    entirely. Not a reinterpretation of anything §13 does specify: this
+    table is the minimal, documented gap-fill an agronomist's "I need more
+    information before I can confirm this" needs somewhere to land.
+
+    Does not touch Case.status/CaseStatus: that enum is frozen (§1) with no
+    "info requested" member, and asking for more information neither
+    resolves nor reassigns a case -- it is a note attached to one that is
+    still open or assigned.
+    """
+
+    __tablename__ = "case_note"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    case_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("case.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    author_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("app_user.id", ondelete="RESTRICT"), nullable=False
+    )
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    requested_assets: Mapped[list[str] | None] = mapped_column(ARRAY(Text))
+    """AssetKind values (as text -- see DistinguishingCue.discriminates for
+    the same dialect-generic-ARRAY reasoning) the agronomist wants the
+    farmer to supply. Null/empty means the request is text-only."""
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMPTZ, nullable=False, server_default=func.now()
     )

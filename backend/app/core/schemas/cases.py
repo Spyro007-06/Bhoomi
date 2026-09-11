@@ -3,6 +3,11 @@
 OWNER: Shreekumar.
 
 `GET /cases/{id}` — the bundle — is NOT here. That is Thaariha's F12.
+
+`RequestInfoIn`/`RequestInfoOut` are also F12 (Thaariha): §13 names
+`POST /cases/{id}/request-info` but never specifies a shape for it (absent
+from §16's endpoint index too) — see CaseNote's docstring in
+app/core/models.py for the gap this documented, minimal shape fills.
 """
 
 from __future__ import annotations
@@ -12,7 +17,13 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.contracts.enums import CaseStatus, ConfirmationVerdict, ProblemStatus, TargetLabel
+from app.contracts.enums import (
+    AssetKind,
+    CaseStatus,
+    ConfirmationVerdict,
+    ProblemStatus,
+    TargetLabel,
+)
 
 
 class ConfirmIn(BaseModel):
@@ -61,3 +72,25 @@ class CaseQueueItem(BaseModel):
 
 class CaseQueueOut(BaseModel):
     cases: list[CaseQueueItem]
+
+
+class RequestInfoIn(BaseModel):
+    """`POST /cases/{id}/request-info` request. `message` is the free-text
+    ask ("Can you send a photo of the underside of the leaf?");
+    `requested_assets` optionally names what kind of evidence would answer
+    it, so a client can prompt the farmer's camera/mic directly rather than
+    making them re-read the message to figure out what to attach."""
+
+    message: str = Field(min_length=1)
+    requested_assets: list[AssetKind] | None = None
+
+
+class RequestInfoOut(BaseModel):
+    """Echoes the case's own status, unchanged — request-info does not
+    resolve or reassign a case (CaseStatus has no "info requested" member;
+    see CaseNote's docstring). `note_id` is what a client polls the bundle's
+    observations against, or displays in a case's own note history."""
+
+    case_id: uuid.UUID
+    status: CaseStatus
+    note_id: uuid.UUID

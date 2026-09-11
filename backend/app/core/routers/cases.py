@@ -5,13 +5,19 @@ OWNER: split, deliberately. See docs/API_CONTRACT.md §13, ownership note.
     POST /cases/{id}/confirm         Shreekumar  (this file)
     GET  /agronomist/case-queue      Shreekumar  (this file)
     GET  /cases/{id}                 Thaariha    (this file)
-    POST /cases/{id}/request-info     Thaariha    (NOT here - still 501)
+    POST /cases/{id}/request-info    Thaariha    (this file)
 
 docs/API_CONTRACT.md §16 lists the whole of §12/§13 as Thaariha's. §13's confirm
 endpoint has no intelligence in it: it takes a verdict, writes a Confirmation,
 and its four downstream effects — problem resolution, the prior, the spread
 fan-out, the F15 aggregates — are all core features. Bundle compilation is the
 part with reasoning in it and stays hers.
+
+request-info's shape is not in the frozen doc at all -- §13 names the endpoint
+in prose and §16's endpoint index omits it entirely. See CaseNote's docstring
+(app/core/models.py) and schemas/cases.py's RequestInfoIn/Out for the
+documented, minimal gap-fill this implements rather than a reinterpretation of
+something §13 already specified.
 
 Specified by: docs/API_CONTRACT.md §12 and §13.
 """
@@ -25,9 +31,26 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.contracts.enums import CaseStatus, Role
-from app.core.models import Asset, Case, Diagnosis, Farm, FollowUp, LabelCheck, Observation, Problem
+from app.core.models import (
+    Asset,
+    Case,
+    CaseNote,
+    Diagnosis,
+    Farm,
+    FollowUp,
+    LabelCheck,
+    Observation,
+    Problem,
+)
 from app.core.schemas.bundle import CaseBundleOut
-from app.core.schemas.cases import CaseQueueItem, CaseQueueOut, ConfirmIn, ConfirmOut
+from app.core.schemas.cases import (
+    CaseQueueItem,
+    CaseQueueOut,
+    ConfirmIn,
+    ConfirmOut,
+    RequestInfoIn,
+    RequestInfoOut,
+)
 from app.core.services.confirmation import confirm_case
 from app.db import get_session
 from app.deps import Principal, require_role
@@ -236,3 +259,55 @@ async def confirm(
         confirmation_id=result.confirmation.id,
         spread_alerts_issued=result.spread.total,
     )
+
+
+@router.post(
+    "/cases/{case_id}/request-info",
+    response_model=RequestInfoOut,
+    responses={
+        **_UNAUTHENTICATED,
+        **_NOT_AN_AGRONOMIST,
+        **error_response(404, "That case does not exist."),
+        **error_response(
+            422,
+            "The request body did not parse (message is required), OR that "
+            "case has already been resolved.",
+        ),
+    },
+)
+async def request_info(
+    case_id: uuid.UUID,
+    payload: RequestInfoIn,
+    principal: Principal = AGRONOMIST_ONLY,
+    session: AsyncSession = Depends(get_session),
+) -> RequestInfoOut:
+    """Record an agronomist's request for more information on a case.
+
+    See the module docstring for why this shape is a documented gap-fill
+    rather than an implementation of something §13 already specified.
+    Refused on an already-resolved case for the same reason confirm() is:
+    there is nothing left to gather more information for.
+    """
+    case = await session.get(Case, case_id)
+    if case is None:
+        raise NotFound("That case does not exist.")
+    if case.status == CaseStatus.RESOLVED:
+        raise BhoomiError(
+            ErrorCode.VALIDATION_FAILED, "That case has already been resolved."
+        )
+
+    note = CaseNote(
+        case_id=case.id,
+        author_id=principal.subject,
+        message=payload.message,
+        requested_assets=(
+            [kind.value for kind in payload.requested_assets]
+            if payload.requested_assets
+            else None
+        ),
+    )
+    session.add(note)
+    await session.flush()
+    await session.commit()
+
+    return RequestInfoOut(case_id=case.id, status=case.status, note_id=note.id)

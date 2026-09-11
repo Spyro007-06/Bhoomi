@@ -17,6 +17,7 @@ Wire format only — request and response shapes, enums, error codes. Internal l
 | `target_tier`: diagnosable \| inspection | 12 of the 26 cannot be settled by a photograph — a stem borer larva is inside the stem. Routing those through the gate would produce a confident answer about something the image never contained. |
 | Growth stages became a per-crop table | The v2 enum was paddy-specific, so the phenology branch could not express "pink bollworm at boll formation". |
 | Data-model addendum folded in and deleted | Six parts deep, and the base documents still said paddy. Over a month that gap becomes the thing nobody can resolve. |
+| §13's `POST /cases/{id}/request-info` given a shape (2026-09-11) | Named in §13's prose and §16's index since v3.0, but never specified — a genuine gap, not a reopening. See §13. |
 
 The gate constants, the gate algorithm and the frozen contract shapes in
 `app/contracts/` are **unchanged**. Scope grew; the principles did not move.
@@ -582,6 +583,21 @@ POST /cases/{id}/request-info
 ```
 `spread_alerts_issued` is the F6 fan-out count. Only `confirmed` and `corrected` verdicts propagate — unconfirmed model output never triggers neighbour alerts.
 
+**`POST /cases/{id}/request-info`**
+
+> **Added 2026-09-11.** This endpoint was named above and in the original §16
+> endpoint index but never given a request/response shape — a gap in this
+> document, not a decision to reopen. The shape below is the gap-fill,
+> documented here rather than picked silently in a PR.
+
+```json
+// req
+{ "message": "Can you send a photo of the underside of the leaf?", "requested_assets": ["image"] }
+// res 200
+{ "case_id": "c_5", "status": "assigned", "note_id": "cn_1" }
+```
+`requested_assets` is optional (`image` and/or `audio`, contract's `asset_kind`). `status` echoes the case's current `case_status` unchanged — this does not resolve or reassign the case, and `case_status` has no "info requested" member. Refused (`VALIDATION_FAILED`, 422) once the case is already `resolved`.
+
 ---
 
 ## 14. Referral
@@ -654,6 +670,7 @@ Only **confirmed** cases appear. Model output alone never renders on an official
 | POST/GET | `/problems/{id}/escalate` · `/cases/{id}` | Escalation + bundle | Thaariha |
 | GET | `/agronomist/case-queue` | Case queue | **Shreekumar** (was Thaariha) |
 | POST | `/cases/{id}/confirm` | Confirmation write | **Shreekumar** (was Thaariha) |
+| POST | `/cases/{id}/request-info` | Request more info from farmer | Thaariha |
 | GET | `/farms/{id}/referrals` | Referral | Tharun |
 | GET | `/officials/hotspots` · `/accuracy` · `/queue` | Dashboard | Santheesh + Shreekumar |
 

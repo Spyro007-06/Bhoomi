@@ -51,9 +51,9 @@ IMPLEMENTED = {
     # routers/cases.py: POST /cases/{id}/confirm and GET /agronomist/case-queue
     # are Shreekumar's; GET /cases/{id} — the bundle — landed from Thaariha's
     # reviewed delivery (thaariha_reviewed_dropin.zip, merged whole). POST
-    # /cases/{id}/request-info remains hers and NOT implemented; it is absent
-    # from the router rather than stubbed, so it 404s rather than returning a
-    # plausible empty response.
+    # /cases/{id}/request-info is hers too, now built against a documented
+    # gap-fill shape (CaseNote, app/core/models.py) — §13 named the endpoint
+    # but never specified one.
     "routers/cases.py",
     # schemas/bundle.py: GET /cases/{id}'s response models — Thaariha's F12,
     # same merge as routers/cases.py's bundle route above.
