@@ -32,7 +32,6 @@ from app.core.models import Asset, Diagnosis, Farm, LabelPrior, Problem, User
 from app.core.routers.diagnose import diagnose_farm
 from app.core.schemas.diagnose import DiagnoseIn
 from app.deps import Principal
-from app.errors import BhoomiError
 
 
 def _unique_region() -> str:
@@ -123,19 +122,25 @@ async def test_out_of_scope_escalates(db_session) -> None:
     assert out.escalation is not None
 
 
-async def test_confident_reaches_advise_and_is_refused_not_composed(db_session) -> None:
-    """The gate.py deployed today is the Phase 2 implementation -- it does
-    not consult retrieval_score at all (see app/intelligence/gate.py's own
-    module docstring), so a confident, in-scope, unambiguous prediction
-    reaches advise even with zero corpus rows loaded. This build refuses to
-    compose an advisory rather than fabricate one -- 501, not a bug."""
+async def test_confident_fixture_escalates_with_no_relevant_source(db_session) -> None:
+    """gate.py's fail-closed fix (merged 4a4fe1a) changed this: retrieval_score
+    is always None here (diagnose.py never wires retrieval to the corpus --
+    see this file's docstring / the comment at the retrieval_score assignment
+    in diagnose_farm()), and the gate now treats None the same as a score
+    below RAG_THRESHOLD rather than skipping the check on it. A confident,
+    in-scope, unambiguous prediction used to reach advise (and get refused
+    with a 501, since the composer isn't built either) -- it now escalates
+    honestly with NO_RELEVANT_SOURCE instead, a complete response rather than
+    a refusal. This was previously (wrongly) pinned as the 501 case; see
+    tests/test_gate.py for the same behaviour change at the gate.decide()
+    level."""
     farm = await _farm(db_session)
 
-    with pytest.raises(BhoomiError) as caught:
-        await _diagnose(db_session, farm, "confident")
+    out = await _diagnose(db_session, farm, "confident")
 
-    assert caught.value.code.value == "NOT_IMPLEMENTED"
-    assert caught.value.status_code == 501
+    assert out.gate.outcome == "escalate"
+    assert out.gate.reason_code == "NO_RELEVANT_SOURCE"
+    assert out.escalation is not None
 
 
 # --- VISION_MODEL=real, no fixture header: the real classifier path ---------
@@ -263,10 +268,17 @@ async def test_no_advisory_or_clarification_field_on_any_response(db_session) ->
 # --- the Problem/Diagnosis record, written regardless of branch -------------
 
 
-async def test_problem_and_diagnosis_are_recorded_even_on_the_501_branch(db_session) -> None:
+async def test_problem_and_diagnosis_are_recorded_on_the_escalate_path(db_session) -> None:
+    """Renamed from test_problem_and_diagnosis_are_recorded_even_on_the_501_
+    branch: the confident fixture no longer reaches a 501 (see
+    test_confident_fixture_escalates_with_no_relevant_source above) -- it
+    escalates. The property this test actually pins -- a real classification
+    event is recorded before the response is decided, regardless of which
+    branch the gate reaches -- still holds and is still worth asserting on
+    this specific fixture, now against the outcome it actually produces."""
     farm = await _farm(db_session)
-    with pytest.raises(BhoomiError):
-        await _diagnose(db_session, farm, "confident")
+    out = await _diagnose(db_session, farm, "confident")
+    assert out.gate.outcome == "escalate"
 
     problems = (
         await db_session.execute(select(Problem).where(Problem.farm_id == farm.id))
@@ -279,7 +291,7 @@ async def test_problem_and_diagnosis_are_recorded_even_on_the_501_branch(db_sess
         await db_session.execute(select(Diagnosis).where(Diagnosis.problem_id == problems[0].id))
     ).scalars().all()
     assert len(diagnoses) == 1
-    assert diagnoses[0].gate_outcome == GateOutcome.ADVISE
+    assert diagnoses[0].gate_outcome == GateOutcome.ESCALATE
     assert diagnoses[0].is_stub is True
 
 
