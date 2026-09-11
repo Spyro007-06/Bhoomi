@@ -1223,6 +1223,69 @@
         "title": "EscalationOut",
         "type": "object"
       },
+      "ExtractedOut": {
+        "properties": {
+          "active_ingredient": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Ingredient"
+          },
+          "concentration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Concentration"
+          },
+          "formulation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formulation"
+          },
+          "ocr_confidence": {
+            "title": "Ocr Confidence",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ocr_confidence"
+        ],
+        "title": "ExtractedOut",
+        "type": "object"
+      },
+      "FallbackOut": {
+        "properties": {
+          "accepts": {
+            "default": [
+              "voice",
+              "text"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepts",
+            "type": "array"
+          }
+        },
+        "title": "FallbackOut",
+        "type": "object"
+      },
       "FarmCreate": {
         "description": "`location` is required. docs/API_CONTRACT.md \u00a75: \"Spread alerts and the\nhotspot map are inoperable without it.\" Omitting it is a 422 through the\nerror envelope, not a null column.",
         "properties": {
@@ -1740,6 +1803,50 @@
         "title": "HotspotsOut",
         "type": "object"
       },
+      "LabelCheckErrorOut": {
+        "description": "Not the \u00a70 envelope's `ErrorDetail` \u2014 see the module docstring.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "LabelCheckErrorOut",
+        "type": "object"
+      },
+      "LabelCheckIn": {
+        "properties": {
+          "days_to_harvest": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days To Harvest"
+          },
+          "image_asset_id": {
+            "format": "uuid",
+            "title": "Image Asset Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_asset_id"
+        ],
+        "title": "LabelCheckIn",
+        "type": "object"
+      },
       "LabelCheckOut": {
         "properties": {
           "at": {
@@ -1790,6 +1897,59 @@
           "at"
         ],
         "title": "LabelCheckOut",
+        "type": "object"
+      },
+      "LabelCheckResponse": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LabelCheckErrorOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extracted": {
+            "$ref": "#/components/schemas/ExtractedOut"
+          },
+          "fallback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FallbackOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerdictOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "extracted"
+        ],
+        "title": "LabelCheckResponse",
         "type": "object"
       },
       "LadderRungOut": {
@@ -2899,6 +3059,34 @@
         ],
         "title": "VerdictCode",
         "type": "string"
+      },
+      "VerdictOut": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/VerdictCode"
+          },
+          "matched_row_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Row Id"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "VerdictOut",
+        "type": "object"
       },
       "app__core__schemas__diagnose__GateOut": {
         "description": "Mirrors contract C3's GateDecision. Not GateDecision itself: this is\nthe HTTP-facing shape, and outcome/reason_code here can differ from what\ndecide() returned \u2014 see EscalationOut's docstring for the one case where\nthat happens (clarify, no cue found).",
@@ -5064,6 +5252,95 @@
         "summary": "Escalate Problem",
         "tags": [
           "case file"
+        ]
+      }
+    },
+    "/api/v1/problems/{problem_id}/label-check": {
+      "post": {
+        "description": "docs/API_CONTRACT.md \u00a79. See the module docstring for the five-step\norchestration; every step below is a call into another owner's module,\nnot new logic.",
+        "operationId": "label_check_api_v1_problems__problem_id__label_check_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "problem_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Problem Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabelCheckIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelCheckResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is not the farmer who owns this problem."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That problem does not exist, or belongs to a different account."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse, or image_asset_id resolves to an Asset that is not kind=image."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Label Check",
+        "tags": [
+          "label check"
         ]
       }
     },

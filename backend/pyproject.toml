@@ -35,6 +35,7 @@ dependencies = [
   "pillow==11.0.0",
   "numpy==2.4.6",
   "pytesseract==0.3.13",
+  "sentence-transformers==3.3.1",  # BGE-m3 embeddings, F7 (app/intelligence/rag.py)
 ]
 
 [project.optional-dependencies]

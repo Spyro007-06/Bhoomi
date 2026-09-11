@@ -58,8 +58,8 @@ def _sample_topk() -> TopK:
     )
 
 
-NOT_YET_IMPLEMENTED = [
-    ("app.intelligence.rag", "compose", ("q", "paddy", "paddy_blast", [])),
+NOT_YET_IMPLEMENTED: list[tuple[str, str, tuple]] = [
+    # compose() (app.intelligence.rag) implemented -- see tests/test_rag_compose.py.
 ]
 
 
