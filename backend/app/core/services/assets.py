@@ -102,6 +102,30 @@ def _as_uuid(asset_id: uuid.UUID | str) -> uuid.UUID | None:
         return None
 
 
+def presigned_get_url(object_key: str) -> str:
+    """Sign a GET URL for an object already in storage. No network call, no
+    session: this is a local cryptographic signing operation, not a check
+    that anything actually exists at `object_key` -- a presigned-PUT-never-
+    uploaded row signs exactly as cleanly as a real one. get_asset_bytes()
+    above is the only way to tell the difference, and that needs a real GET.
+
+    Extracted from store_bytes()'s tail, which does this exact signing step
+    inline while writing new bytes. Pulled out so a read-only caller (F12's
+    case bundle, app/intelligence/bundle.py) can reuse the same signing logic
+    for an object it did not just write, rather than duplicating it.
+
+    Always signed against settings.s3_public_endpoint_url, never
+    s3_endpoint_url -- see _s3()'s docstring for why the two differ.
+    """
+    if not object_key:
+        raise ValueError("object_key is empty -- nothing to sign a URL for.")
+    return _s3(settings.s3_public_endpoint_url).generate_presigned_url(
+        "get_object",
+        Params={"Bucket": settings.s3_bucket, "Key": object_key},
+        ExpiresIn=settings.presign_expiry_seconds,
+    )
+
+
 async def get_asset_bytes(
     session: AsyncSession,
     asset_id: uuid.UUID | str,
@@ -212,9 +236,5 @@ async def store_bytes(
     )
     await session.commit()
 
-    url = _s3(settings.s3_public_endpoint_url).generate_presigned_url(
-        "get_object",
-        Params={"Bucket": settings.s3_bucket, "Key": object_key},
-        ExpiresIn=settings.presign_expiry_seconds,
-    )
+    url = presigned_get_url(object_key)
     return StoredAsset(asset_id=asset_id, url=url, expires_in=settings.presign_expiry_seconds)

@@ -15,8 +15,26 @@ import pytest
 from app.config import settings
 from app.contracts.enums import AssetKind
 from app.core.models import Asset
-from app.core.services.assets import get_asset_bytes, store_bytes
+from app.core.services.assets import get_asset_bytes, presigned_get_url, store_bytes
 from app.errors import NotFound, ValidationFailed
+
+# --- presigned_get_url --------------------------------------------------
+#
+# No db_session, no MinIO round trip: generate_presigned_url() is a local
+# SigV4 signing operation, not a network call, so these run regardless of
+# whether a real database or object store is reachable -- unlike every
+# other test in this file.
+
+
+def test_presigned_get_url_signs_against_the_public_endpoint() -> None:
+    url = presigned_get_url("image/some-real-key.jpg")
+    assert url.startswith(settings.s3_public_endpoint_url)
+    assert "image/some-real-key.jpg" in url
+
+
+def test_presigned_get_url_refuses_an_empty_key() -> None:
+    with pytest.raises(ValueError):
+        presigned_get_url("")
 
 
 async def _insert_asset(session, **overrides) -> Asset:

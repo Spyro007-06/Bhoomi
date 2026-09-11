@@ -20,6 +20,16 @@ an enum (improved/no_change/got_worse), not free text. This function returns
 current answer, not a fabricated one, but it is a genuine open question for
 whoever owns the farmer-facing "what have you tried" capture — not something
 to guess at here.
+
+IMAGE URLS: resolved through core/services/assets.py's presigned_get_url(),
+not hardcoded None. A signing failure for one image (an empty/malformed
+object_key -- see presigned_get_url()'s own docstring for why this is a pure
+signing operation that cannot detect "never uploaded") falls back to url=None
+for THAT image only, rather than raising and failing the whole bundle over
+one bad row -- an agronomist should still see every other photo, observation
+and verdict on the case even if one image's URL cannot be produced. None
+here is an honest "no URL could be generated", not a placeholder standing in
+for one that should exist.
 """
 
 from __future__ import annotations
@@ -35,6 +45,17 @@ from app.core.schemas.bundle import (
     BundleProblem,
     CaseBundleOut,
 )
+from app.core.services.assets import presigned_get_url
+
+
+def _image_url(asset: Asset) -> str | None:
+    """One image's URL, or None if a real one could not be produced. See the
+    module docstring's IMAGE URLS note -- this must never raise past itself,
+    so one bad object_key cannot take down the rest of the bundle."""
+    try:
+        return presigned_get_url(asset.object_key)
+    except ValueError:
+        return None
 
 
 def compile_bundle(
@@ -95,7 +116,7 @@ def compile_bundle(
     ]
 
     bundle_images = [
-        BundleImage(asset_id=a.id, url=None, at=a.uploaded_at or a.created_at)
+        BundleImage(asset_id=a.id, url=_image_url(a), at=a.uploaded_at or a.created_at)
         for a in sorted(images, key=lambda a: a.uploaded_at or a.created_at)
     ]
 
