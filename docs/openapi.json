@@ -908,6 +908,125 @@
         "title": "CitationOut",
         "type": "object"
       },
+      "ClarifyIn": {
+        "properties": {
+          "answer": {
+            "$ref": "#/components/schemas/CueAnswer"
+          },
+          "cue_id": {
+            "format": "uuid",
+            "title": "Cue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cue_id",
+          "answer"
+        ],
+        "title": "ClarifyIn",
+        "type": "object"
+      },
+      "ClarifyNotResolvedOut": {
+        "properties": {
+          "escalation": {
+            "$ref": "#/components/schemas/EscalationOut"
+          },
+          "observation_id": {
+            "format": "uuid",
+            "title": "Observation Id",
+            "type": "string"
+          },
+          "reason": {
+            "default": "answer_did_not_discriminate",
+            "title": "Reason",
+            "type": "string"
+          },
+          "resolved": {
+            "default": false,
+            "title": "Resolved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "required": [
+          "observation_id",
+          "escalation"
+        ],
+        "title": "ClarifyNotResolvedOut",
+        "type": "object"
+      },
+      "ClarifyResolvedOut": {
+        "properties": {
+          "advisory": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdvisoryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "citations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitationOut"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "diagnosis": {
+            "$ref": "#/components/schemas/ResolvedDiagnosisOut"
+          },
+          "escalation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observation_id": {
+            "format": "uuid",
+            "title": "Observation Id",
+            "type": "string"
+          },
+          "resolved": {
+            "default": true,
+            "title": "Resolved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "required": [
+          "diagnosis",
+          "observation_id"
+        ],
+        "title": "ClarifyResolvedOut",
+        "type": "object"
+      },
       "ConfirmIn": {
         "description": "Both \u00a713 request shapes: confirming and correcting.",
         "properties": {
@@ -2725,6 +2844,33 @@
           "phone"
         ],
         "title": "ReferralOut",
+        "type": "object"
+      },
+      "ResolvedDiagnosisOut": {
+        "properties": {
+          "label": {
+            "$ref": "#/components/schemas/TargetLabel"
+          },
+          "resolved_by": {
+            "default": "field_observation",
+            "title": "Resolved By",
+            "type": "string"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "ResolvedDiagnosisOut",
         "type": "object"
       },
       "Role": {
@@ -5350,6 +5496,102 @@
         "summary": "Get Problem",
         "tags": [
           "case file"
+        ]
+      }
+    },
+    "/api/v1/problems/{problem_id}/clarify": {
+      "post": {
+        "operationId": "clarify_api_v1_problems__problem_id__clarify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "problem_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Problem Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClarifyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ClarifyResolvedOut"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ClarifyNotResolvedOut"
+                    }
+                  ],
+                  "title": "Response Clarify Api V1 Problems  Problem Id  Clarify Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is not the farmer who owns this problem."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That problem does not exist, belongs to a different account, or cue_id does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Clarify",
+        "tags": [
+          "doubt doctor"
         ]
       }
     },

@@ -106,6 +106,10 @@ IMPLEMENTED = {
     # F7 -- POST /advisory/query.
     "routers/advisory.py",
     "schemas/advisory.py",
+    # F4 -- POST /problems/{id}/clarify, reusing services/advisory.py's
+    # retrieve()/compose_advisory() for the resolved-with-advisory case.
+    "routers/clarify.py",
+    "schemas/clarify.py",
 }
 
 
