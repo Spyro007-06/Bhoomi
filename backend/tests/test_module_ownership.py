@@ -62,7 +62,6 @@ NOT_YET_IMPLEMENTED = [
     ("app.intelligence.rag", "compose", ("q", "paddy", "paddy_blast", [])),
     ("app.intelligence.verdict", "verdict", (None, "paddy", "paddy_blast", None, None)),
     ("app.intelligence.bundle", "compile_bundle", (None, None, None, [], [], [], [])),
-    ("app.vision.ocr", "extract_label", (b"x",)),
 ]
 
 

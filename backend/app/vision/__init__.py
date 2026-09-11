@@ -6,6 +6,6 @@ Exposes `classify(image) -> TopK` and `extract_label(image) -> LabelExtract`.
 """
 
 from app.vision.classifier import classify
-from app.vision.ocr import extract_label
+from app.vision.ocr import LabelExtract, extract_label
 
-__all__ = ["classify", "extract_label"]
+__all__ = ["classify", "extract_label", "LabelExtract"]
