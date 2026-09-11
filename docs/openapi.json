@@ -908,6 +908,53 @@
         "title": "CitationOut",
         "type": "object"
       },
+      "ClarificationOut": {
+        "description": "docs/API_CONTRACT.md \u00a76's `clarification` block \u2014 F4's Doubt Doctor\nquestion, the branch reached when the gate says `clarify` AND a matching\nDistinguishingCue was found (see app/core/routers/diagnose.py's\n_find_discriminating_cue()). No `advisory` accompanies this branch \u2014\n\"the client must not render treatment text on this branch.\"\n\n`question_localized` stays `None` until F9 (Shruthi) wires a real\nen \u2192 farmer-language translation \u2014 voice/embedding_text.py's translator\nonly runs source-language \u2192 English today, the opposite direction, so\nthere is no honest way to produce this yet. Same convention as\nDiagnoseOut.spoken_summary: null, not a fabricated or untranslated\nstring standing in for one.",
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/CueAnswer"
+            },
+            "title": "Answers",
+            "type": "array"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CueCandidateOut"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "cue_id": {
+            "format": "uuid",
+            "title": "Cue Id",
+            "type": "string"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "question_localized": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "F9, owner Shruthi. Null until a real en->farmer-language translator is wired.",
+            "title": "Question Localized"
+          }
+        },
+        "required": [
+          "cue_id",
+          "question",
+          "candidates"
+        ],
+        "title": "ClarificationOut",
+        "type": "object"
+      },
       "ClarifyIn": {
         "properties": {
           "answer": {
@@ -1134,6 +1181,43 @@
         "title": "CueAnswer",
         "type": "string"
       },
+      "CueCandidateOut": {
+        "description": "One of the two labels a DistinguishingCue discriminates between.\n\n`signature`/`image_url` are sourced from LabelReference (app/core/models.py),\nthe per-label table that exists precisely so a cue does not need its own\ncopy of this content \u2014 one row per label, reused by every cue pair that\nlabel appears in. Both are `None`, honestly, when no LabelReference row\nexists yet for the label (authored alongside the corpus, same as cue\ntext \u2014 not generated here), or when `image_url` could not be signed \u2014\nnever a fabricated description.",
+        "properties": {
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "label": {
+            "$ref": "#/components/schemas/TargetLabel"
+          },
+          "signature": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signature"
+          }
+        },
+        "required": [
+          "label",
+          "signature",
+          "image_url"
+        ],
+        "title": "CueCandidateOut",
+        "type": "object"
+      },
       "DiagnoseIn": {
         "description": "docs/API_CONTRACT.md \u00a76. `description_asset_id` / `description_text`\nare optional supplementary context (a voice note or typed note alongside\nthe photo) \u2014 unused by this build's orchestration, which does not touch\nNLU or retrieval, but accepted so a client sending them is not refused.",
         "properties": {
@@ -1178,8 +1262,52 @@
         "type": "object"
       },
       "DiagnoseOut": {
-        "description": "docs/API_CONTRACT.md \u00a76. `problem_type` is included on every branch \u2014\nthe frozen doc's clarify/escalate examples omit it, read as abbreviation\nrather than exclusion: Problem always has a type, and the field is\ngenuinely meaningful on every branch, not conditional on gate outcome.\n\n`escalation` is the only populated branch field this build ever produces.\n`spoken_summary` is Shruthi's (F9) and stays null until she wires it.",
+        "description": "docs/API_CONTRACT.md \u00a76. `problem_type` is included on every branch \u2014\nthe frozen doc's clarify/escalate examples omit it, read as abbreviation\nrather than exclusion: Problem always has a type, and the field is\ngenuinely meaningful on every branch, not conditional on gate outcome.\n\n`diagnosis`/`advisory`/`citations` are populated on the `advise` branch\nonly (`None`/`[]` on every other branch \u2014 omitted from the wire response\nvia `response_model_exclude_none`, same convention as `escalation` and\n`clarification`). \"Exactly one of `advisory`, `clarification`,\n`escalation` appears \u2014 never two, never none\" (\u00a76) \u2014 enforced by\ndiagnose_farm()'s branching, not re-validated here.\n`spoken_summary` is Shruthi's (F9) and stays null until she wires it.",
         "properties": {
+          "advisory": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdvisoryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "citations": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CitationOut"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Citations"
+          },
+          "clarification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClarificationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "diagnosis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/app__core__schemas__diagnose__DiagnosisOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "escalation": {
             "anyOf": [
               {
@@ -1213,57 +1341,6 @@
           "problem_type"
         ],
         "title": "DiagnoseOut",
-        "type": "object"
-      },
-      "DiagnosisOut": {
-        "properties": {
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "gate": {
-            "$ref": "#/components/schemas/app__core__schemas__problems__GateOut"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "image_asset_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Image Asset Id"
-          },
-          "label": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TargetLabel"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "model_version": {
-            "title": "Model Version",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "gate",
-          "model_version",
-          "created_at"
-        ],
-        "title": "DiagnosisOut",
         "type": "object"
       },
       "ErrorCode": {
@@ -1912,8 +1989,32 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HealthOut": {
+        "description": "F11, owner Thaariha. docs/API_CONTRACT.md \u00a75: \"a sentence and a trend\narrow. There is no numeric score field, deliberately.\" Computed in\napp/core/routers/farms.py's farm_summary() from real rows (open Problems,\nactive Alerts, resolved-Problem history) \u2014 never a fabricated sentence.",
+        "properties": {
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "trend": {
+            "enum": [
+              "improving",
+              "stable",
+              "worsening"
+            ],
+            "title": "Trend",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentence",
+          "trend"
+        ],
+        "title": "HealthOut",
+        "type": "object"
+      },
       "HomeSummaryOut": {
-        "description": "`GET /farms/{id}/summary` \u2014 the home screen in one call, \u00a75.\n\n`health` is F11 and belongs to **Thaariha**. It is null here, not a\nfabricated sentence: docs/API_CONTRACT.md \u00a712's rule against placeholder\nstrings exists because this project has shipped fake copy before, and\ndocs/API_CONTRACT.md \u00a75 is explicit that health is a sentence and a trend,\nwith no numeric score field. Inventing either would be the same mistake.\n\n`spoken_summary` is likewise null until F9 (Shruthi) can produce it in the\nfarmer's language. An English placeholder read aloud in Marathi is worse\nthan silence.",
+        "description": "`GET /farms/{id}/summary` \u2014 the home screen in one call, \u00a75.\n\n`health` is F11 (owner Thaariha). Populated from real farm history \u2014\nsee HealthOut and farm_summary()'s _health_summary() helper \u2014 never a\nfabricated sentence; docs/API_CONTRACT.md \u00a712's rule against placeholder\nstrings exists because this project has shipped fake copy before.\n\n`spoken_summary` is likewise null until F9 (Shruthi) can produce it in the\nfarmer's language. An English placeholder read aloud in Marathi is worse\nthan silence.",
         "properties": {
           "active_alerts": {
             "title": "Active Alerts",
@@ -1923,9 +2024,15 @@
             "$ref": "#/components/schemas/FarmSummaryOut"
           },
           "health": {
-            "description": "F11, owner Thaariha. Null until implemented \u2014 never a placeholder.",
-            "title": "Health",
-            "type": "null"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HealthOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "F11, owner Thaariha. Always populated by farm_summary() now \u2014 the Optional type stays for wire compatibility with a farm that somehow has none of the rows _health_summary() reads."
           },
           "open_problems": {
             "title": "Open Problems",
@@ -2545,7 +2652,7 @@
           "diagnosis": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DiagnosisOut"
+                "$ref": "#/components/schemas/app__core__schemas__problems__DiagnosisOut"
               },
               {
                 "type": "null"
@@ -2844,6 +2951,60 @@
           "phone"
         ],
         "title": "ReferralOut",
+        "type": "object"
+      },
+      "RequestInfoIn": {
+        "description": "`POST /cases/{id}/request-info` request. `message` is the free-text\nask (\"Can you send a photo of the underside of the leaf?\");\n`requested_assets` optionally names what kind of evidence would answer\nit, so a client can prompt the farmer's camera/mic directly rather than\nmaking them re-read the message to figure out what to attach.",
+        "properties": {
+          "message": {
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "requested_assets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AssetKind"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Assets"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "RequestInfoIn",
+        "type": "object"
+      },
+      "RequestInfoOut": {
+        "description": "Echoes the case's own status, unchanged \u2014 request-info does not\nresolve or reassign a case (CaseStatus has no \"info requested\" member;\nsee CaseNote's docstring). `note_id` is what a client polls the bundle's\nobservations against, or displays in a case's own note history.",
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "note_id": {
+            "format": "uuid",
+            "title": "Note Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          }
+        },
+        "required": [
+          "case_id",
+          "status",
+          "note_id"
+        ],
+        "title": "RequestInfoOut",
         "type": "object"
       },
       "ResolvedDiagnosisOut": {
@@ -3326,6 +3487,34 @@
         "title": "VerdictOut",
         "type": "object"
       },
+      "app__core__schemas__diagnose__DiagnosisOut": {
+        "description": "docs/API_CONTRACT.md \u00a76's `diagnosis` block, `advise` branch only.\n\n`severity` is None -- no severity classifier exists in this build (an\nhonest gap, not a placeholder; see app/intelligence/bundle.py's IMAGE\nURLS note for the same convention). `resolved_by` is fixed to \"model\"\nhere, distinct from clarify.py's ResolvedDiagnosisOut, which is always\n\"field_observation\" -- the two routes reach a label by different means\nand the wire value says which.",
+        "properties": {
+          "label": {
+            "$ref": "#/components/schemas/TargetLabel"
+          },
+          "resolved_by": {
+            "default": "model",
+            "title": "Resolved By",
+            "type": "string"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "DiagnosisOut",
+        "type": "object"
+      },
       "app__core__schemas__diagnose__GateOut": {
         "description": "Mirrors contract C3's GateDecision. Not GateDecision itself: this is\nthe HTTP-facing shape, and outcome/reason_code here can differ from what\ndecide() returned \u2014 see EscalationOut's docstring for the one case where\nthat happens (clarify, no cue found).",
         "properties": {
@@ -3368,6 +3557,57 @@
           "is_stub"
         ],
         "title": "GateOut",
+        "type": "object"
+      },
+      "app__core__schemas__problems__DiagnosisOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "gate": {
+            "$ref": "#/components/schemas/app__core__schemas__problems__GateOut"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "image_asset_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Asset Id"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetLabel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "gate",
+          "model_version",
+          "created_at"
+        ],
+        "title": "DiagnosisOut",
         "type": "object"
       },
       "app__core__schemas__problems__GateOut": {
@@ -4063,6 +4303,95 @@
         ]
       }
     },
+    "/api/v1/cases/{case_id}/request-info": {
+      "post": {
+        "description": "Record an agronomist's request for more information on a case.\n\nSee the module docstring for why this shape is a documented gap-fill\nrather than an implementation of something \u00a713 already specified.\nRefused on an already-resolved case for the same reason confirm() is:\nthere is nothing left to gather more information for.",
+        "operationId": "request_info_api_v1_cases__case_id__request_info_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestInfoIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestInfoOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller's role is not agronomist."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That case does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse (message is required), OR that case has already been resolved."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Info",
+        "tags": [
+          "agronomist"
+        ]
+      }
+    },
     "/api/v1/farms": {
       "post": {
         "description": "Create a farm. `location` is required \u2014 see FarmCreate.",
@@ -4427,7 +4756,7 @@
     },
     "/api/v1/farms/{farm_id}/diagnose": {
       "post": {
-        "description": "The gated diagnose path. docs/API_CONTRACT.md \u00a76, docs/DESIGN.md \u00a76, \u00a77.\n\nescalate and clarify-with-no-cue-found are the only branches this build\nproduces a full response for. advise, and clarify-with-a-cue-found, are\nreal reachable gate outcomes this build refuses rather than fabricates a\nresponse for -- 501 NOT_IMPLEMENTED. See the module docstring.\n\nThe Problem and Diagnosis rows are written regardless of which branch is\nreached, including the two 501 branches: a real classification event\nhappened and is recorded before the response is decided, not only when\nthis build knows how to finish answering it.",
+        "description": "The gated diagnose path. docs/API_CONTRACT.md \u00a76, docs/DESIGN.md \u00a76, \u00a77.\n\n`escalate`, `advise`, and both `clarify` shapes (no cue found; cue\nfound -- F4's question rendering) all produce a full response. See the\nmodule docstring.\n\nThe Problem and Diagnosis rows are written regardless of which branch is\nreached: a real classification event happened and is recorded before the\nresponse is decided.",
         "operationId": "diagnose_farm_api_v1_farms__farm_id__diagnose_post",
         "parameters": [
           {
@@ -4527,16 +4856,6 @@
               }
             },
             "description": "The request body did not parse, X-Vision-Fixture named an unrecognised fixture, or (VISION_MODEL=real, no fixture header) image_asset_id resolves to an Asset that is not kind=image."
-          },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "The gate reached an outcome this orchestration does not compose a response for: 'advise' (F7's advisory composer is not built -- details.reason_code names the gate reason, e.g. ABOVE_GATE), or 'clarify' with a matching DistinguishingCue found (F4's Doubt Doctor question rendering is not built -- details.cue_id names the matched cue). The two are distinguishable by which details key is present."
           }
         },
         "security": [
@@ -4854,7 +5173,7 @@
     },
     "/api/v1/farms/{farm_id}/summary": {
       "get": {
-        "description": "The home screen in one call. docs/API_CONTRACT.md \u00a75.\n\nThe three counts are real queries. `health` and `spoken_summary` are null,\nnot invented \u2014 see HomeSummaryOut for who owns them.",
+        "description": "The home screen in one call. docs/API_CONTRACT.md \u00a75.\n\nThe three counts are real queries. `health` is computed by\n_health_summary() (F11, owner Thaariha) from real rows. `spoken_summary`\nstays null \u2014 see HomeSummaryOut for who owns it.",
         "operationId": "farm_summary_api_v1_farms__farm_id__summary_get",
         "parameters": [
           {
