@@ -19,33 +19,24 @@ import pytest
 from app import config
 from app.contracts.vision import Prediction, TopK
 from app.core.services.prior import apply, bias_from_counts
+from app.intelligence.gate import decide
 
 # ---------------------------------------------------------------------------
-# Reference gate.
+# reference_gate() calls the real gate.decide(), Thaariha's, now that it is
+# built. It used to be a local transcription of docs/DESIGN.md §6 because
+# decide() raised NotImplementedError; that stand-in is gone.
 #
-# Transcribed from docs/DESIGN.md §6 because the real one
-# (app/intelligence/gate.py, Thaariha) raises NotImplementedError. The ORDER
-# matters and is the whole point: the floor check runs BEFORE the ambiguity
-# check, which is why the cap alone does not protect the escalate/clarify
-# boundary.
-#
-# When decide() lands, replace this with a call to it. If the two ever disagree,
-# the real gate is right and this is wrong.
+# retrieval_score is fixed at 1.0 (always above RAG_THRESHOLD) for every call
+# here, in both the "before" and "after" comparison -- this test is about the
+# floor/margin/gate bands the prior can cross, not about F7 retrieval, and a
+# fixed score keeps decide()'s NO_RELEVANT_SOURCE branch out of the picture
+# identically on both sides of the comparison, exactly as the old transcribed
+# reference_gate() (which had no retrieval check at all) did.
 # ---------------------------------------------------------------------------
 
 
 def reference_gate(topk: TopK) -> str:
-    top1 = topk.predictions[0].confidence
-    top2 = topk.predictions[1].confidence
-    if topk.out_of_scope:
-        return "escalate"
-    if top1 < config.FLOOR:
-        return "escalate"
-    if top1 - top2 < config.MARGIN:
-        return "clarify"
-    if top1 < config.GATE:
-        return "escalate"
-    return "advise"
+    return decide(topk, retrieval_score=1.0).outcome
 
 
 def _topk(top1: float, top2: float, top3: float = 0.0) -> TopK:
