@@ -4,15 +4,18 @@ OWNER: Thaariha + Suchit; orchestration by Shreekumar
 
 Serves:
     POST /farms/{id}/diagnose -- the orchestration (this file): load farm
-        context, classify, apply the prior, call app.intelligence.gate.decide()
-        (owner Thaariha, unmodified here), and branch. Two of the gate's three
-        branches produce a real, complete response (escalate; clarify with no
-        matching cue, which is the only clarify path reachable while
-        DistinguishingCue is empty). advise, and clarify with a cue actually
-        found, are real reachable states this build does not compose a
-        response for -- 501 NOT_IMPLEMENTED, not a bug: F7's advisory
-        composer and F4's Doubt Doctor question flow are Thaariha's and are
-        not built here. See _resolve_topk() and diagnose_farm() below.
+        context, classify, apply the prior, run F7's retrieve() to get a
+        real retrieval_score, call app.intelligence.gate.decide() (owner
+        Thaariha, unmodified here), and branch. `escalate`, `advise` (F7's
+        composer, app.core.services.advisory, now wired), and `clarify` with
+        no matching cue (the only clarify path reachable while
+        DistinguishingCue is empty) all produce a real, complete response.
+        `clarify` with a cue actually found is still a real reachable state
+        this build does not compose a response for -- 501 NOT_IMPLEMENTED,
+        not a bug: F4's Doubt Doctor *question rendering* is a different
+        feature from F4's *answer resolution*, which
+        POST /problems/{id}/clarify (routers/clarify.py) now serves. See
+        _resolve_topk() and diagnose_farm() below.
 
     POST /vision/classify -- Phase 1 exception, vision fixture / test mode
         (owner Suchit). Returns contract C1 (TopK) unmodified and untouched
@@ -37,7 +40,8 @@ from app.config import settings
 from app.contracts.enums import AssetKind, GateOutcome, GateReasonCode, ProblemStatus, TargetLabel
 from app.contracts.vision import Prediction, TopK
 from app.core.models import Case, Diagnosis, DistinguishingCue, Farm, Problem, User
-from app.core.schemas.diagnose import DiagnoseIn, DiagnoseOut, EscalationOut, GateOut
+from app.core.schemas.diagnose import DiagnoseIn, DiagnoseOut, DiagnosisOut, EscalationOut, GateOut
+from app.core.services import advisory as advisory_service
 from app.core.services import prior as prior_service
 from app.core.services.alerts import TARGET_PROBLEM_TYPES
 from app.core.services.assets import get_asset_bytes
@@ -303,24 +307,16 @@ async def _escalation_out(session: AsyncSession, case: Case) -> EscalationOut:
             "unrecognised fixture, or (VISION_MODEL=real, no fixture header) "
             "image_asset_id resolves to an Asset that is not kind=image.",
         ),
-        # THE important one. Both are real, reachable gate outcomes today,
-        # not hypothetical future states: `advise` is reached by every
-        # confident, in-scope, unambiguous prediction (gate.decide() is
-        # still the Phase 2 implementation and does not consult
-        # retrieval_score, so a corpus existing would not currently change
-        # this); `clarify` reaches it the moment DistinguishingCue holds a
-        # cue for the predicted pair. Composing the advisory (F7) and
-        # rendering the Doubt Doctor question (F4) are Thaariha's and are
-        # not built in this orchestration.
+        # `clarify` with a matching DistinguishingCue found is the one
+        # remaining reachable gate outcome this orchestration does not
+        # compose a response for: F4's Doubt Doctor *question rendering* is
+        # a different feature from *answer resolution*
+        # (POST /problems/{id}/clarify, routers/clarify.py, now built).
         **error_response(
             501,
-            "The gate reached an outcome this orchestration does not compose "
-            "a response for: 'advise' (F7's advisory composer is not built -- "
-            "details.reason_code names the gate reason, e.g. ABOVE_GATE), or "
-            "'clarify' with a matching DistinguishingCue found (F4's Doubt "
-            "Doctor question rendering is not built -- details.cue_id names "
-            "the matched cue). The two are distinguishable by which details "
-            "key is present.",
+            "The gate reached 'clarify' with a matching DistinguishingCue "
+            "found, but rendering the Doubt Doctor question is not built in "
+            "this orchestration -- details.cue_id names the matched cue.",
         ),
     },
 )
@@ -333,13 +329,13 @@ async def diagnose_farm(
 ) -> DiagnoseOut:
     """The gated diagnose path. docs/API_CONTRACT.md §6, docs/DESIGN.md §6, §7.
 
-    escalate and clarify-with-no-cue-found are the only branches this build
-    produces a full response for. advise, and clarify-with-a-cue-found, are
-    real reachable gate outcomes this build refuses rather than fabricates a
-    response for -- 501 NOT_IMPLEMENTED. See the module docstring.
+    `escalate`, `advise`, and clarify-with-no-cue-found all produce a full
+    response. clarify-with-a-cue-found is the one reachable gate outcome
+    this build still refuses rather than fabricates a response for -- 501
+    NOT_IMPLEMENTED. See the module docstring.
 
     The Problem and Diagnosis rows are written regardless of which branch is
-    reached, including the two 501 branches: a real classification event
+    reached, including the 501 branch: a real classification event
     happened and is recorded before the response is decided, not only when
     this build knows how to finish answering it.
     """
@@ -381,13 +377,6 @@ async def diagnose_farm(
     }
     topk = prior_service.apply(topk, biases)
 
-    # The corpus has zero loaded rows -- every delivered row was refused on
-    # source_dated (seed/corpus/SOURCES_NEEDED.md). retrieval_score is
-    # honestly None, not a value invented to make the advise branch reachable.
-    retrieval_score: float | None = None
-
-    decision = decide(topk, retrieval_score)
-
     top1 = topk.predictions[0]
     # top1.label is already a TargetLabel -- Prediction.label carries that type
     # now (contract C1), and app/vision/classifier.py is the one place a
@@ -395,6 +384,22 @@ async def diagnose_farm(
     # TargetLabel(...) here used to be where a v2 checkpoint name (e.g.
     # "blast") blew up; that conversion no longer belongs at this call site.
     target_label = top1.label
+
+    # F7's retrieval is real now (app.core.services.advisory), but retrieve()
+    # itself stays honestly empty (best_relevance=None) unless
+    # settings.llm_enabled -- see that module's docstring. Computed
+    # unconditionally rather than short-circuited on out_of_scope/below_floor/
+    # ambiguous first: those checks are decide()'s to make, not duplicated
+    # here as a cost-saving pre-filter (a real deployment pays one embed()
+    # call per diagnose regardless of which band it lands in).
+    retrieval = await advisory_service.retrieve(
+        session, farm.crop.value, target_label.value,
+        target_label.value.replace("_", " "), payload.lang,
+    )
+    retrieval_score = retrieval.best_relevance
+
+    decision = decide(topk, retrieval_score)
+
     problem = await _upsert_open_problem(session, farm.id, target_label)
 
     session.add(
@@ -463,16 +468,51 @@ async def diagnose_farm(
             details={"cue_id": str(cue.id)},
         )
 
-    # advise: unreachable while the corpus is empty under the intended
-    # design (decide() should refuse for NO_RELEVANT_SOURCE first) -- reached
-    # here only because the deployed gate.decide() is still the Phase 2
-    # implementation and does not consult retrieval_score at all. Refused
-    # regardless of why it was reached: composing an advisory is F7's, not
-    # built here.
+    # decision.outcome == "advise": reaching here means decide() already
+    # confirmed retrieval_score >= RAG_THRESHOLD, so retrieval.chunks is
+    # non-empty -- but compose() can still reject after its retry (a
+    # structural/grounding violation neither side of the threshold check
+    # sees). That failure mode is handled the same way clarify.py's
+    # RESOLVED-BUT-NO-ADVISORY case is: escalate rather than fabricate.
+    composed = await advisory_service.compose_advisory(
+        session, farm.crop.value, target_label.value, retrieval, None
+    )
+    if composed is None:
+        case = await escalate(
+            session, problem.id, reason="advise: composition failed validation"
+        )
+        await session.commit()
+        return DiagnoseOut(
+            gate=GateOut(
+                outcome="escalate",
+                confidence=decision.confidence,
+                threshold_applied=decision.threshold_applied,
+                reason_code=decision.reason_code,
+                alternatives=decision.alternatives,
+                is_stub=topk.is_stub,
+            ),
+            problem_id=problem.id,
+            problem_type=problem.problem_type,
+            escalation=await _escalation_out(session, case),
+        )
+
+    advisory_row = advisory_service.persist(session, problem.id, composed)
+    await session.flush()
+    advisory_out = advisory_service.to_advisory_out(advisory_row)
+
     await session.commit()
-    raise BhoomiError(
-        ErrorCode.NOT_IMPLEMENTED,
-        "The gate reached 'advise', but composing an advisory is not built "
-        "in this orchestration.",
-        details={"reason_code": decision.reason_code},
+    return DiagnoseOut(
+        gate=GateOut(
+            outcome=decision.outcome,
+            confidence=decision.confidence,
+            threshold_applied=decision.threshold_applied,
+            reason_code=decision.reason_code,
+            alternatives=decision.alternatives,
+            is_stub=topk.is_stub,
+        ),
+        problem_id=problem.id,
+        problem_type=problem.problem_type,
+        diagnosis=DiagnosisOut(label=target_label, severity=problem.severity),
+        advisory=advisory_out,
+        citations=advisory_out.citations,
     )
