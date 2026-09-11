@@ -94,6 +94,22 @@ IMPLEMENTED = {
     # F13 referral and helpline.
     "routers/referrals.py",
     "schemas/referrals.py",
+    # F8 label check -- POST /problems/{id}/label-check. verdict()'s
+    # problem_type threading (app/intelligence/verdict.py) landed first;
+    # this is the router that calls it.
+    "routers/labelcheck.py",
+    "schemas/labelcheck.py",
+    # F7 -- the shared embed()+search()+compose() orchestration used by
+    # advisory.py, diagnose.py's `advise` branch, and clarify.py's
+    # `resolved` branch.
+    "services/advisory.py",
+    # F7 -- POST /advisory/query.
+    "routers/advisory.py",
+    "schemas/advisory.py",
+    # F4 -- POST /problems/{id}/clarify, reusing services/advisory.py's
+    # retrieve()/compose_advisory() for the resolved-with-advisory case.
+    "routers/clarify.py",
+    "schemas/clarify.py",
 }
 
 
@@ -156,6 +172,7 @@ def test_the_expected_modules_exist() -> None:
         "corpus.py",
         "alerts.py",
         "assets.py",
+        "advisory.py",
     }
 
 

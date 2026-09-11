@@ -23,6 +23,16 @@ is known, foreclosing NOT_IN_RECORDS. So this takes `matched_rows: list`, the
 unfiltered output of registered_use.lookup(session, ingredient, crop): every row
 for that ingredient on that crop, across every target. I own this file; this is
 a correction to match the sibling module's stated contract, not a guess.
+
+SECOND SIGNATURE NOTE: `problem_type` is now required, not a TODO. docs/DESIGN.md
+§9's WRONG_CLASS example is a fungicide matched against an insect pest — that
+comparison needs the Problem's `problem_type` (disease | pest), which a bare
+TargetLabel string cannot give without re-deriving alerts.py's
+TARGET_PROBLEM_TYPES table from inside this module (a second copy of a mapping
+that already lives on the Problem row). labelcheck.py's router already has the
+Problem open when it calls this function, so it passes `problem.problem_type`
+straight through — cheaper and less duplicative than re-deriving it here from
+`target`.
 """
 
 from __future__ import annotations
@@ -30,9 +40,25 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.contracts.enums import VerdictCode
+from app.contracts.enums import ProblemType, VerdictCode
 from app.contracts.gate import VERDICT_MESSAGES, phi_conflict_message
 from app.core.services.registered_use import normalise_ingredient
+
+# Which registered_use.pesticide_class values are NOT a class mismatch for a
+# given problem_type. PESTICIDE_CLASSES (app/core/models.py, addendum B2) is
+# ("fungicide", "insecticide", "herbicide", "acaricide", "nematicide", "other")
+# -- not itself a wire enum, so this compatibility table lives here rather
+# than in contracts/enums.py, next to the one function that needs it.
+#
+# A class absent from BOTH sets below (herbicide is registered for weeds, not
+# disease or pest; "other" is unclassified) is WRONG_CLASS against every
+# problem_type by construction -- there is no crop-disease or crop-pest use a
+# herbicide match could be correct for, so it is never added to either side
+# rather than special-cased as an exception.
+_COMPATIBLE_PESTICIDE_CLASSES: dict[ProblemType, frozenset[str]] = {
+    ProblemType.DISEASE: frozenset({"fungicide"}),
+    ProblemType.PEST: frozenset({"insecticide", "acaricide", "nematicide"}),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +74,7 @@ def verdict(
     extracted: Any,
     crop: str,
     target: str,
+    problem_type: ProblemType,
     days_to_harvest: int | None,
     matched_rows: list,
 ) -> Verdict:
@@ -60,6 +87,10 @@ def verdict(
             reaches this function at all, per docs/DESIGN.md §9).
         crop: the farm's crop, a value from the frozen Crop enum.
         target: the problem's target label, a value from TargetLabel.
+        problem_type: the Problem row's own `problem_type` (disease | pest) —
+            not re-derived from `target` here; see the module docstring's
+            SECOND SIGNATURE NOTE for why the caller passes this straight
+            through instead.
         days_to_harvest: farmer-supplied, for the PHI check. None skips that
             check rather than assuming a safe harvest window.
         matched_rows: every `RegisteredUseRow` for this ingredient on this
@@ -132,14 +163,17 @@ def verdict(
         )
 
     # docs/DESIGN.md §9's WRONG_CLASS example is a fungicide matched against
-    # an insect pest. ProblemType isn't derivable from a bare TargetLabel
-    # string here without importing TARGET_TIERS' crop/pest split, which this
-    # module doesn't otherwise need — the caller (labelcheck router) already
-    # knows problem_type from the Problem row and is better positioned to
-    # pass it than this function is to re-derive it from a label string.
-    # Left as a TODO for whoever wires the router: pass problem_type through
-    # and gate this branch on `row.pesticide_class` vs. it. Not guessed here.
+    # an insect pest. `problem_type` came straight from the Problem row (see
+    # the module docstring's SECOND SIGNATURE NOTE) rather than being
+    # re-derived from `target` here.
     row = for_target[0]
+
+    if row.pesticide_class not in _COMPATIBLE_PESTICIDE_CLASSES.get(problem_type, frozenset()):
+        return Verdict(
+            code=VerdictCode.WRONG_CLASS,
+            message=VERDICT_MESSAGES[VerdictCode.WRONG_CLASS],
+            matched_row_id=row.id,
+        )
 
     if days_to_harvest is not None and days_to_harvest < row.phi_days:
         return Verdict(

@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import (
     ASR_FLOOR,
+    SARVAM_CHAT_MODEL,
     SARVAM_STT_MODEL,
     SARVAM_TRANSLATE_MODE,
     SARVAM_TRANSLATE_MODEL,
@@ -99,6 +100,21 @@ class TextToSpeech(Protocol):
 
 class Translator(Protocol):
     def translate(self, text: str, source_lang: str) -> TranslationResult: ...
+
+
+class ComposerLLM(Protocol):
+    """Added for F7 (app.intelligence.rag.compose()), gated by
+    `settings.llm_enabled` -- a separate flag from `asr_provider` above,
+    because advisory composition is a separate pipeline from speech/
+    translate, not a fourth Sarvam capability those three flip together.
+
+    Deliberately NOT unified with SpeechToText/TextToSpeech/Translator: this
+    lives in intelligence/'s call path (compose() calls it directly, no
+    router in between), so it is async like the rest of that call chain
+    rather than mirroring LiveTranslator's sync shape.
+    """
+
+    async def complete(self, system_prompt: str, user_prompt: str) -> str: ...
 
 
 # ---------------------------------------------------------------------------
@@ -182,6 +198,41 @@ class StubTranslator:
             "passthrough, no real translation. is_stub=true. docs/DESIGN.md §12."
         )
         return TranslationResult(text=text, is_stub=True)
+
+
+class StubComposerLLM:
+    """Fixed refusal, never called by compose() on the intended path.
+
+    docs/DESIGN.md §6's gate fails closed on `retrieval_score is None`
+    (app/intelligence/gate.py), and app.intelligence.rag's orchestration
+    caller only computes a real `retrieval_score` when `settings.llm_enabled`
+    is true -- with the flag off, `advise` is unreachable and compose() is
+    never invoked at all. This class exists so a caller that reaches
+    compose() anyway (a test, or a future bug that wires retrieval without
+    the flag) gets a loud, honest refusal instead of a silently-composed
+    advisory with no real grounding behind it -- the same "structurally
+    incapable of producing advice" property vision/classifier.py's stub
+    distribution carries, enforced here by raising rather than by an
+    unreachable confidence band (there is no confidence band for a chat
+    completion to sit below).
+    """
+
+    async def complete(self, system_prompt: str, user_prompt: str) -> str:
+        log.warning(
+            "intelligence.rag.compose()'s LLM served by STUB — refusing to "
+            "compose. is_stub=true. docs/DESIGN.md §12."
+        )
+        # A plain RuntimeError, not a BhoomiError: reaching this class at all
+        # means a caller invoked compose() without LLM_ENABLED=true, which
+        # the intended orchestration structurally cannot do (see the class
+        # docstring) -- this is an internal invariant violation to fail loud
+        # on, not a farmer-facing condition with its own stable error code.
+        raise RuntimeError(
+            "StubComposerLLM.complete() called -- compose() must not be "
+            "reached while settings.llm_enabled is false. This is a caller "
+            "bug (see app.voice.providers.StubComposerLLM's docstring), not "
+            "a condition to render to a client."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -377,6 +428,46 @@ class LiveTranslator:
             },
         )
         return TranslationResult(text=body["translated_text"], is_stub=False)
+
+
+class LiveComposerLLM:
+    """Sarvam-M chat completions, OpenAI-compatible shape.
+    docs.sarvam.ai/api-reference/chat-completions.
+
+    UNVERIFIED against a live Sarvam call -- no API key or network available
+    while writing this (same honesty as any other real path this build
+    cannot exercise end to end; see docs/DESIGN.md §13's verification rule).
+    The endpoint path and request/response shape follow Sarvam's documented
+    OpenAI-compatible chat-completions contract; flagged here rather than
+    silently assumed correct.
+
+    `complete()` returns the assistant's raw message content as text --
+    compose() is responsible for parsing it as JSON and validating the
+    result. This class does not know or care that the reply is JSON; that
+    keeps the OpenAI-shaped plumbing here identical for any future caller
+    that just wants a chat completion.
+    """
+
+    async def complete(self, system_prompt: str, user_prompt: str) -> str:
+        body = await _sarvam_post_async(
+            "/v1/chat/completions",
+            "chat-completions",
+            json={
+                "model": SARVAM_CHAT_MODEL,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "temperature": 0.0,
+            },
+        )
+        return body["choices"][0]["message"]["content"]
+
+
+def get_composer_llm() -> ComposerLLM:
+    if not settings.llm_enabled:
+        return StubComposerLLM()
+    return LiveComposerLLM()
 
 
 # ---------------------------------------------------------------------------

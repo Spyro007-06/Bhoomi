@@ -140,6 +140,16 @@ SARVAM_TRANSLATE_MODE = "formal"
 """Deterministic register. Colloquial/code-mixed modes vary phrasing run to run,
 which is exactly the wrong property for a reproducible retrieval test."""
 
+SARVAM_CHAT_MODEL = "sarvam-m"
+"""Sarvam's chat-completion model, used by app.intelligence.rag.compose() (F7)
+to draft the grounded advisory ladder. Gated by `settings.llm_enabled`, not
+`asr_provider` -- composition is a separate pipeline from the speech/
+translate path those three model pins above serve, and LLM_ENABLED is the
+feature flag docs/DESIGN.md §12 already names for it (see app/main.py's
+health payload). A module constant, not a setting, for the same reason the
+other three Sarvam pins are: a reproducible advisory-composition test needs
+one fixed model, not one an environment can swap at demo time."""
+
 # ---------------------------------------------------------------------------
 # Spread, follow-up and the confirmation prior — docs/DESIGN.md §10, §11.
 # ---------------------------------------------------------------------------

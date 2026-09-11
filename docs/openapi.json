@@ -86,6 +86,38 @@
         "title": "AccuracyWindow",
         "type": "object"
       },
+      "AdvisoryNotRetrievedOut": {
+        "properties": {
+          "escalation_offered": {
+            "default": true,
+            "title": "Escalation Offered",
+            "type": "boolean"
+          },
+          "reason": {
+            "default": "no_relevant_source",
+            "title": "Reason",
+            "type": "string"
+          },
+          "retrieved": {
+            "default": false,
+            "title": "Retrieved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "title": "AdvisoryNotRetrievedOut",
+        "type": "object"
+      },
       "AdvisoryOut": {
         "description": "docs/API_CONTRACT.md \u00a78. `what_to_avoid` precedes `ladder` in the object\nand must be rendered first and loudest by clients.",
         "properties": {
@@ -146,6 +178,66 @@
           "created_at"
         ],
         "title": "AdvisoryOut",
+        "type": "object"
+      },
+      "AdvisoryQueryIn": {
+        "properties": {
+          "farm_id": {
+            "format": "uuid",
+            "title": "Farm Id",
+            "type": "string"
+          },
+          "lang": {
+            "title": "Lang",
+            "type": "string"
+          },
+          "query_text": {
+            "title": "Query Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "farm_id",
+          "query_text",
+          "lang"
+        ],
+        "title": "AdvisoryQueryIn",
+        "type": "object"
+      },
+      "AdvisoryRetrievedOut": {
+        "properties": {
+          "advisory": {
+            "$ref": "#/components/schemas/AdvisoryOut"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/CitationOut"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "retrieved": {
+            "default": true,
+            "title": "Retrieved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "required": [
+          "advisory",
+          "citations"
+        ],
+        "title": "AdvisoryRetrievedOut",
         "type": "object"
       },
       "AlertListOut": {
@@ -816,6 +908,125 @@
         "title": "CitationOut",
         "type": "object"
       },
+      "ClarifyIn": {
+        "properties": {
+          "answer": {
+            "$ref": "#/components/schemas/CueAnswer"
+          },
+          "cue_id": {
+            "format": "uuid",
+            "title": "Cue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cue_id",
+          "answer"
+        ],
+        "title": "ClarifyIn",
+        "type": "object"
+      },
+      "ClarifyNotResolvedOut": {
+        "properties": {
+          "escalation": {
+            "$ref": "#/components/schemas/EscalationOut"
+          },
+          "observation_id": {
+            "format": "uuid",
+            "title": "Observation Id",
+            "type": "string"
+          },
+          "reason": {
+            "default": "answer_did_not_discriminate",
+            "title": "Reason",
+            "type": "string"
+          },
+          "resolved": {
+            "default": false,
+            "title": "Resolved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "required": [
+          "observation_id",
+          "escalation"
+        ],
+        "title": "ClarifyNotResolvedOut",
+        "type": "object"
+      },
+      "ClarifyResolvedOut": {
+        "properties": {
+          "advisory": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdvisoryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "citations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitationOut"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "diagnosis": {
+            "$ref": "#/components/schemas/ResolvedDiagnosisOut"
+          },
+          "escalation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observation_id": {
+            "format": "uuid",
+            "title": "Observation Id",
+            "type": "string"
+          },
+          "resolved": {
+            "default": true,
+            "title": "Resolved",
+            "type": "boolean"
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          }
+        },
+        "required": [
+          "diagnosis",
+          "observation_id"
+        ],
+        "title": "ClarifyResolvedOut",
+        "type": "object"
+      },
       "ConfirmIn": {
         "description": "Both \u00a713 request shapes: confirming and correcting.",
         "properties": {
@@ -1221,6 +1432,69 @@
           "eta_minutes"
         ],
         "title": "EscalationOut",
+        "type": "object"
+      },
+      "ExtractedOut": {
+        "properties": {
+          "active_ingredient": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Ingredient"
+          },
+          "concentration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Concentration"
+          },
+          "formulation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formulation"
+          },
+          "ocr_confidence": {
+            "title": "Ocr Confidence",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ocr_confidence"
+        ],
+        "title": "ExtractedOut",
+        "type": "object"
+      },
+      "FallbackOut": {
+        "properties": {
+          "accepts": {
+            "default": [
+              "voice",
+              "text"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepts",
+            "type": "array"
+          }
+        },
+        "title": "FallbackOut",
         "type": "object"
       },
       "FarmCreate": {
@@ -1740,6 +2014,50 @@
         "title": "HotspotsOut",
         "type": "object"
       },
+      "LabelCheckErrorOut": {
+        "description": "Not the \u00a70 envelope's `ErrorDetail` \u2014 see the module docstring.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "LabelCheckErrorOut",
+        "type": "object"
+      },
+      "LabelCheckIn": {
+        "properties": {
+          "days_to_harvest": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days To Harvest"
+          },
+          "image_asset_id": {
+            "format": "uuid",
+            "title": "Image Asset Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_asset_id"
+        ],
+        "title": "LabelCheckIn",
+        "type": "object"
+      },
       "LabelCheckOut": {
         "properties": {
           "at": {
@@ -1790,6 +2108,59 @@
           "at"
         ],
         "title": "LabelCheckOut",
+        "type": "object"
+      },
+      "LabelCheckResponse": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LabelCheckErrorOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extracted": {
+            "$ref": "#/components/schemas/ExtractedOut"
+          },
+          "fallback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FallbackOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "spoken_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Summary"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerdictOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "extracted"
+        ],
+        "title": "LabelCheckResponse",
         "type": "object"
       },
       "LadderRungOut": {
@@ -2475,6 +2846,33 @@
         "title": "ReferralOut",
         "type": "object"
       },
+      "ResolvedDiagnosisOut": {
+        "properties": {
+          "label": {
+            "$ref": "#/components/schemas/TargetLabel"
+          },
+          "resolved_by": {
+            "default": "field_observation",
+            "title": "Resolved By",
+            "type": "string"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "ResolvedDiagnosisOut",
+        "type": "object"
+      },
       "Role": {
         "enum": [
           "farmer",
@@ -2900,6 +3298,34 @@
         "title": "VerdictCode",
         "type": "string"
       },
+      "VerdictOut": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/VerdictCode"
+          },
+          "matched_row_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Row Id"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "VerdictOut",
+        "type": "object"
+      },
       "app__core__schemas__diagnose__GateOut": {
         "description": "Mirrors contract C3's GateDecision. Not GateDecision itself: this is\nthe HTTP-facing shape, and outcome/reason_code here can differ from what\ndecide() returned \u2014 see EscalationOut's docstring for the one case where\nthat happens (clarify, no cue found).",
         "properties": {
@@ -3004,6 +3430,91 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/advisory/query": {
+      "post": {
+        "description": "docs/API_CONTRACT.md \u00a78's standalone question. Not tied to a Problem\n-- see app/core/schemas/advisory.py's module docstring for why the\nreturned advisory is never persisted to the `advisory` table.\n\n`target` isn't part of the request contract (only `farm_id`,\n`query_text`, `lang`) -- retrieval is scoped to the farm's crop and, for\ntarget, the farm's most recently opened Problem's label if it has one,\nfalling back to no target filter otherwise. docs/API_CONTRACT.md \u00a78\ndoesn't specify how a standalone question resolves a target; this is the\norchestration's own reasonable choice, not a guess dressed as the spec.",
+        "operationId": "advisory_query_api_v1_advisory_query_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdvisoryQueryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AdvisoryRetrievedOut"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AdvisoryNotRetrievedOut"
+                    }
+                  ],
+                  "title": "Response Advisory Query Api V1 Advisory Query Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is not a farmer, or the farm belongs to someone else."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That farm does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Advisory Query",
+        "tags": [
+          "advisory"
+        ]
+      }
+    },
     "/api/v1/agronomist/case-queue": {
       "get": {
         "description": "Cases for this agronomist, oldest first. docs/API_CONTRACT.md \u00a713.\n\nOldest first, not highest severity first: a queue ordered by urgency starves\nits tail, and the farmer whose case has waited longest is the one most\nlikely to have stopped trusting that anyone is coming.",
@@ -4988,6 +5499,102 @@
         ]
       }
     },
+    "/api/v1/problems/{problem_id}/clarify": {
+      "post": {
+        "operationId": "clarify_api_v1_problems__problem_id__clarify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "problem_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Problem Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClarifyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ClarifyResolvedOut"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ClarifyNotResolvedOut"
+                    }
+                  ],
+                  "title": "Response Clarify Api V1 Problems  Problem Id  Clarify Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is not the farmer who owns this problem."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That problem does not exist, belongs to a different account, or cue_id does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Clarify",
+        "tags": [
+          "doubt doctor"
+        ]
+      }
+    },
     "/api/v1/problems/{problem_id}/escalate": {
       "post": {
         "description": "Manually escalate this problem to an agronomist. docs/API_CONTRACT.md \u00a712.\n\nA route-surface addition only, no new decision logic: this is the same\nescalate() that already fires automatically from the gate (below-floor,\nout-of-scope, ambiguous-with-no-cue), from a \"got worse\" follow-up\nresponse, and from an inspection-tier alert. Idempotent per problem\n(escalate()'s own guarantee, core/services/escalation.py): calling this\ntwice on the same problem returns the SAME case, not a second one in the\nqueue.",
@@ -5064,6 +5671,95 @@
         "summary": "Escalate Problem",
         "tags": [
           "case file"
+        ]
+      }
+    },
+    "/api/v1/problems/{problem_id}/label-check": {
+      "post": {
+        "description": "docs/API_CONTRACT.md \u00a79. See the module docstring for the five-step\norchestration; every step below is a call into another owner's module,\nnot new logic.",
+        "operationId": "label_check_api_v1_problems__problem_id__label_check_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "problem_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Problem Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabelCheckIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelCheckResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "No, or an invalid, bearer token."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The caller is not the farmer who owns this problem."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "That problem does not exist, or belongs to a different account."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The request body did not parse, or image_asset_id resolves to an Asset that is not kind=image."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Label Check",
+        "tags": [
+          "label check"
         ]
       }
     },

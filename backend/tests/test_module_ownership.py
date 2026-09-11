@@ -58,8 +58,8 @@ def _sample_topk() -> TopK:
     )
 
 
-NOT_YET_IMPLEMENTED = [
-    ("app.intelligence.rag", "compose", ("q", "paddy", "paddy_blast", [])),
+NOT_YET_IMPLEMENTED: list[tuple[str, str, tuple]] = [
+    # compose() (app.intelligence.rag) implemented -- see tests/test_rag_compose.py.
 ]
 
 
@@ -88,11 +88,12 @@ def test_verdict_signature_exists_and_returns_a_verdict() -> None:
     -- see the merge commit); verdict() no longer refuses. See
     tests/test_verdict.py for the one behaviour added on merge (a caller-bug
     sanity check), not re-tested here."""
+    from app.contracts.enums import ProblemType
     from app.intelligence.verdict import verdict
 
     result = verdict(
         extracted=None, crop="paddy", target="paddy_blast",
-        days_to_harvest=None, matched_rows=[],
+        problem_type=ProblemType.DISEASE, days_to_harvest=None, matched_rows=[],
     )
     assert result.code == "NOT_IN_RECORDS"
 
