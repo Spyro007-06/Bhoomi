@@ -7,7 +7,8 @@ class LocaleNotifier extends StateNotifier<AppLanguage> {
   final SecureStorage? _storage;
   static const String languageStorageKey = 'bhoomi_app_language';
 
-  LocaleNotifier([this._storage]) : super(AppLanguage.marathi) {
+  LocaleNotifier([this._storage])
+      : super(AppLanguage.marathi) {
     _loadPersistedLanguage();
   }
 
@@ -43,4 +44,3 @@ final stringsProvider = Provider<AppStrings>((ref) {
   final lang = ref.watch(appLanguageProvider);
   return AppStrings(lang);
 });
-

@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/utils/location_service.dart';
+import '../../../models/farm_models.dart';
 import '../../../providers/farm_providers.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../widgets/app_button.dart';
@@ -30,9 +31,12 @@ class FarmSetupScreen extends ConsumerStatefulWidget {
 class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
   CropType _selectedCrop = CropType.paddy;
   final TextEditingController _varietyController = TextEditingController(text: 'Indrayani');
-  final TextEditingController _regionController = TextEditingController(text: 'Nashik');
+  final TextEditingController _regionController = TextEditingController(text: 'Nashik, Maharashtra');
+  final TextEditingController _latController = TextEditingController();
+  final TextEditingController _lngController = TextEditingController();
   String _selectedGrowthStage = 'tillering';
   bool _isLoading = false;
+  bool _isManualLocation = false;
   String? _errorMessage;
 
   late final LocationService _locationService;
@@ -50,6 +54,8 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
   void dispose() {
     _varietyController.dispose();
     _regionController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
     super.dispose();
   }
 
@@ -65,7 +71,10 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
     setState(() {
       _isDetectingLocation = false;
       _locationResult = result;
-      if (!result.isSuccess && result.errorMessage != null) {
+      if (result.isSuccess && result.location != null) {
+        _latController.text = result.location!.lat.toStringAsFixed(4);
+        _lngController.text = result.location!.lng.toStringAsFixed(4);
+      } else if (!result.isSuccess && result.errorMessage != null) {
         _errorMessage = result.errorMessage;
       }
     });
@@ -95,21 +104,48 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
           case CropType.jowar:
             _varietyController.text = 'CSH-16';
             break;
+          case CropType.tomato:
+            _varietyController.text = 'Arka Rakshak';
+            break;
+          case CropType.banana:
+            _varietyController.text = 'Grand Naine';
+            break;
+          case CropType.chilli:
+            _varietyController.text = 'Guntur Sannam';
+            break;
+          case CropType.groundnut:
+            _varietyController.text = 'TAG 24';
+            break;
         }
       }
     });
   }
 
   Future<void> _handleSaveFarm() async {
+    final strings = ref.read(stringsProvider);
     final region = _regionController.text.trim();
     if (region.isEmpty) {
-      setState(() => _errorMessage = 'Please enter your region / district');
+      setState(() => _errorMessage = strings.farmRegionError);
       return;
     }
 
-    final location = _locationResult?.location;
+    GeoPoint? location;
+    if (_isManualLocation) {
+      final latText = _latController.text.trim();
+      final lngText = _lngController.text.trim();
+      if (latText.isNotEmpty && lngText.isNotEmpty) {
+        final latVal = double.tryParse(latText);
+        final lngVal = double.tryParse(lngText);
+        if (latVal != null && lngVal != null) {
+          location = GeoPoint(lat: latVal, lng: lngVal);
+        }
+      }
+      location ??= LocationService.estimateCoordinatesForRegion(region);
+    } else {
+      location = _locationResult?.location;
+    }
+
     if (location == null) {
-      final strings = ref.read(stringsProvider);
       setState(() => _errorMessage = strings.locationPermissionRequired);
       return;
     }
@@ -303,150 +339,375 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
               ),
               const SizedBox(height: AppSpacing.m16),
 
-              // Region Input
+              // Location & Region Card (GPS Auto-detect or Manual Entry)
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.l16),
+                backgroundColor: AppColors.warmSurface,
+                border: Border.all(
+                  color: (hasLocation || _isManualLocation)
+                      ? AppColors.border
+                      : AppColors.turmeric,
+                  width: 1.0,
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      strings.regionLabel,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.soilCharcoal,
-                        fontWeight: FontWeight.w700,
+                    // Mode Selector (GPS vs Manual)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.ricePaper,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(9),
+                              onTap: () {
+                                setState(() {
+                                  _isManualLocation = false;
+                                  _errorMessage = null;
+                                });
+                                if (_locationResult?.location == null) {
+                                  _detectLocation();
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: !_isManualLocation
+                                      ? AppColors.forest
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.my_location_rounded,
+                                      size: 16,
+                                      color: !_isManualLocation
+                                          ? Colors.white
+                                          : AppColors.soilCharcoal,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        strings.useGpsLocation,
+                                        style: AppTypography.captionSmall.copyWith(
+                                          color: !_isManualLocation
+                                              ? Colors.white
+                                              : AppColors.soilCharcoal,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(9),
+                              onTap: () {
+                                setState(() {
+                                  _isManualLocation = true;
+                                  _errorMessage = null;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: _isManualLocation
+                                      ? AppColors.forest
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.edit_location_alt_rounded,
+                                      size: 16,
+                                      color: _isManualLocation
+                                          ? Colors.white
+                                          : AppColors.soilCharcoal,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        strings.enterLocationManually,
+                                        style: AppTypography.captionSmall.copyWith(
+                                          color: _isManualLocation
+                                              ? Colors.white
+                                              : AppColors.soilCharcoal,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.s8),
-                    AppTextField(
-                      controller: _regionController,
-                      hintText: strings.regionHint,
-                      prefixIcon: const Icon(Icons.location_city_rounded, color: AppColors.fieldSlate),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.m16),
+                    const SizedBox(height: AppSpacing.m16),
 
-              // Location Status Card (Real Device Geolocation)
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.l16),
-                backgroundColor: hasLocation
-                    ? AppColors.warmSurface
-                    : AppColors.turmeric.withValues(alpha: 0.08),
-                border: Border.all(
-                  color: hasLocation ? AppColors.border : AppColors.turmeric,
-                  width: hasLocation ? 1.0 : 1.5,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          strings.locationLabel,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.soilCharcoal,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        if (_isDetectingLocation)
-                          const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.forest,
+                    if (!_isManualLocation) ...[
+                      // GPS Auto-detect Mode
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            strings.locationLabel,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.soilCharcoal,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.s8),
-                    if (_isDetectingLocation)
-                      Text(
-                        strings.locationDetecting,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.fieldSlate,
-                        ),
-                      )
-                    else if (hasLocation)
-                      Row(
-                        children: [
-                          const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 20),
-                          const SizedBox(width: AppSpacing.s8),
-                          Expanded(
-                            child: Text(
-                              '${strings.locationSet}: Lat ${_locationResult!.location!.lat.toStringAsFixed(4)}, Lng ${_locationResult!.location!.lng.toStringAsFixed(4)}',
-                              style: AppTypography.bodySmall.copyWith(
+                          if (_isDetectingLocation)
+                            const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
                                 color: AppColors.forest,
-                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ),
                         ],
-                      )
-                    else ...[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.warning_amber_rounded, color: AppColors.turmeric, size: 20),
-                          const SizedBox(width: AppSpacing.s8),
-                          Expanded(
-                            child: Text(
-                              _locationResult?.isDeniedForever == true
-                                  ? strings.locationDeniedForever
-                                  : (_locationResult?.isDisabled == true
-                                      ? strings.locationServicesDisabled
-                                      : (_locationResult?.isTimeout == true
-                                          ? strings.locationTimeoutError
-                                          : strings.locationPermissionRequired)),
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.soilCharcoal,
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      if (_isDetectingLocation)
+                        Text(
+                          strings.locationDetecting,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.fieldSlate,
+                          ),
+                        )
+                      else if (_locationResult?.isSuccess == true && _locationResult?.location != null)
+                        Row(
+                          children: [
+                            const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 20),
+                            const SizedBox(width: AppSpacing.s8),
+                            Expanded(
+                              child: Text(
+                                '${strings.locationSet}: Lat ${_locationResult!.location!.lat.toStringAsFixed(4)}, Lng ${_locationResult!.location!.lng.toStringAsFixed(4)}',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.forest,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
+                          ],
+                        )
+                      else ...[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.warning_amber_rounded, color: AppColors.turmeric, size: 20),
+                            const SizedBox(width: AppSpacing.s8),
+                            Expanded(
+                              child: Text(
+                                _locationResult?.isDeniedForever == true
+                                    ? strings.locationDeniedForever
+                                    : (_locationResult?.isDisabled == true
+                                        ? strings.locationServicesDisabled
+                                        : (_locationResult?.isTimeout == true
+                                            ? strings.locationTimeoutError
+                                            : strings.locationPermissionRequired)),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.soilCharcoal,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.s10),
+                        Wrap(
+                          spacing: AppSpacing.s8,
+                          runSpacing: AppSpacing.s6,
+                          children: [
+                            TextButton.icon(
+                              onPressed: _detectLocation,
+                              icon: const Icon(Icons.refresh_rounded, size: 18, color: AppColors.forest),
+                              label: Text(
+                                strings.retryLocation,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.forest,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            if (_locationResult?.isDeniedForever == true)
+                              TextButton.icon(
+                                onPressed: () => _locationService.openAppSettings(),
+                                icon: const Icon(Icons.settings_outlined, size: 18, color: AppColors.forest),
+                                label: Text(
+                                  strings.openSettingsButton,
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.forest,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              )
+                            else if (_locationResult?.isDisabled == true)
+                              TextButton.icon(
+                                onPressed: () => _locationService.openLocationSettings(),
+                                icon: const Icon(Icons.settings_outlined, size: 18, color: AppColors.forest),
+                                label: Text(
+                                  strings.openSettingsButton,
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.forest,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.s8),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isManualLocation = true;
+                              _errorMessage = null;
+                            });
+                          },
+                          child: Text(
+                            strings.enterLocationManually,
+                            style: AppTypography.captionSmall.copyWith(
+                              color: AppColors.forest,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
-                        ],
+                        ),
+                      ),
+                    ] else ...[
+                      // Manual Location Mode
+                      Text(
+                        strings.manualLocationSubtitle,
+                        style: AppTypography.captionSmall.copyWith(
+                          color: AppColors.fieldSlate,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.s10),
+                      Text(
+                        strings.farmRegionLabel,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.soilCharcoal,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.s6),
+                      AppTextField(
+                        controller: _regionController,
+                        hintText: strings.farmRegionHint,
+                        prefixIcon: const Icon(Icons.location_city_rounded, color: AppColors.fieldSlate),
+                        onChanged: (val) {
+                          if (_latController.text.trim().isEmpty) {
+                            final est = LocationService.estimateCoordinatesForRegion(val);
+                            _latController.text = est.lat.toStringAsFixed(4);
+                            _lngController.text = est.lng.toStringAsFixed(4);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      // Suggestion Chips
                       Wrap(
-                        spacing: AppSpacing.s8,
-                        runSpacing: AppSpacing.s6,
+                        spacing: 6,
+                        runSpacing: 4,
                         children: [
-                          TextButton.icon(
-                            onPressed: _detectLocation,
-                            icon: const Icon(Icons.refresh_rounded, size: 18, color: AppColors.forest),
+                          'Nashik, Maharashtra',
+                          'Pune, Maharashtra',
+                          'Coimbatore, Tamil Nadu',
+                          'Dharwad, Karnataka',
+                        ].map((chip) {
+                          return ActionChip(
                             label: Text(
-                              strings.retryLocation,
-                              style: AppTypography.bodySmall.copyWith(
+                              chip,
+                              style: AppTypography.captionSmall.copyWith(
                                 color: AppColors.forest,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                               ),
+                            ),
+                            backgroundColor: AppColors.ricePaper,
+                            side: BorderSide(
+                              color: AppColors.forest.withValues(alpha: 0.3),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            onPressed: () {
+                              setState(() {
+                                _regionController.text = chip;
+                                final est = LocationService.estimateCoordinatesForRegion(chip);
+                                _latController.text = est.lat.toStringAsFixed(4);
+                                _lngController.text = est.lng.toStringAsFixed(4);
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: AppSpacing.m12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  strings.latitudeOptionalLabel,
+                                  style: AppTypography.captionSmall.copyWith(
+                                    color: AppColors.soilCharcoal,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.s6),
+                                AppTextField(
+                                  controller: _latController,
+                                  hintText: '19.9975',
+                                  keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                    signed: true,
+                                  ),
+                                  prefixIcon: const Icon(Icons.explore_outlined, color: AppColors.fieldSlate, size: 18),
+                                ),
+                              ],
                             ),
                           ),
-                          if (_locationResult?.isDeniedForever == true)
-                            TextButton.icon(
-                              onPressed: () => _locationService.openAppSettings(),
-                              icon: const Icon(Icons.settings_outlined, size: 18, color: AppColors.forest),
-                              label: Text(
-                                strings.openSettingsButton,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.forest,
-                                  fontWeight: FontWeight.w700,
+                          const SizedBox(width: AppSpacing.s10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  strings.longitudeOptionalLabel,
+                                  style: AppTypography.captionSmall.copyWith(
+                                    color: AppColors.soilCharcoal,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                              ),
-                            )
-                          else if (_locationResult?.isDisabled == true)
-                            TextButton.icon(
-                              onPressed: () => _locationService.openLocationSettings(),
-                              icon: const Icon(Icons.settings_outlined, size: 18, color: AppColors.forest),
-                              label: Text(
-                                strings.openSettingsButton,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.forest,
-                                  fontWeight: FontWeight.w700,
+                                const SizedBox(height: AppSpacing.s6),
+                                AppTextField(
+                                  controller: _lngController,
+                                  hintText: '73.7898',
+                                  keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                    signed: true,
+                                  ),
+                                  prefixIcon: const Icon(Icons.explore_outlined, color: AppColors.fieldSlate, size: 18),
                                 ),
-                              ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
                     ],
@@ -469,7 +730,9 @@ class _FarmSetupScreenState extends ConsumerState<FarmSetupScreen> {
                 label: strings.saveFarmButton,
                 size: AppButtonSize.large,
                 isLoading: _isLoading,
-                onPressed: _isLoading || !hasLocation ? null : _handleSaveFarm,
+                onPressed: _isLoading || (!hasLocation && !_isManualLocation)
+                    ? null
+                    : _handleSaveFarm,
                 leadingIcon: const Icon(Icons.check_rounded, color: Colors.white),
               ),
             ],

@@ -464,6 +464,7 @@ class MockStep8ReferralRepo extends ReferralRepository {
 }
 
 List<Override> _createMasterStep8Overrides({
+  required MockStep8SecureStorage secureStorage,
   required TokenStorage tokenStorage,
   required MockStep8AuthRepo authRepo,
   required MockStep8FarmRepo farmRepo,
@@ -476,6 +477,7 @@ List<Override> _createMasterStep8Overrides({
   required MockStep8ReferralRepo referralRepo,
 }) {
   return [
+    secureStorageProvider.overrideWithValue(secureStorage),
     tokenStorageProvider.overrideWithValue(tokenStorage),
     authRepositoryProvider.overrideWithValue(authRepo),
     farmRepositoryProvider.overrideWithValue(farmRepo),
@@ -527,6 +529,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       final overrides = _createMasterStep8Overrides(
+        secureStorage: mockSecureStorage,
         tokenStorage: tokenStorage,
         authRepo: authRepo,
         farmRepo: farmRepo,
@@ -585,7 +588,7 @@ void main() {
       expect(find.text('भातावरील करपा'), findsOneWidget);
 
       // Phase 6: Acknowledge Alert (Inspect Now)
-      await tester.tap(find.text("मी तपासतो (Inspect Field)"));
+      await tester.tap(find.textContaining("मी तपासतो"));
       await tester.pumpAndSettle();
       expect(find.text('प्रतिसाद नोंदवला गेला आहे. शेताचे निरीक्षण केल्याबद्दल धन्यवाद!'), findsWidgets);
 
@@ -631,6 +634,7 @@ void main() {
       ];
 
       final overrides = _createMasterStep8Overrides(
+        secureStorage: mockSecureStorage,
         tokenStorage: tokenStorage,
         authRepo: authRepo,
         farmRepo: farmRepo,
@@ -681,6 +685,7 @@ void main() {
       ];
 
       final overrides = _createMasterStep8Overrides(
+        secureStorage: mockSecureStorage,
         tokenStorage: tokenStorage,
         authRepo: authRepo,
         farmRepo: farmRepo,
@@ -719,6 +724,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       final overrides = _createMasterStep8Overrides(
+        secureStorage: mockSecureStorage,
         tokenStorage: tokenStorage,
         authRepo: authRepo,
         farmRepo: farmRepo,

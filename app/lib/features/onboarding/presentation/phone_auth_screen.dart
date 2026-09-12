@@ -15,20 +15,23 @@ import 'otp_verify_screen.dart';
 
 /// Phone authentication entrypoint screen for Bhoomi Farmer App.
 class PhoneAuthScreen extends ConsumerStatefulWidget {
-  const PhoneAuthScreen({super.key});
+  final String? initialPhoneNumber;
+
+  const PhoneAuthScreen({super.key, this.initialPhoneNumber});
 
   @override
   ConsumerState<PhoneAuthScreen> createState() => _PhoneAuthScreenState();
 }
 
 class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
-  final TextEditingController _phoneController = TextEditingController();
+  late final TextEditingController _phoneController;
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _phoneController = TextEditingController(text: widget.initialPhoneNumber ?? '');
     _phoneController.addListener(_onPhoneChanged);
   }
 

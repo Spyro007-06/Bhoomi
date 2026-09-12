@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/config/app_mode.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -193,6 +194,10 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
 
     final controller = _cameraController;
     if (controller == null || !controller.value.isInitialized) {
+      if (AppModeConfig.isDemo) {
+        await _useDemoImage();
+        return;
+      }
       final strings = ref.read(stringsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(strings.cameraInitializing)),
@@ -252,6 +257,36 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
           ),
         );
       }
+    }
+  }
+
+  /// Supplies a bundled photograph only when a demo device has no usable
+  /// camera. The production path above continues to capture hardware photos.
+  Future<void> _useDemoImage() async {
+    if (_isProcessingCapture) return;
+    setState(() => _isProcessingCapture = true);
+    try {
+      final data = await rootBundle.load(
+        'assets/images/crop_tomato_early_blight.jpg',
+      );
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      ref.read(diagnosisControllerProvider.notifier).setImage(bytes);
+      if (!mounted) return;
+      setState(() => _isProcessingCapture = false);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ImagePreviewScreen(imageBytes: bytes),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isProcessingCapture = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString()), backgroundColor: AppColors.danger),
+      );
     }
   }
 
@@ -475,6 +510,13 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen>
                             label: strings.galleryButton,
                             onPressed: _onGalleryPressed,
                           ),
+                          if (AppModeConfig.isDemo) ...[
+                            const SizedBox(height: AppSpacing.s10),
+                            AppButton.secondary(
+                              label: strings.demoPhotoButton,
+                              onPressed: _useDemoImage,
+                            ),
+                          ],
                         ],
                       ),
                     ),

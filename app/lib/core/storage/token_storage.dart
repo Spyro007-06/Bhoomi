@@ -66,6 +66,31 @@ class TokenStorage {
     return token != null && token.isNotEmpty;
   }
 
+  /// Key generator for user-isolated profile storage
+  static String userProfileKey(String userId) => 'bhoomi_farmer_profile_$userId';
+
+  /// Store user-scoped farmer profile
+  Future<void> saveUserProfile(String userId, Map<String, dynamic> profileData) async {
+    final encoded = jsonEncode(profileData);
+    await _storage.write(key: userProfileKey(userId), value: encoded);
+  }
+
+  /// Retrieve user-scoped farmer profile
+  Future<Map<String, dynamic>?> getUserProfile(String userId) async {
+    final raw = await _storage.read(key: userProfileKey(userId));
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return jsonDecode(raw) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Clear user-scoped farmer profile
+  Future<void> clearUserProfile(String userId) async {
+    await _storage.delete(key: userProfileKey(userId));
+  }
+
   /// Clear all credentials and session data on logout
   Future<void> clearSession() async {
     await _storage.delete(key: _keyAccessToken);

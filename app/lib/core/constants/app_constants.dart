@@ -90,6 +90,31 @@ abstract final class AppConstants {
       'mr': 'गादमाशी',
       'hi': 'गाल मिज',
     },
+    'early_blight': {
+      'en': 'Early Blight',
+      'mr': 'अर्ली ब्लाइट (करपा)',
+      'hi': 'अगेती झुलसा',
+    },
+    'late_blight': {
+      'en': 'Late Blight',
+      'mr': 'लेट ब्लाइट (करपा)',
+      'hi': 'पछेती झुलसा',
+    },
+    'septoria_leaf_spot': {
+      'en': 'Septoria Leaf Spot',
+      'mr': 'सेप्टोरिया पानांवरील ठिपके',
+      'hi': 'सेप्टोरिया पत्ती धब्बा',
+    },
+    'fruit_borer': {
+      'en': 'Fruit Borer',
+      'mr': 'फळ पोखरणारी अळी',
+      'hi': 'फल छेदक कीट',
+    },
+    'heavy_rainfall': {
+      'en': 'Heavy Rainfall',
+      'mr': 'मुसळधार पाऊस',
+      'hi': 'भारी वर्षा',
+    },
     'treatment': {
       'en': 'Crop Treatment',
       'mr': 'पीक उपचार',
@@ -111,7 +136,39 @@ abstract final class AppConstants {
       }
     }
 
-    final normalized = rawTarget.toLowerCase().trim().replaceAll(' ', '_');
+    final lower = rawTarget.toLowerCase().trim();
+
+    // Check specific substring matches first (e.g. 'Early Blight (Alternaria solani)' or 'early_blight')
+    if (lower.contains('early_blight') || lower.contains('early blight') || lower.contains('alternaria')) {
+      final entry = targetDisplayNames['early_blight'];
+      if (entry != null && entry.containsKey(lang)) return entry[lang]!;
+    }
+    if (lower.contains('late_blight') || lower.contains('late blight') || lower.contains('phytophthora')) {
+      final entry = targetDisplayNames['late_blight'];
+      if (entry != null && entry.containsKey(lang)) return entry[lang]!;
+    }
+    if (lower.contains('septoria')) {
+      final entry = targetDisplayNames['septoria_leaf_spot'];
+      if (entry != null && entry.containsKey(lang)) return entry[lang]!;
+    }
+    if (lower.contains('fruit_borer') || lower.contains('fruit borer')) {
+      final entry = targetDisplayNames['fruit_borer'];
+      if (entry != null && entry.containsKey(lang)) return entry[lang]!;
+    }
+    if (lower.contains('heavy_rainfall') || lower.contains('heavy rainfall') || lower.contains('rain')) {
+      final entry = targetDisplayNames['heavy_rainfall'];
+      if (entry != null && entry.containsKey(lang)) return entry[lang]!;
+    }
+    if (lower.contains('blast')) {
+      final entry = targetDisplayNames['blast'];
+      if (entry != null && entry.containsKey(lang)) return entry[lang]!;
+    }
+    if (lower.contains('brown_spot') || lower.contains('brown spot')) {
+      final entry = targetDisplayNames['brown_spot'];
+      if (entry != null && entry.containsKey(lang)) return entry[lang]!;
+    }
+
+    final normalized = lower.replaceAll(' ', '_');
     final entry = targetDisplayNames[normalized];
     if (entry != null && entry.containsKey(lang)) {
       return entry[lang]!;
@@ -120,8 +177,16 @@ abstract final class AppConstants {
       return entry['mr']!;
     }
 
-    // If string already contains localized brackets or formatted text, keep it clean
-    if (rawTarget.contains('(') || rawTarget.contains(' - ')) {
+    // If string already contains localized Devanagari text, keep it
+    final hasDevanagari = RegExp(r'[\u0900-\u097F]').hasMatch(rawTarget);
+    if (hasDevanagari) {
+      if (lang == 'mr' || lang == 'hi') {
+        // Strip English brackets if present, e.g. "Paddy Blast (भातावरील करपा)" -> "भातावरील करपा"
+        final bracketMatch = RegExp(r'\(([\u0900-\u097F\s]+)\)').firstMatch(rawTarget);
+        if (bracketMatch != null) {
+          return bracketMatch.group(1)!.trim();
+        }
+      }
       return rawTarget;
     }
 
@@ -131,6 +196,6 @@ abstract final class AppConstants {
         .where((w) => w.isNotEmpty)
         .map((w) => '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
         .join(' ');
-    return words.isNotEmpty ? words : 'Crop Issue';
+    return words.isNotEmpty ? words : (lang == 'mr' ? 'पिकाची समस्या' : (lang == 'hi' ? 'फसल की समस्या' : 'Crop Issue'));
   }
 }

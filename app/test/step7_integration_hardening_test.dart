@@ -667,10 +667,10 @@ void main() {
 
       expect(find.text('भातावरील करपा'), findsOneWidget);
       expect(find.text('Inspect upper leaves on 10 plants across field.'), findsOneWidget);
-      expect(find.text("मी तपासतो (Inspect Field)"), findsOneWidget);
+      expect(find.textContaining("मी तपासतो"), findsOneWidget);
 
       // Tap I'll check
-      await tester.tap(find.text("मी तपासतो (Inspect Field)"));
+      await tester.tap(find.textContaining("मी तपासतो"));
       await tester.pumpAndSettle();
 
       expect(alertRepo.lastRespondedAlertId, 'alert_step7_1');

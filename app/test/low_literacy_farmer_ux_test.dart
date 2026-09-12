@@ -214,7 +214,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 3. Verify IPM Ladder content
-      expect(find.textContaining('Paddy Blast'), findsWidgets);
+      expect(find.textContaining('करपा'), findsWidgets);
       expect(find.textContaining('Drain excess water'), findsOneWidget);
     });
 

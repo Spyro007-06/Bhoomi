@@ -47,14 +47,14 @@ class RiskCard extends ConsumerWidget {
     }
   }
 
-  Widget _buildRiskBadge() {
+  Widget _buildRiskBadge(AppStrings strings) {
     switch (riskLevel.toLowerCase()) {
       case 'high':
-        return const AppStatusBadge.highRisk();
+        return AppStatusBadge.highRisk(label: strings.badgeHighRisk);
       case 'medium':
-        return const AppStatusBadge.mediumRisk();
+        return AppStatusBadge.mediumRisk(label: strings.badgeMediumRisk);
       default:
-        return const AppStatusBadge.lowRisk();
+        return AppStatusBadge.lowRisk(label: strings.badgeLowRisk);
     }
   }
 
@@ -118,7 +118,7 @@ class RiskCard extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                _buildRiskBadge(),
+                _buildRiskBadge(strings),
                 const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(
@@ -179,7 +179,7 @@ class RiskCard extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              reason,
+                              strings.getLocalizedRiskReason(reason),
                               style: AppTypography.body.copyWith(
                                 fontSize: 15,
                                 color: AppColors.soilCharcoal,
@@ -221,7 +221,7 @@ class RiskCard extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.s8),
                         Expanded(
                           child: Text(
-                            task,
+                            strings.getLocalizedInspectionTask(task),
                             style: AppTypography.bodyMedium.copyWith(
                               color: AppColors.soilCharcoal,
                             ),

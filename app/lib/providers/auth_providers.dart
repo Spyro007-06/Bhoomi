@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/config/demo_config.dart';
 import '../models/auth_models.dart';
 import 'repository_providers.dart';
 import 'farm_providers.dart';
+import 'farmer_profile_providers.dart';
 import 'feature_providers.dart';
 
 enum AuthStatus {
@@ -56,6 +58,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final isAuthed = await authRepo.isAuthenticated();
       if (isAuthed) {
         final user = await authRepo.getCurrentUser();
+        if (user != null) {
+          await _ref.read(farmerProfileProvider.notifier).loadProfile(user.id);
+        }
         state = state.copyWith(
           status: AuthStatus.authenticated,
           user: user,
@@ -63,6 +68,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           errorMessage: null,
         );
       } else {
+        _ref.read(farmerProfileProvider.notifier).clearProfile();
         state = state.copyWith(
           status: AuthStatus.unauthenticated,
           user: null,
@@ -71,6 +77,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
+      _ref.read(farmerProfileProvider.notifier).clearProfile();
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
         user: null,
@@ -104,6 +111,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final authRepo = _ref.read(authRepositoryProvider);
       final res = await authRepo.verifyOtp(requestId: requestId, otp: otp);
+      
+      // Load user profile or initialize new state
+      await _ref.read(farmerProfileProvider.notifier).loadProfile(res.user.id);
+
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: res.user,
@@ -126,7 +137,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final res = await authRepo.loginAsDemo();
 
       // Auto-set the demo farm context for the demo session
-      await _ref.read(activeFarmIdProvider.notifier).setActiveFarmId('f_demo_01');
+      await _ref.read(activeFarmIdProvider.notifier).setActiveFarmId(DemoConfig.demoFarmId);
+      await _ref.read(farmerProfileProvider.notifier).loadProfile(res.user.id);
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -149,6 +161,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await authRepo.logout();
 
     // Reset and invalidate all farmer-specific state on logout
+    _ref.read(farmerProfileProvider.notifier).clearProfile();
     _ref.read(activeFarmIdProvider.notifier).clearActiveFarm();
     _ref.invalidate(activeFarmSummaryProvider);
     _ref.invalidate(activeAlertsProvider);

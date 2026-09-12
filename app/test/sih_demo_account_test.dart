@@ -20,6 +20,8 @@ import 'package:bhoomi/repositories/timeline_repository.dart';
 import 'package:bhoomi/repositories/referral_repository.dart';
 import 'package:bhoomi/repositories/followup_repository.dart';
 import 'package:bhoomi/providers/repository_providers.dart';
+import 'package:bhoomi/core/localization/locale_provider.dart';
+import 'package:bhoomi/core/localization/app_strings.dart';
 import 'package:bhoomi/widgets/language_selector_button.dart';
 
 class MockDemoSecureStorage extends SecureStorage {
@@ -213,6 +215,7 @@ List<Override> _getDemoOverrides(MockDemoSecureStorage storage, FakeDemoAuthRepo
     timelineRepositoryProvider.overrideWithValue(FakeDemoTimelineRepo()),
     referralRepositoryProvider.overrideWithValue(FakeDemoReferralRepo()),
     followUpRepositoryProvider.overrideWithValue(FakeDemoFollowUpRepo()),
+    appLanguageProvider.overrideWith((ref) => LocaleNotifier(storage)..state = AppLanguage.marathi),
   ];
 }
 
@@ -321,7 +324,7 @@ void main() {
       // Switch language to English
       await tester.tap(find.byType(LanguageSelectorButton));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('English'));
+      await tester.tap(find.text('English').last);
       await tester.pumpAndSettle();
 
       // English button text
@@ -332,9 +335,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('🌾 Bhoomi Demo'), findsOneWidget);
-      expect(find.text('Farmer: Ramesh Patil'), findsOneWidget);
-      expect(find.text('Farm: Demo Paddy Farm'), findsOneWidget);
-      expect(find.text('Location: Nashik, Maharashtra'), findsOneWidget);
+      expect(find.text('Farmer: Arun Kumar'), findsOneWidget);
+      expect(find.text('Farm: Green Valley Farm'), findsOneWidget);
+      expect(find.text('Location: Tamil Nadu'), findsOneWidget);
       expect(find.text('Enter Demo'), findsOneWidget);
     });
 

@@ -1,5 +1,4 @@
 import '../core/constants/api_endpoints.dart';
-import '../core/constants/demo_fixtures.dart';
 import '../core/network/api_client.dart';
 import '../models/followup_models.dart';
 
@@ -21,15 +20,8 @@ class FollowUpRepositoryImpl implements FollowUpRepository {
 
   @override
   Future<PendingFollowUpsResponse> getPendingFollowUps(String farmId) async {
-    try {
-      final response = await _apiClient.get(ApiEndpoints.pendingFollowUps(farmId));
-      return PendingFollowUpsResponse.fromJson(response as Map<String, dynamic>);
-    } catch (_) {
-      if (const bool.fromEnvironment('DEMO_MODE') || farmId.startsWith('f_demo') || farmId == 'f_1') {
-        return const PendingFollowUpsResponse(followups: DemoFixtures.demoPendingFollowUps);
-      }
-      rethrow;
-    }
+    final response = await _apiClient.get(ApiEndpoints.pendingFollowUps(farmId));
+    return PendingFollowUpsResponse.fromJson(response as Map<String, dynamic>);
   }
 
   @override

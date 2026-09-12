@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/config/app_mode.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -9,12 +10,15 @@ import '../../../models/farm_models.dart';
 import '../../../providers/farm_providers.dart';
 import '../../../providers/feature_providers.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../core/constants/crop_constants.dart';
+import '../../../models/farmer_profile_models.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_card.dart';
 import '../../../widgets/farm_health_card.dart';
 import '../../../widgets/risk_card.dart';
 import '../../../widgets/followup_card.dart';
-import '../../onboarding/presentation/farm_setup_screen.dart';
+import '../../onboarding/presentation/farmer_farm_setup_screen.dart';
+import '../../../providers/farmer_profile_providers.dart';
 import '../../timeline/presentation/problem_detail_screen.dart';
 import '../../../widgets/farmer_voice_assistant.dart';
 import '../../../widgets/language_selector_button.dart';
@@ -28,15 +32,16 @@ class HomeScreen extends ConsumerWidget {
     this.onCheckCropPressed,
   });
 
-  String _getGreeting(dynamic strings) {
+  String _getGreeting(dynamic strings, String? farmerName) {
     final hour = DateTime.now().hour;
-    if (hour < 12) {
-      return strings.greetingMorning;
-    } else if (hour < 17) {
-      return strings.greetingAfternoon;
-    } else {
-      return strings.greetingEvening;
+    final timeGreeting = hour < 12
+        ? strings.greetingMorning
+        : (hour < 17 ? strings.greetingAfternoon : strings.greetingEvening);
+    if (farmerName != null && farmerName.trim().isNotEmpty) {
+      final firstName = farmerName.trim().split(' ').first;
+      return '$timeGreeting, $firstName';
     }
+    return timeGreeting;
   }
 
   @override
@@ -44,6 +49,7 @@ class HomeScreen extends ConsumerWidget {
     final strings = ref.watch(stringsProvider);
     final activeFarmId = ref.watch(activeFarmIdProvider);
     final summaryAsync = ref.watch(activeFarmSummaryProvider);
+    final profile = ref.watch(farmerProfileProvider).profile;
 
     final farmIdForFeatures = activeFarmId ?? 'f_1';
     final alertsAsync = ref.watch(activeAlertsProvider(farmIdForFeatures));
@@ -80,7 +86,7 @@ class HomeScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _getGreeting(strings),
+                            _getGreeting(strings, profile?.name),
                             style: AppTypography.subheading.copyWith(
                               color: AppColors.primaryDark,
                               fontWeight: FontWeight.w800,
@@ -88,16 +94,42 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${strings.appName} · ${strings.greetingPartnerSubtitle}',
+                            profile != null
+                                ? '${profile.farmArea ?? 2.5} ${FarmAreaUnit.fromKey(profile.farmAreaUnit).localizedLabel(strings.language.code)} · ${CropType.fromKey(profile.currentCrop).getLocalizedName(strings)} · 📍 ${strings.getLocalizedRegion(profile.region)}'
+                                : '${strings.appName} · ${strings.greetingPartnerSubtitle}',
                             style: AppTypography.caption.copyWith(
                               color: AppColors.fieldSlate,
                               fontWeight: FontWeight.w600,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.s8),
+                    if (AppModeConfig.isDemo) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.s8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.forest.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          strings.demoModeLabel,
+                          style: AppTypography.captionSmall.copyWith(
+                            color: AppColors.forest,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.s8),
+                    ],
                     // Global Language Selector Button
                     const LanguageSelectorButton(),
                   ],
@@ -300,7 +332,7 @@ class HomeScreen extends ConsumerWidget {
                     final topAlert = alertsRes.alerts.first;
                     final tasks = topAlert.inspectionTasks.isNotEmpty
                         ? topAlert.inspectionTasks
-                        : ['Check the upper leaves on 10 plants across the field.'];
+                        : [strings.defaultInspectionTask];
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,8 +388,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: AppSpacing.m12),
                         FollowUpCard(
-                          question: topFollowup.question ?? strings.followupQuestionDefault,
-                          questionLocalized: strings.followupQuestionDefault,
+                          question: strings.getLocalizedFollowupQuestion(topFollowup.question),
                           target: topFollowup.target ?? 'treatment',
                           onResponse: (response) async {
                             try {
@@ -413,7 +444,8 @@ class HomeScreen extends ConsumerWidget {
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => const FarmSetupScreen(),
+                                builder: (context) =>
+                                    const FarmerFarmSetupScreen(isFirstTimeOnboarding: false),
                               ),
                             );
                           },
@@ -427,42 +459,45 @@ class HomeScreen extends ConsumerWidget {
                     data: (summary) {
                       if (summary != null) {
                         return FarmHealthCard(
-                          health: summary.health,
-                          cropName: '${summary.farm.crop} (${summary.farm.variety ?? "Indrayani"})',
-                          growthStage: summary.farm.growthStage,
-                          region: summary.farm.region,
+                          health: HealthModel(
+                            sentence: strings.getLocalizedHealthSentence(summary.health.sentence),
+                            trend: summary.health.trend,
+                          ),
+                          cropName: '${CropType.fromKey(summary.farm.crop).getLocalizedName(strings)} (${summary.farm.variety ?? "Indrayani"})',
+                          growthStage: strings.getLocalizedGrowthStage(summary.farm.growthStage),
+                          region: strings.getLocalizedRegion(summary.farm.region),
                           openProblems: summary.openProblems,
                           pendingFollowups: summary.pendingFollowups,
                           activeAlerts: summary.activeAlerts,
                         );
                       }
                       return FarmHealthCard(
-                        health: const HealthModel(
-                          sentence: 'Farm memory initialized. Monitoring active.',
+                        health: HealthModel(
+                          sentence: strings.healthSentenceDefault,
                           trend: 'stable',
                         ),
-                        cropName: 'Paddy / भात (Indrayani)',
-                        growthStage: 'Tillering',
-                        region: 'Nashik',
+                        cropName: '${strings.cropPaddy} (Indrayani)',
+                        growthStage: strings.growthStageTillering,
+                        region: strings.getLocalizedRegion('Nashik'),
                       );
                     },
                     loading: () => FarmHealthCard(
-                      health: const HealthModel(
-                        sentence: 'Loading farm status...',
+                      health: HealthModel(
+                        sentence: strings.loading,
                         trend: 'stable',
                       ),
-                      cropName: 'Paddy / भात',
+                      cropName: strings.cropPaddy,
                       growthStage: '...',
                       region: '...',
                     ),
                     error: (_, __) => FarmHealthCard(
-                      health: const HealthModel(
-                        sentence: 'Farm status offline. Cached data displayed.',
+                      health: HealthModel(
+                        sentence: strings.healthSentenceDefault,
                         trend: 'stable',
                       ),
-                      cropName: 'Paddy / भात',
-                      growthStage: 'Tillering',
-                      region: 'Maharashtra',
+                      cropName: strings.cropPaddy,
+                      growthStage: strings.growthStageTillering,
+                      region: strings.getLocalizedRegion('Maharashtra'),
                     ),
                   ),
 

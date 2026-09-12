@@ -104,6 +104,9 @@ class MockGeolocatorWrapper implements GeolocatorWrapper {
   }
 
   @override
+  Future<Position?> getLastKnownPosition() async => positionToReturn;
+
+  @override
   Future<bool> openAppSettings() async {
     appSettingsOpened = true;
     return true;

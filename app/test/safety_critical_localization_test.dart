@@ -241,6 +241,10 @@ void main() {
     // =========================================================================
     for (final lang in AppLanguage.values) {
       testWidgets('AdvisoryIpmCard renders 100% localized and strict IPM order in ${lang.name}', (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
         final strings = AppStrings(lang);
 
         await tester.pumpWidget(

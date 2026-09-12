@@ -5,7 +5,11 @@ enum CropType {
   paddy('paddy'),
   cotton('cotton'),
   soybean('soybean'),
-  jowar('jowar');
+  jowar('jowar'),
+  tomato('tomato'),
+  banana('banana'),
+  chilli('chilli'),
+  groundnut('groundnut');
 
   final String key;
   const CropType(this.key);
@@ -29,6 +33,14 @@ enum CropType {
         return strings.cropSoybean;
       case CropType.jowar:
         return strings.cropJowar;
+      case CropType.tomato:
+        return strings.cropTomato;
+      case CropType.banana:
+        return strings.cropBanana;
+      case CropType.chilli:
+        return strings.cropChilli;
+      case CropType.groundnut:
+        return strings.cropGroundnut;
     }
   }
 
@@ -69,6 +81,28 @@ enum CropType {
           GrowthStageItem(key: 'panicle_initiation', name: strings.growthStagePanicle),
           GrowthStageItem(key: 'flowering', name: strings.growthStageFlowering),
           GrowthStageItem(key: 'grain_filling', name: strings.growthStageGrainFilling),
+          GrowthStageItem(key: 'maturity', name: strings.growthStageMaturity),
+        ];
+      case CropType.tomato:
+      case CropType.chilli:
+        return [
+          GrowthStageItem(key: 'vegetative', name: strings.growthStageVegetative),
+          GrowthStageItem(key: 'flowering', name: strings.growthStageFlowering),
+          GrowthStageItem(key: 'fruiting', name: strings.growthStageFruiting),
+          GrowthStageItem(key: 'maturity', name: strings.growthStageMaturity),
+        ];
+      case CropType.banana:
+        return [
+          GrowthStageItem(key: 'vegetative', name: strings.growthStageVegetative),
+          GrowthStageItem(key: 'flowering', name: strings.growthStageFlowering),
+          GrowthStageItem(key: 'maturity', name: strings.growthStageMaturity),
+        ];
+      case CropType.groundnut:
+        return [
+          GrowthStageItem(key: 'germination', name: strings.growthStageGermination),
+          GrowthStageItem(key: 'vegetative', name: strings.growthStageVegetative),
+          GrowthStageItem(key: 'flowering', name: strings.growthStageFlowering),
+          GrowthStageItem(key: 'pod_formation', name: strings.growthStagePodFormation),
           GrowthStageItem(key: 'maturity', name: strings.growthStageMaturity),
         ];
     }

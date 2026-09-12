@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 bool get _isTestEnv {
-  if (Platform.environment.containsKey('FLUTTER_TEST')) return true;
+  if (!kIsWeb) {
+    try {
+      if (Platform.environment.containsKey('FLUTTER_TEST')) return true;
+    } catch (_) {}
+  }
   try {
     return WidgetsBinding.instance.runtimeType.toString().contains('Test');
   } catch (_) {

@@ -1,5 +1,4 @@
 import '../core/constants/api_endpoints.dart';
-import '../core/constants/demo_fixtures.dart';
 import '../core/network/api_client.dart';
 import '../models/referral_models.dart';
 
@@ -15,14 +14,7 @@ class ReferralRepositoryImpl implements ReferralRepository {
 
   @override
   Future<ReferralsResponse> getReferrals(String farmId) async {
-    try {
-      final response = await _apiClient.get(ApiEndpoints.referrals(farmId));
-      return ReferralsResponse.fromJson(response as Map<String, dynamic>);
-    } catch (_) {
-      if (const bool.fromEnvironment('DEMO_MODE') || farmId.startsWith('f_demo') || farmId == 'f_1') {
-        return ReferralsResponse(referrals: DemoFixtures.demoReferrals);
-      }
-      rethrow;
-    }
+    final response = await _apiClient.get(ApiEndpoints.referrals(farmId));
+    return ReferralsResponse.fromJson(response as Map<String, dynamic>);
   }
 }

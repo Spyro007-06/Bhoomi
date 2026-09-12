@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/config/app_mode.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -16,12 +17,14 @@ class OtpVerifyScreen extends ConsumerStatefulWidget {
   final String phoneNumber;
   final String requestId;
   final int expiresInSeconds;
+  final String? initialOtp;
 
   const OtpVerifyScreen({
     super.key,
     required this.phoneNumber,
     required this.requestId,
     this.expiresInSeconds = 300,
+    this.initialOtp,
   });
 
   @override
@@ -29,7 +32,7 @@ class OtpVerifyScreen extends ConsumerStatefulWidget {
 }
 
 class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
-  final TextEditingController _otpController = TextEditingController();
+  late final TextEditingController _otpController;
   late String _currentRequestId;
   late int _remainingSeconds;
   Timer? _countdownTimer;
@@ -43,6 +46,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
     _currentRequestId = widget.requestId;
     _remainingSeconds = widget.expiresInSeconds > 0 ? widget.expiresInSeconds : 300;
     _startCountdown();
+    _otpController = TextEditingController(text: widget.initialOtp ?? '');
     _otpController.addListener(_onOtpChanged);
   }
 
@@ -237,6 +241,16 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                                   size: 20,
                                 ),
                               ),
+                              if (AppModeConfig.isDemo) ...[
+                                const SizedBox(height: AppSpacing.s8),
+                                Text(
+                                  strings.demoOtpHint,
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.forest,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: AppSpacing.m16),
 
                               // Resend Row

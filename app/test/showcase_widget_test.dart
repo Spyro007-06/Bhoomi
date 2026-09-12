@@ -75,7 +75,7 @@ void main() {
       await tester.scrollUntilVisible(find.text('Sufficient confidence for treatment guidance'), 300, scrollable: find.byType(Scrollable).first);
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text('Sufficient confidence for treatment guidance'), findsOneWidget);
-      expect(find.text('Paddy Blast (भातावरील करपा)'), findsWidgets);
+      expect(find.textContaining('Paddy Blast'), findsWidgets);
 
       // 8. Check Advisory IPM Card
       await tester.scrollUntilVisible(find.byType(AdvisoryIpmCard), 300, scrollable: find.byType(Scrollable).first);

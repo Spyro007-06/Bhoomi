@@ -1,5 +1,4 @@
 import '../core/constants/api_endpoints.dart';
-import '../core/constants/demo_fixtures.dart';
 import '../core/network/api_client.dart';
 import '../models/alert_models.dart';
 
@@ -28,23 +27,15 @@ class AlertRepositoryImpl implements AlertRepository {
     int limit = 20,
     String? cursor,
   }) async {
-    try {
-      final queryParams = <String, dynamic>{
-        'limit': limit,
-        if (cursor != null) 'cursor': cursor,
-      };
-
-      final response = await _apiClient.get(
-        ApiEndpoints.alerts(farmId),
-        queryParameters: queryParams,
-      );
-      return AlertsResponse.fromJson(response as Map<String, dynamic>);
-    } catch (_) {
-      if (const bool.fromEnvironment('DEMO_MODE') || farmId.startsWith('f_demo') || farmId == 'f_1') {
-        return const AlertsResponse(alerts: DemoFixtures.demoAlerts);
-      }
-      rethrow;
-    }
+    final queryParams = <String, dynamic>{
+      'limit': limit,
+      if (cursor != null) 'cursor': cursor,
+    };
+    final response = await _apiClient.get(
+      ApiEndpoints.alerts(farmId),
+      queryParameters: queryParams,
+    );
+    return AlertsResponse.fromJson(response as Map<String, dynamic>);
   }
 
   @override

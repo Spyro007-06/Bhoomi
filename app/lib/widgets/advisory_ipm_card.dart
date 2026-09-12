@@ -235,7 +235,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
                       ),
                       const SizedBox(height: AppSpacing.s8),
                       Text(
-                        widget.whatToAvoid,
+                        strings.getLocalizedAdvisoryAvoid(widget.whatToAvoid),
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.soilCharcoal,
@@ -277,7 +277,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              widget.whatToCheck,
+                              strings.getLocalizedAdvisoryCheck(widget.whatToCheck),
                               style: AppTypography.body.copyWith(
                                 fontSize: 14,
                                 color: AppColors.soilCharcoal,
@@ -310,6 +310,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
                   stepSubtitle: strings.advisoryStep1Subtitle,
                   accentColor: AppColors.forest,
                   rungs: culturalRungs,
+                  strings: strings,
                 ),
                 const SizedBox(height: AppSpacing.m12),
 
@@ -320,6 +321,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
                   stepSubtitle: strings.advisoryStep2Subtitle,
                   accentColor: AppColors.paddyGreen,
                   rungs: biologicalRungs,
+                  strings: strings,
                 ),
                 const SizedBox(height: AppSpacing.m12),
 
@@ -410,6 +412,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
     required String stepSubtitle,
     required Color accentColor,
     required List<LadderRung> rungs,
+    required AppStrings strings,
   }) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.m12),
@@ -468,7 +471,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
             (rung) => Padding(
               padding: const EdgeInsets.only(left: 32, top: 4),
               child: Text(
-                '• ${rung.action}',
+                '• ${strings.getLocalizedAdvisoryRungAction(rung.action)}',
                 style: AppTypography.body.copyWith(
                   fontSize: 15,
                   color: AppColors.soilCharcoal,
@@ -588,7 +591,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        rung.action,
+                        strings.getLocalizedAdvisoryRungAction(rung.action),
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.soilCharcoal,
@@ -599,7 +602,7 @@ class _AdvisoryIpmCardState extends ConsumerState<AdvisoryIpmCard> {
                         _buildChemicalDetailRow(
                           icon: Icons.water_drop_outlined,
                           label: strings.advisoryDosageLabel,
-                          value: rung.dosage!,
+                          value: strings.getLocalizedAdvisoryDosage(rung.dosage),
                         ),
                       if (rung.phiDays != null)
                         _buildChemicalDetailRow(

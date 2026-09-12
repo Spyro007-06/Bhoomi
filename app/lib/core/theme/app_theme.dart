@@ -107,7 +107,7 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.forest,
-          minimumSize: const Size.fromHeight(AppSpacing.minTouchTarget),
+          minimumSize: const Size(0, AppSpacing.minTouchTarget),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.l16,
             vertical: AppSpacing.s8,

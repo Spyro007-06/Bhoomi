@@ -5,6 +5,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../models/diagnosis_models.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../widgets/app_button.dart';
@@ -108,9 +109,11 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
     final isStub = widget.response.gate.isStub;
     final clarification = widget.response.clarification;
     final candidates = clarification?.candidates ?? [];
-    final question = clarification?.questionLocalized ??
-        clarification?.question ??
-        'Flip the leaf over. Do you see fuzzy grey growth on the underside?';
+    final question = strings.getLocalizedClarificationQuestion(
+      cueId: clarification?.cueId,
+      question: clarification?.question,
+      questionLocalized: clarification?.questionLocalized,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.ricePaper,
@@ -119,7 +122,7 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: AppColors.forest),
-          tooltip: 'Back to Home',
+          tooltip: strings.backToHome,
           onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
         ),
         title: Text(
@@ -141,8 +144,8 @@ class _DoubtDoctorScreenState extends ConsumerState<DoubtDoctorScreen> {
             children: [
               // Stub mode banner if is_stub == true
               if (isStub) ...[
-                const StubBanner(
-                  message: 'Demonstration Mode: Ambiguity gate resolution handled by mock engine.',
+                StubBanner(
+                  message: strings.doubtDoctorStubBanner,
                 ),
                 const SizedBox(height: AppSpacing.m16),
               ],
@@ -284,6 +287,76 @@ class _CandidateCard extends ConsumerWidget {
     required this.candidateTag,
   });
 
+  String? _resolveCandidateAsset(String label, String? imageUrl) {
+    if (imageUrl != null && imageUrl.isNotEmpty && !imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    final normalized = label.toLowerCase().trim();
+    if (normalized.contains('blast')) {
+      return 'assets/images/crop_disease_diamond_lesion.jpg';
+    }
+    if (normalized.contains('brown_spot') ||
+        normalized.contains('brown spot') ||
+        normalized.contains('spot')) {
+      return 'assets/images/crop_disease_brown_spot.jpg';
+    }
+    return null;
+  }
+
+  Widget _buildCandidateImage(BuildContext context, AppStrings strings) {
+    final assetPath = _resolveCandidateAsset(candidate.label, candidate.imageUrl);
+    final semanticLabel = strings.getCandidateImageSemanticLabel(candidate.label);
+
+    Widget imageWidget;
+    if (assetPath != null) {
+      imageWidget = Image.asset(
+        assetPath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        semanticLabel: semanticLabel,
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(Icons.broken_image_rounded, color: AppColors.fieldSlate),
+        ),
+      );
+    } else if (candidate.imageUrl != null && candidate.imageUrl!.startsWith('http')) {
+      imageWidget = Image.network(
+        candidate.imageUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        semanticLabel: semanticLabel,
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(Icons.broken_image_rounded, color: AppColors.fieldSlate),
+        ),
+      );
+    } else {
+      imageWidget = Image.asset(
+        'assets/images/crop_disease_diamond_lesion.jpg',
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        semanticLabel: semanticLabel,
+      );
+    }
+
+    return Semantics(
+      label: semanticLabel,
+      image: true,
+      child: Container(
+        height: 90,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.primaryLight.withValues(alpha: 0.5),
+          borderRadius: AppRadius.input,
+          border: Border.all(color: AppColors.border),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: imageWidget,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(stringsProvider);
@@ -313,32 +386,13 @@ class _CandidateCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s8),
 
-          // Candidate Photo / Placeholder
-          Container(
-            height: 90,
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight.withValues(alpha: 0.5),
-              borderRadius: AppRadius.input,
-              border: Border.all(color: AppColors.border),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: candidate.imageUrl != null && candidate.imageUrl!.isNotEmpty
-                ? Image.network(
-                    candidate.imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Center(
-                      child: Icon(Icons.broken_image_rounded, color: AppColors.fieldSlate),
-                    ),
-                  )
-                : const Center(
-                    child: Icon(Icons.eco_rounded, color: AppColors.forest, size: 36),
-                  ),
-          ),
+          // Candidate Photo
+          _buildCandidateImage(context, strings),
           const SizedBox(height: AppSpacing.s8),
 
-          // Signature Text
+          // Localized Signature Text
           Text(
-            candidate.signature,
+            strings.getLocalizedCandidateSignature(candidate.label, candidate.signature),
             style: AppTypography.caption.copyWith(
               color: AppColors.soilCharcoal,
               height: 1.3,

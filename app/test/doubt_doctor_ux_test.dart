@@ -10,6 +10,8 @@ import 'package:bhoomi/providers/repository_providers.dart';
 import 'package:bhoomi/features/doubt_doctor/presentation/doubt_doctor_screen.dart';
 import 'package:bhoomi/features/diagnose/presentation/advisory_result_screen.dart';
 import 'package:bhoomi/features/diagnose/presentation/escalation_status_screen.dart';
+import 'package:bhoomi/core/localization/app_strings.dart';
+import 'package:bhoomi/core/localization/locale_provider.dart';
 
 class FakeDoubtDoctorRepository extends DoubtDoctorRepository {
   bool shouldResolve = true;
@@ -113,11 +115,16 @@ void main() {
       // 1. Verify Header & Subtitle
       expect(find.text('थोडी अधिक माहिती हवी आहे'), findsOneWidget);
 
-      // 2. Verify Candidate Cards
+      // 2. Verify Candidate Cards with Realistic Photographs and Localized Marathi Signatures
       expect(find.text('भातावरील करपा'), findsOneWidget);
       expect(find.text('तपकिरी ठिपके'), findsOneWidget);
-      expect(find.text('Diamond lesions with grey centre'), findsOneWidget);
-      expect(find.text('Round spots with yellow halo'), findsOneWidget);
+      expect(find.text('करडा मध्यभाग असलेले हिऱ्याच्या आकाराचे ठिपके'), findsOneWidget);
+      expect(find.text('पिवळी कड असलेले गोल तपकिरी ठिपके'), findsOneWidget);
+      // Verify NO English symptom descriptions remain in Marathi mode
+      expect(find.text('Diamond lesions with grey centre'), findsNothing);
+      expect(find.text('Round spots with yellow halo'), findsNothing);
+      // Verify Real Image Assets are loaded
+      expect(find.byType(Image), findsNWidgets(2));
 
       // 3. Verify Localized Question
       expect(find.text('पानाच्या मागील बाजूस करडी बुरशी दिसते का?'), findsOneWidget);
@@ -190,6 +197,97 @@ void main() {
       // Unresolved outcome rendered EscalationStatusScreen
       expect(find.byType(EscalationStatusScreen), findsOneWidget);
       expect(find.text('CASE-EXP-001'), findsOneWidget);
+    });
+
+    testWidgets('Hindi mode renders ONLY Hindi text, realistic images, and Hindi signatures',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appLanguageProvider.overrideWith((ref) => LocaleNotifier()..setLanguage(AppLanguage.hindi)),
+            doubtDoctorRepositoryProvider.overrideWithValue(fakeDoubtDoctorRepo),
+          ],
+          child: const BhoomiApp(
+            homeOverride: DoubtDoctorScreen(response: sampleClarifyResponse),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Title & Subtitle in Hindi
+      expect(find.text('थोड़ी और जानकारी चाहिए'), findsOneWidget);
+      expect(find.text('सटीक निदान के लिए खेत में देखकर नीचे दिए गए प्रश्न का उत्तर दें।'), findsOneWidget);
+
+      // Candidates in Hindi
+      expect(find.text('धान का झुलसा रोग'), findsOneWidget);
+      expect(find.text('भूरा धब्बा रोग'), findsOneWidget);
+      expect(find.text('बीच में धूसर/ग्रे रंग वाले हीरे के आकार के धब्बे'), findsOneWidget);
+      expect(find.text('पीले घेरे वाले गोल भूरे धब्बे'), findsOneWidget);
+
+      // Real images loaded
+      expect(find.byType(Image), findsNWidgets(2));
+
+      // Question in Hindi
+      expect(find.text('क्या पत्ती के नीचे धूसर/ग्रे फफूंद दिखाई देती है?'), findsOneWidget);
+
+      // Buttons in Hindi
+      expect(find.text('हाँ'), findsOneWidget);
+      expect(find.text('नहीं'), findsOneWidget);
+      expect(find.text('पता नहीं'), findsOneWidget);
+
+      // Verify no English leak
+      expect(find.text('Diamond lesions with grey centre'), findsNothing);
+      expect(find.text('Round spots with yellow halo'), findsNothing);
+    });
+
+    testWidgets('English mode renders ONLY English text, realistic images, and English signatures',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appLanguageProvider.overrideWith((ref) => LocaleNotifier()..setLanguage(AppLanguage.english)),
+            doubtDoctorRepositoryProvider.overrideWithValue(fakeDoubtDoctorRepo),
+          ],
+          child: const BhoomiApp(
+            homeOverride: DoubtDoctorScreen(response: sampleClarifyResponse),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Title & Subtitle in English
+      expect(find.text("Let's check one more thing"), findsOneWidget);
+      expect(find.text('Check your field observation to confirm the diagnosis.'), findsOneWidget);
+
+      // Candidates in English
+      expect(find.text('Paddy Blast'), findsOneWidget);
+      expect(find.text('Brown Spot'), findsOneWidget);
+      expect(find.text('Diamond lesions with grey centre'), findsOneWidget);
+      expect(find.text('Round spots with yellow halo'), findsOneWidget);
+
+      // Real images loaded
+      expect(find.byType(Image), findsNWidgets(2));
+
+      // Question in English
+      expect(find.text('Do you see grey mold on underside?'), findsOneWidget);
+
+      // Buttons in English
+      expect(find.text('YES'), findsOneWidget);
+      expect(find.text('NO'), findsOneWidget);
+      expect(find.text("CAN'T TELL"), findsOneWidget);
+
+      // Verify no Marathi leak
+      expect(find.text('भातावरील करपा'), findsNothing);
+      expect(find.text('तपकिरी ठिपके'), findsNothing);
+      expect(find.text('होय'), findsNothing);
     });
   });
 }

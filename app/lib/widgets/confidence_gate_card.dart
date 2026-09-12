@@ -152,7 +152,7 @@ class _AdviseGateCard extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const AppStatusBadge.advise(),
+                AppStatusBadge.advise(label: strings.badgeAdvise),
                 const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(
@@ -324,7 +324,7 @@ class _ClarifyGateCard extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const AppStatusBadge.clarify(),
+                AppStatusBadge.clarify(label: strings.badgeClarify),
                 const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(
@@ -550,7 +550,7 @@ class _EscalateGateCard extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const AppStatusBadge.escalate(),
+                AppStatusBadge.escalate(label: strings.badgeEscalate),
                 const SizedBox(width: AppSpacing.m12),
                 Expanded(
                   child: Text(

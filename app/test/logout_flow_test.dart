@@ -19,6 +19,9 @@ import 'package:bhoomi/models/alert_models.dart';
 import 'package:bhoomi/models/followup_models.dart';
 import 'package:bhoomi/models/timeline_models.dart';
 import 'package:bhoomi/models/referral_models.dart';
+import 'package:bhoomi/models/farmer_profile_models.dart';
+import 'package:bhoomi/repositories/farmer_profile_repository.dart';
+import 'package:bhoomi/providers/storage_providers.dart';
 import 'package:bhoomi/features/more/presentation/more_screen.dart';
 import 'package:bhoomi/features/landing/presentation/landing_screen.dart';
 
@@ -111,7 +114,31 @@ class FakeShellReferralRepo extends ReferralRepository {
   }
 }
 
-List<Override> _getShellOverrides() {
+class FakeShellProfileRepo implements FarmerProfileRepository {
+  @override
+  Future<FarmerProfile?> getProfile(String userId) async {
+    return FarmerProfile(
+      farmerId: userId,
+      name: 'Farmer John',
+      mobileNumber: '+919876543210',
+      preferredLanguage: 'mr',
+      farmId: 'f_shell_01',
+      latitude: 19.9975,
+      longitude: 73.7898,
+      region: 'Nashik',
+      farmArea: 2.0,
+      currentCrop: 'paddy',
+    );
+  }
+
+  @override
+  Future<FarmerProfile> saveProfile(FarmerProfile profile) async => profile;
+
+  @override
+  Future<void> deleteProfile(String userId) async {}
+}
+
+List<Override> _getShellOverrides([SecureStorage? storage]) {
   return [
     activeFarmIdProvider.overrideWith((ref) => ActiveFarmIdNotifier(null, 'f_shell_01')),
     farmRepositoryProvider.overrideWithValue(FakeShellFarmRepo()),
@@ -119,6 +146,8 @@ List<Override> _getShellOverrides() {
     followUpRepositoryProvider.overrideWithValue(FakeShellFollowUpRepo()),
     timelineRepositoryProvider.overrideWithValue(FakeShellTimelineRepo()),
     referralRepositoryProvider.overrideWithValue(FakeShellReferralRepo()),
+    farmerProfileRepositoryProvider.overrideWithValue(FakeShellProfileRepo()),
+    if (storage != null) secureStorageProvider.overrideWithValue(storage),
   ];
 }
 
@@ -191,7 +220,7 @@ void main() {
         ProviderScope(
           overrides: [
             authRepositoryProvider.overrideWithValue(authRepository),
-            ..._getShellOverrides(),
+            ..._getShellOverrides(memoryStorage),
           ],
           child: const BhoomiApp(),
         ),
